@@ -19,71 +19,48 @@
         .app-container { background-color: #121212; }
         .card-bg { background-color: #1C1C1E; }
         
-        /* Tema Roxo */
+        .tab-content { display: none; }
+        .tab-content.active { 
+            display: block; 
+            animation: smoothEnter 0.3s ease-out forwards;
+        }
+
+        @keyframes smoothEnter {
+            0% { opacity: 0; transform: translateY(8px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
         .text-roxo { color: #7C3AED; }
         .bg-roxo { background-color: #7C3AED; }
         .fab-button { background-color: #7C3AED; }
         
-        /* Inputs Customizados */
         input[type="color"] { -webkit-appearance: none; border: none; padding: 0; }
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
-        select { color-scheme: dark; }
-        select option { background-color: #1C1C1E; color: #FFFFFF; }
-
-        /* -------------------------------------------
-           ANIMAÇÕES E TRANSIÇÕES FLUIDAS (NATIVAS)
-           ------------------------------------------- */
         
-        /* Feedback Tátil ao Tocar */
-        .tap-effect {
-            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s;
-            will-change: transform;
-        }
-        .tap-effect:active {
-            transform: scale(0.96);
-            opacity: 0.8;
-        }
+        .tap-effect { transition: transform 0.1s, opacity 0.1s; }
+        .tap-effect:active { transform: scale(0.97); opacity: 0.8; }
 
-        /* Transição Suave de Abas (Fade + Slide Up) */
-        @keyframes smoothEnter {
-            0% { opacity: 0; transform: translateY(12px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-        
-        .tab-content { display: none; }
-        .tab-content.active { 
-            display: block; 
-            animation: smoothEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        /* Suavização extra para os Modais */
-        .modal-content-transition {
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            will-change: transform;
-        }
-        .modal-backdrop-transition {
-            transition: opacity 0.3s ease-out;
-            will-change: opacity;
-        }
+        .modal-content-transition { transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-backdrop-transition { transition: opacity 0.25s ease-out; }
     </style>
 </head>
 <body class="antialiased select-none">
 
     <div class="max-w-md mx-auto app-container min-h-screen relative pb-24 shadow-2xl overflow-x-hidden">
 
-        <header class="sticky top-0 z-20 app-container pt-8 pb-6 border-b border-gray-800 transition-all duration-300">
-            <div class="flex justify-center items-center gap-3 mb-6">
-                <button onclick="changeMonth(-1)" class="p-2 text-gray-400 hover:text-white tap-effect"><i class="ph ph-caret-left text-lg"></i></button>
-                <span id="current-month-display" class="font-medium text-gray-200 text-lg capitalize transition-opacity duration-300">Fevereiro 2026</span>
-                <button onclick="changeMonth(1)" class="p-2 text-gray-400 hover:text-white tap-effect"><i class="ph ph-caret-right text-lg"></i></button>
+        <header class="sticky top-0 z-20 app-container pt-8 pb-6 border-b border-gray-800">
+            <div class="flex justify-between items-center mb-6 w-4/5 mx-auto">
+                <button onclick="changeMonth(-1)" class="p-2 text-gray-400 hover:text-white tap-effect"><i class="ph ph-caret-left text-xl"></i></button>
+                <span id="current-month-display" class="font-medium text-gray-200 text-lg capitalize w-40 text-center tracking-wide">Fevereiro 2026</span>
+                <button onclick="changeMonth(1)" class="p-2 text-gray-400 hover:text-white tap-effect"><i class="ph ph-caret-right text-xl"></i></button>
             </div>
 
             <div class="flex flex-col items-center mb-8">
                 <p class="text-sm text-gray-400 mb-1">Saldo atual em contas</p>
-                <h1 id="header-balance" class="text-4xl font-bold text-white tracking-tight mb-3 transition-opacity duration-300">R$ 0,00</h1>
+                <h1 id="header-balance" class="text-4xl font-bold text-white tracking-tight mb-3">R$ 0,00</h1>
                 <button onclick="toggleBalance()" class="text-gray-400 p-2 rounded-full hover:bg-gray-800 tap-effect">
-                    <i class="ph ph-eye text-xl transition-transform duration-200" id="eye-icon"></i>
+                    <i class="ph ph-eye text-xl" id="eye-icon"></i>
                 </button>
             </div>
 
@@ -93,8 +70,8 @@
                         <i class="ph ph-arrow-up text-white text-xl font-bold"></i>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-400">Receitas</p>
-                        <p id="dash-income" class="text-green-500 font-bold text-xl tracking-tight transition-opacity duration-300">R$ 0,00</p>
+                        <p class="text-[11px] text-gray-400 uppercase tracking-wider">Receitas</p>
+                        <p id="dash-income" class="text-green-500 font-bold text-lg tracking-tight">R$ 0,00</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3 w-1/2 justify-start border-l border-gray-800 pl-4">
@@ -102,8 +79,8 @@
                         <i class="ph ph-arrow-down text-white text-xl font-bold"></i>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-400">Despesas</p>
-                        <p id="dash-expense" class="text-red-500 font-bold text-xl tracking-tight transition-opacity duration-300">R$ 0,00</p>
+                        <p class="text-[11px] text-gray-400 uppercase tracking-wider">Despesas</p>
+                        <p id="dash-expense" class="text-red-500 font-bold text-lg tracking-tight">R$ 0,00</p>
                     </div>
                 </div>
             </div>
@@ -113,7 +90,7 @@
             <div class="card-bg rounded-3xl p-5 shadow-lg">
                 <h2 class="text-gray-300 font-medium mb-6">Despesas por categoria</h2>
                 <div class="flex flex-col gap-6">
-                    <div class="relative w-40 h-40 mx-auto shrink-0 transition-transform duration-500 ease-out hover:scale-105">
+                    <div class="relative w-40 h-40 mx-auto shrink-0 transition-transform hover:scale-105">
                         <canvas id="expensesChart"></canvas>
                     </div>
                     <div id="custom-legend" class="space-y-3 px-2"></div>
@@ -123,7 +100,7 @@
 
         <main id="tab-transactions" class="tab-content px-4 mt-6">
             <h2 class="text-xl font-medium text-white mb-6">Transações</h2>
-            <div id="transactions-list" class="space-y-6 mb-8"></div>
+            <div id="transactions-list" class="mb-8"></div>
         </main>
 
         <main id="tab-categories" class="tab-content px-4 mt-6">
@@ -131,7 +108,7 @@
             <div class="card-bg rounded-2xl p-4 mb-6 shadow-md">
                 <form onsubmit="addCategory(event)" class="flex gap-3 items-center">
                     <input type="color" id="cat-color" value="#7C3AED" class="w-10 h-10 rounded-full cursor-pointer bg-transparent tap-effect">
-                    <input type="text" id="cat-name" placeholder="Nome da categoria" required class="flex-1 bg-[#2C2C2E] text-white rounded-xl p-3 outline-none focus:ring-1 focus:ring-purple-500 transition-shadow">
+                    <input type="text" id="cat-name" placeholder="Nome da categoria" required class="flex-1 bg-[#2C2C2E] text-white rounded-xl p-3 outline-none focus:ring-1 focus:ring-purple-500">
                     <button type="submit" class="bg-roxo text-white px-4 py-3 rounded-xl font-bold tap-effect shadow-lg shadow-purple-500/30">+</button>
                 </form>
             </div>
@@ -153,24 +130,22 @@
 
         <nav class="fixed bottom-0 max-w-md w-full left-1/2 -translate-x-1/2 card-bg border-t border-gray-800 px-6 py-2 pb-safe flex justify-between items-center z-30">
             <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-roxo w-14 tap-effect" data-target="home">
-                <i class="ph-fill ph-house text-2xl mb-1 transition-transform"></i>
+                <i class="ph-fill ph-house text-2xl mb-1"></i>
                 <span class="text-[10px] font-medium">Principal</span>
             </button>
             <button onclick="switchTab('transactions')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="transactions">
-                <i class="ph ph-list-dashes text-2xl mb-1 transition-transform"></i>
+                <i class="ph ph-list-dashes text-2xl mb-1"></i>
                 <span class="text-[10px] font-medium">Transações</span>
             </button>
-            
             <div class="relative -top-5">
-                <button onclick="openModal()" class="fab-button text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-[0_8px_16px_rgba(124,58,237,0.4)] tap-effect hover:scale-105 active:scale-95">+</button>
+                <button onclick="openModal()" class="fab-button text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-[0_8px_16px_rgba(124,58,237,0.4)] tap-effect">+</button>
             </div>
-            
             <button onclick="switchTab('categories')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="categories">
-                <i class="ph ph-squares-four text-2xl mb-1 transition-transform"></i>
+                <i class="ph ph-squares-four text-2xl mb-1"></i>
                 <span class="text-[10px] font-medium">Categorias</span>
             </button>
             <button onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="more">
-                <i class="ph ph-dots-three text-2xl mb-1 transition-transform"></i>
+                <i class="ph ph-dots-three text-2xl mb-1"></i>
                 <span class="text-[10px] font-medium">Mais</span>
             </button>
         </nav>
@@ -194,10 +169,10 @@
                         
                         <div class="mb-6">
                             <label class="text-xs text-gray-500 mb-1 block">Valor</label>
-                            <input type="number" id="amount" min="0" step="0.01" inputmode="decimal" required class="w-full text-4xl font-bold text-white bg-transparent border-b border-gray-700 py-2 outline-none focus:border-roxo transition-colors" placeholder="R$ 0,00">
+                            <input type="tel" id="amount" inputmode="numeric" oninput="handleAmountInput(event)" required class="w-full text-4xl font-bold text-white bg-transparent border-b border-gray-700 py-2 outline-none focus:border-roxo" placeholder="0,00">
                         </div>
                         
-                        <div class="mb-5 flex items-center border-b border-gray-700 py-3 transition-colors focus-within:border-roxo">
+                        <div class="mb-5 flex items-center border-b border-gray-700 py-3">
                             <i class="ph ph-pencil-simple text-gray-400 text-xl mr-3"></i>
                             <input type="text" id="desc" required class="w-full bg-transparent outline-none text-white text-lg" placeholder="Descrição">
                         </div>
@@ -209,7 +184,7 @@
                         </div>
                         <input type="hidden" id="category" required>
 
-                        <div class="mb-6 flex items-center border-b border-gray-700 py-3 focus-within:border-roxo transition-colors">
+                        <div class="mb-6 flex items-center border-b border-gray-700 py-3">
                             <i class="ph ph-calendar text-gray-400 text-xl mr-3"></i>
                             <input type="date" id="date" required class="w-full bg-transparent outline-none text-white text-lg" style="color-scheme: dark;">
                         </div>
@@ -217,12 +192,12 @@
                         <div id="rep-section" class="mb-4">
                             <label class="text-xs text-gray-500 mb-2 block">Repetição</label>
                             <div class="flex gap-2">
-                                <button type="button" id="btn-rep-unica" onclick="setRepetition('unica')" class="flex-1 py-2 text-sm rounded-lg bg-roxo text-white transition-all duration-200 tap-effect">Única</button>
-                                <button type="button" id="btn-rep-fixa" onclick="setRepetition('fixa')" class="flex-1 py-2 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 transition-all duration-200 tap-effect">Fixa</button>
-                                <button type="button" id="btn-rep-parcelada" onclick="setRepetition('parcelada')" class="flex-1 py-2 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 transition-all duration-200 tap-effect">Parcelada</button>
+                                <button type="button" id="btn-rep-unica" onclick="setRepetition('unica')" class="flex-1 py-2 text-sm rounded-lg bg-roxo text-white tap-effect">Única</button>
+                                <button type="button" id="btn-rep-fixa" onclick="setRepetition('fixa')" class="flex-1 py-2 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 tap-effect">Fixa</button>
+                                <button type="button" id="btn-rep-parcelada" onclick="setRepetition('parcelada')" class="flex-1 py-2 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 tap-effect">Parcelada</button>
                             </div>
                             
-                            <div id="installments-div" class="hidden mt-4 flex flex-col gap-3 border-b border-gray-700 pb-4 pt-2 transition-all duration-300">
+                            <div id="installments-div" class="hidden mt-4 flex flex-col gap-3 border-b border-gray-700 pb-4 pt-2">
                                 <div class="flex items-center">
                                     <i class="ph ph-copy text-gray-400 text-xl mr-3"></i>
                                     <input type="number" id="installments-count" min="2" max="48" inputmode="numeric" placeholder="Qtd. parcelas (ex: 3)" class="w-full bg-transparent outline-none text-white text-lg">
@@ -303,8 +278,10 @@
             </div>
         </div>
 
-    </div> <script>
-        const STORAGE_KEY = 'mobills_dark_smooth';
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'mobills_dark_final_v7';
         let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         
         let defaultCategories = [
@@ -313,7 +290,7 @@
             { id: 3, name: 'Compras', color: '#A855F7' }, 
             { id: 4, name: 'Outros', color: '#6B7280' }
         ];
-        let categories = JSON.parse(localStorage.getItem('mobills_cats_smooth')) || defaultCategories;
+        let categories = JSON.parse(localStorage.getItem('mobills_cats_final_v7')) || defaultCategories;
 
         let currentType = 'expense';
         let currentRepetition = 'unica';
@@ -321,27 +298,41 @@
         let isBalanceHidden = false;
         
         let displayDate = new Date();
+        
         let editingTxId = null;
         let editingCatId = null;
         let pendingAction = null; 
         let pendingData = null; 
 
+        // Formatação Oficial R$
         const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
-        // Inicialização
+        // MÁSCARA DE MOEDA NO INPUT (Digita: 1000 -> Vira: 10,00)
+        function handleAmountInput(e) {
+            let value = e.target.value.replace(/\D/g, "");
+            if (value === "") {
+                e.target.value = "";
+                return;
+            }
+            let num = (parseInt(value) / 100).toFixed(2);
+            e.target.value = num.replace(".", ",").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+        }
+
+        // Converter string de máscara "1.234,50" para float "1234.50"
+        function parseCurrency(val) {
+            if(!val) return 0;
+            return parseFloat(val.replace(/\./g, '').replace(',', '.'));
+        }
+
         document.getElementById('date').valueAsDate = new Date();
         updateUI();
 
-        // UI & NAVEGAÇÃO
+        // ----------------------------------------------------
+        // NAVEGAÇÃO E UI
+        // ----------------------------------------------------
         function changeMonth(step) {
             displayDate.setMonth(displayDate.getMonth() + step);
-            // Suavizar texto do Header
-            const display = document.getElementById('current-month-display');
-            display.style.opacity = 0;
-            setTimeout(() => {
-                updateUI();
-                display.style.opacity = 1;
-            }, 150);
+            updateUI();
         }
 
         function toggleBalance() {
@@ -387,10 +378,12 @@
             updateCategoriesList();
             
             localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
-            localStorage.setItem('mobills_cats_smooth', JSON.stringify(categories));
+            localStorage.setItem('mobills_cats_final_v7', JSON.stringify(categories));
         }
 
+        // ----------------------------------------------------
         // GRÁFICOS
+        // ----------------------------------------------------
         function updateChartAndLegend(categoryTotals) {
             const ctx = document.getElementById('expensesChart').getContext('2d');
             const legendDiv = document.getElementById('custom-legend');
@@ -440,7 +433,9 @@
             });
         }
 
-        // TRANSAÇÕES LISTA
+        // ----------------------------------------------------
+        // TRANSAÇÕES (LISTA PLANA IGUAL AO PRINT)
+        // ----------------------------------------------------
         function updateTransactionsList(filtered) {
             const list = document.getElementById('transactions-list');
             list.innerHTML = '';
@@ -462,7 +457,8 @@
                 const dateObj = new Date(date + 'T12:00:00');
                 const dateHeader = `${dateObj.toLocaleDateString('pt-BR', { weekday: 'long' })}, ${dateObj.toLocaleDateString('pt-BR', { day: '2-digit' })}`;
                 
-                let html = `<div class="mb-6"><h3 class="text-[13px] font-semibold text-gray-400 mb-3 capitalize border-b border-gray-800 pb-2">${dateHeader}</h3><div class="space-y-4">`;
+                // Cabeçalho da data com linha inferior suave
+                let html = `<div class="mb-6"><h3 class="text-[13px] font-semibold text-gray-400 mb-2 capitalize border-b border-gray-800 pb-2">${dateHeader}</h3><div class="flex flex-col">`;
 
                 grouped[date].forEach(t => {
                     const isIncome = t.type === 'income';
@@ -472,26 +468,28 @@
 
                     let icon = isIncome ? 'ph-trend-up' : 'ph-tag';
                     if (t.category.toLowerCase().includes('carro')) icon = 'ph-car';
-                    if (t.category.toLowerCase().includes('alimentação')) icon = 'ph-fork-knife';
+                    if (t.category.toLowerCase().includes('alimentação') || t.category.toLowerCase().includes('comida')) icon = 'ph-fork-knife';
                     if (t.category.toLowerCase().includes('compras')) icon = 'ph-shopping-bag';
+                    if (t.category.toLowerCase().includes('lazer')) icon = 'ph-popcorn';
 
                     let repName = 'Único';
                     if(t.repetition === 'fixa') repName = 'Fixo';
                     if(t.repetition === 'parcelada') repName = 'Parcelado';
 
+                    // Removido o bg-color e bordas arredondadas. Adicionado py-3 para espaçamento natural
                     html += `
-                        <div class="flex items-center justify-between cursor-pointer tap-effect bg-[#1C1C1E] rounded-xl" onclick="openEditTransaction(${t.id})">
+                        <div class="flex items-center justify-between cursor-pointer tap-effect py-3" onclick="openEditTransaction(${t.id})">
                             <div class="flex items-center gap-4">
-                                <div class="w-11 h-11 rounded-full flex items-center justify-center text-white shadow-sm" style="background-color: ${catColor}">
-                                    <i class="ph ${icon} text-xl"></i>
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center text-white" style="background-color: ${catColor}">
+                                    <i class="ph ${icon} text-2xl"></i>
                                 </div>
                                 <div>
-                                    <p class="font-medium text-gray-100 text-[15px] mb-0.5">${t.desc}</p>
-                                    <p class="text-[11px] text-gray-500 tracking-wide">${t.category} • ${repName}</p>
+                                    <p class="font-medium text-gray-100 text-[16px] mb-0.5">${t.desc}</p>
+                                    <p class="text-[12px] text-gray-500 tracking-wide">${t.category} • ${repName}</p>
                                 </div>
                             </div>
                             <div class="flex flex-col items-end">
-                                <p class="font-semibold ${colorClass} text-[15px]">${isIncome ? '' : ''}${formatCurrency(t.amount)}</p>
+                                <p class="font-medium ${colorClass} text-[15px]">${isIncome ? '' : ''}${formatCurrency(t.amount)}</p>
                             </div>
                         </div>
                     `;
@@ -501,15 +499,20 @@
             });
         }
 
-        // SALVAR
+        // ----------------------------------------------------
+        // LÓGICA DE SALVAR
+        // ----------------------------------------------------
         function saveTransaction(e) {
             e.preventDefault();
             const desc = document.getElementById('desc').value;
-            const totalAmount = Math.abs(parseFloat(document.getElementById('amount').value));
+            // Parse a string formatada em float
+            const rawAmount = document.getElementById('amount').value;
+            const totalAmount = Math.abs(parseCurrency(rawAmount));
+            
             const category = document.getElementById('category').value;
             const dateInput = document.getElementById('date').value;
 
-            if(!desc || isNaN(totalAmount) || !dateInput || !category) {
+            if(!desc || isNaN(totalAmount) || totalAmount === 0 || !dateInput || !category) {
                 alert("Preencha todos os campos e selecione uma categoria.");
                 return;
             }
@@ -543,6 +546,7 @@
                 } else if (currentRepetition === 'parcelada') {
                     let parcels = parseInt(document.getElementById('installments-count').value) || 2;
                     let instType = document.querySelector('input[name="inst_type"]:checked').value;
+                    
                     let amountPerParcel = totalAmount;
                     if (instType === 'total') amountPerParcel = totalAmount / parcels;
 
@@ -551,6 +555,7 @@
                         transactions.push({ id: Date.now() + i, groupId, desc: `${desc} (${i+1}/${parcels})`, amount: amountPerParcel, date: d.toISOString().split('T')[0], ...baseObj });
                     }
                 } else if (currentRepetition === 'fixa') {
+                    // Fixa cria 10 anos de lançamentos (120 meses)
                     for(let i=0; i<120; i++) {
                         let d = new Date(baseDate); d.setMonth(d.getMonth() + i);
                         transactions.push({ id: Date.now() + i, groupId, desc: desc, amount: totalAmount, date: d.toISOString().split('T')[0], ...baseObj });
@@ -560,13 +565,13 @@
             
             updateUI();
             
+            // Lógica de "Continuar adicionando"
             if (editingTxId || !document.getElementById('continue-adding').checked) {
                 closeModal();
             } else {
                 document.getElementById('amount').value = '';
                 document.getElementById('desc').value = '';
-                // Pequeno delay para a UI respirar antes de dar focus
-                setTimeout(() => document.getElementById('amount').focus(), 100);
+                setTimeout(() => document.getElementById('amount').focus(), 50);
             }
         }
 
@@ -574,6 +579,7 @@
             if (!editingTxId) return;
             const t = transactions.find(x => x.id === editingTxId);
             if (!t) return;
+
             const isGrouped = t.groupId ? transactions.some(x => x.groupId === t.groupId && x.id !== t.id) : false;
 
             if (isGrouped) {
@@ -636,14 +642,16 @@
             if(pendingAction === 'delete') closeModal();
         }
 
-        // CONFIRMAÇÕES (Com Animações Smooth)
+        // ----------------------------------------------------
+        // CONFIRMAÇÕES NATIVAS (MODAIS)
+        // ----------------------------------------------------
         function openSimpleConfirm(title, desc) {
             document.getElementById('simple-confirm-title').innerText = title;
             document.getElementById('simple-confirm-desc').innerText = desc;
             const m = document.getElementById('modal-simple-confirm');
             const c = document.getElementById('modal-simple-confirm-content');
             m.classList.remove('hidden');
-            void m.offsetWidth; // Force reflow
+            void m.offsetWidth;
             m.classList.remove('opacity-0');
             c.classList.remove('translate-y-full');
         }
@@ -653,7 +661,7 @@
             const c = document.getElementById('modal-simple-confirm-content');
             m.classList.add('opacity-0');
             c.classList.add('translate-y-full');
-            setTimeout(() => m.classList.add('hidden'), 300);
+            setTimeout(() => m.classList.add('hidden'), 250);
         }
 
         function openRepeatConfirm(title, actionType) {
@@ -677,10 +685,12 @@
             const c = document.getElementById('modal-repeat-confirm-content');
             m.classList.add('opacity-0');
             c.classList.add('translate-y-full');
-            setTimeout(() => m.classList.add('hidden'), 300);
+            setTimeout(() => m.classList.add('hidden'), 250);
         }
 
+        // ----------------------------------------------------
         // CATEGORIAS
+        // ----------------------------------------------------
         function updateCategoriesList() {
             const list = document.getElementById('categories-list');
             list.innerHTML = '';
@@ -724,7 +734,7 @@
             const c = document.getElementById('modal-category-select-content');
             m.classList.add('opacity-0');
             c.classList.add('translate-y-full');
-            setTimeout(() => m.classList.add('hidden'), 300);
+            setTimeout(() => m.classList.add('hidden'), 250);
         }
 
         function selectCategory(name) {
@@ -766,10 +776,11 @@
             openSimpleConfirm('Excluir Categoria', 'Transações atreladas a esta categoria ficarão sem marcação. Continuar?');
         }
 
+        // ----------------------------------------------------
         // MODAIS BASE
+        // ----------------------------------------------------
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            // Usando timeout zero para garantir que o CSS aplique a animação nova
             setTimeout(() => document.getElementById(`tab-${tabId}`).classList.add('active'), 10);
 
             document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -805,7 +816,7 @@
             const m = document.getElementById('modal');
             const c = document.getElementById('modal-content');
             m.classList.remove('hidden');
-            void m.offsetWidth; // Reflow
+            void m.offsetWidth;
             m.classList.remove('opacity-0');
             c.classList.remove('translate-y-full');
         }
@@ -820,7 +831,11 @@
             document.getElementById('rep-section').style.display = 'none'; 
             document.getElementById('continue-adding-wrapper').classList.add('hidden');
             
-            document.getElementById('amount').value = t.amount;
+            // Preenche o valor com a máscara
+            let numStr = t.amount.toFixed(2).replace(".", ",").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+            document.getElementById('amount').value = numStr;
+            
+            // Remove o sufixo de parcelas para edição limpa
             document.getElementById('desc').value = t.desc.replace(/ \(\d+\/\d+\)$/, '');
             document.getElementById('date').value = t.date;
             
@@ -843,7 +858,7 @@
             const c = document.getElementById('modal-content');
             m.classList.add('opacity-0');
             c.classList.add('translate-y-full');
-            setTimeout(() => m.classList.add('hidden'), 300);
+            setTimeout(() => m.classList.add('hidden'), 250);
         }
 
         function openEditCategory(id) {
@@ -866,7 +881,7 @@
             const c = document.getElementById('modal-category-content');
             m.classList.add('opacity-0');
             c.classList.add('translate-y-full');
-            setTimeout(() => m.classList.add('hidden'), 300);
+            setTimeout(() => m.classList.add('hidden'), 250);
         }
 
         function setType(type) {
@@ -874,11 +889,11 @@
             const btnExp = document.getElementById('btn-expense');
             const btnInc = document.getElementById('btn-income');
             if(type === 'expense') {
-                btnExp.className = 'flex-1 py-3 text-sm font-medium rounded-lg bg-red-500/20 text-red-500 border border-red-500/50 transition-all';
-                btnInc.className = 'flex-1 py-3 text-sm font-medium rounded-lg text-gray-400 border border-transparent transition-all';
+                btnExp.className = 'flex-1 py-3 text-sm font-medium rounded-lg bg-red-500/20 text-red-500 border border-red-500/50 transition-all tap-effect';
+                btnInc.className = 'flex-1 py-3 text-sm font-medium rounded-lg text-gray-400 border border-transparent transition-all tap-effect';
             } else {
-                btnInc.className = 'flex-1 py-3 text-sm font-medium rounded-lg bg-green-500/20 text-green-500 border border-green-500/50 transition-all';
-                btnExp.className = 'flex-1 py-3 text-sm font-medium rounded-lg text-gray-400 border border-transparent transition-all';
+                btnInc.className = 'flex-1 py-3 text-sm font-medium rounded-lg bg-green-500/20 text-green-500 border border-green-500/50 transition-all tap-effect';
+                btnExp.className = 'flex-1 py-3 text-sm font-medium rounded-lg text-gray-400 border border-transparent transition-all tap-effect';
             }
         }
 
@@ -901,7 +916,9 @@
             }
         }
 
+        // ----------------------------------------------------
         // BACKUP
+        // ----------------------------------------------------
         function exportData() {
             const dataStr = JSON.stringify({ transactions, categories });
             const blob = new Blob([dataStr], { type: "application/json" });
