@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Controle Mobills</title>
@@ -19,6 +19,15 @@
         .app-container { background-color: #121212; }
         .card-bg { background-color: #1C1C1E; }
         
+        /* Proteção para a barra inferior do iPhone (Home Indicator) */
+        .nav-safe-area {
+            padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 16px));
+            padding-top: 0.5rem;
+        }
+        .content-safe-area {
+            padding-bottom: calc(7rem + env(safe-area-inset-bottom, 16px));
+        }
+
         .tab-content { display: none; }
         .tab-content.active { 
             display: block; 
@@ -29,6 +38,19 @@
             0% { opacity: 0; transform: translateY(8px); }
             100% { opacity: 1; transform: translateY(0); }
         }
+
+        /* ---------------------------------------------------
+           ANIMAÇÕES DIRECIONAIS DOS MESES (SLIDE IN/OUT)
+           --------------------------------------------------- */
+        .slide-out-left { animation: slideOutLeft 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .slide-in-right { animation: slideInRight 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .slide-out-right { animation: slideOutRight 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .slide-in-left { animation: slideInLeft 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+        @keyframes slideOutLeft { to { transform: translateX(-25px); opacity: 0; } }
+        @keyframes slideInRight { from { transform: translateX(25px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOutRight { to { transform: translateX(25px); opacity: 0; } }
+        @keyframes slideInLeft { from { transform: translateX(-25px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         
         .text-roxo { color: #7C3AED; }
         .bg-roxo { background-color: #7C3AED; }
@@ -47,16 +69,16 @@
 </head>
 <body class="antialiased select-none">
 
-    <div id="swipe-zone" class="max-w-md mx-auto app-container min-h-screen relative pb-24 shadow-2xl overflow-x-hidden">
+    <div id="swipe-zone" class="max-w-md mx-auto app-container min-h-screen relative content-safe-area shadow-2xl overflow-x-hidden">
 
-        <header class="sticky top-0 z-20 app-container pt-8 pb-6 border-b border-gray-800">
+        <header class="sticky top-0 z-20 app-container pt-12 pb-6 border-b border-gray-800">
             <div class="flex justify-between items-center mb-6 w-4/5 mx-auto">
                 <button onclick="changeMonth(-1)" class="p-2 text-gray-400 hover:text-white tap-effect"><i class="ph ph-caret-left text-xl"></i></button>
                 <span id="current-month-display" class="font-medium text-gray-200 text-lg capitalize w-40 text-center tracking-wide transition-opacity duration-200">Fevereiro 2026</span>
                 <button onclick="changeMonth(1)" class="p-2 text-gray-400 hover:text-white tap-effect"><i class="ph ph-caret-right text-xl"></i></button>
             </div>
 
-            <div class="flex flex-col items-center mb-8">
+            <div class="animate-month flex flex-col items-center mb-8">
                 <p class="text-sm text-gray-400 mb-1">Saldo atual em contas</p>
                 <h1 id="header-balance" class="text-4xl font-bold text-white tracking-tight mb-3">R$ 0,00</h1>
                 <button onclick="toggleBalance()" class="text-gray-400 p-2 rounded-full hover:bg-gray-800 tap-effect">
@@ -64,7 +86,7 @@
                 </button>
             </div>
 
-            <div class="flex justify-center gap-4 px-4">
+            <div class="animate-month flex justify-center gap-4 px-4">
                 <div class="flex items-center gap-3 w-1/2 justify-end">
                     <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center shrink-0 shadow-lg shadow-green-500/20">
                         <i class="ph ph-arrow-up text-white text-xl font-bold"></i>
@@ -86,7 +108,7 @@
             </div>
         </header>
 
-        <main id="tab-home" class="tab-content active px-4 mt-6 space-y-4">
+        <main id="tab-home" class="tab-content active px-4 mt-6 animate-month">
             <div class="card-bg rounded-3xl p-5 shadow-lg">
                 <h2 class="text-gray-300 font-medium mb-6">Despesas por categoria</h2>
                 <div class="flex flex-col gap-6">
@@ -98,9 +120,9 @@
             </div>
         </main>
 
-        <main id="tab-transactions" class="tab-content px-4 mt-6">
+        <main id="tab-transactions" class="tab-content px-4 mt-6 animate-month">
             <h2 class="text-xl font-medium text-white mb-6">Transações</h2>
-            <div id="transactions-list" class="mb-8"></div>
+            <div id="transactions-list"></div>
         </main>
 
         <main id="tab-categories" class="tab-content px-4 mt-6">
@@ -112,7 +134,7 @@
                     <button type="submit" class="bg-roxo text-white px-4 py-3 rounded-xl font-bold tap-effect shadow-lg shadow-purple-500/30">+</button>
                 </form>
             </div>
-            <div id="categories-list" class="space-y-3 mb-8"></div>
+            <div id="categories-list" class="space-y-3"></div>
         </main>
 
         <main id="tab-more" class="tab-content px-4 mt-6">
@@ -128,7 +150,7 @@
             </div>
         </main>
 
-        <nav class="fixed bottom-0 max-w-md w-full left-1/2 -translate-x-1/2 card-bg border-t border-gray-800 px-6 py-2 pb-safe flex justify-between items-center z-30">
+        <nav class="fixed bottom-0 max-w-md w-full left-1/2 -translate-x-1/2 card-bg border-t border-gray-800 px-6 nav-safe-area flex justify-between items-center z-30">
             <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-roxo w-14 tap-effect" data-target="home">
                 <i class="ph-fill ph-house text-2xl mb-1"></i>
                 <span class="text-[10px] font-medium">Principal</span>
@@ -137,7 +159,7 @@
                 <i class="ph ph-list-dashes text-2xl mb-1"></i>
                 <span class="text-[10px] font-medium">Transações</span>
             </button>
-            <div class="relative -top-5">
+            <div class="relative -top-6">
                 <button onclick="openModal()" class="fab-button text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-[0_8px_16px_rgba(124,58,237,0.4)] tap-effect">+</button>
             </div>
             <button onclick="switchTab('categories')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="categories">
@@ -159,7 +181,7 @@
                     <button type="button" onclick="document.getElementById('form').requestSubmit()" class="text-roxo font-bold p-2 -mr-2 tap-effect"><i class="ph ph-check text-2xl"></i></button>
                 </div>
 
-                <div class="overflow-y-auto p-5 pb-10">
+                <div class="overflow-y-auto p-5 pb-[10vh]">
                     <form id="form" onsubmit="saveTransaction(event)">
                         <div class="flex bg-[#121212] rounded-xl p-1 mb-6">
                             <button type="button" id="btn-expense" onclick="setType('expense')" class="flex-1 py-3 text-sm font-medium rounded-lg bg-red-500/20 text-red-500 border border-red-500/50 transition-all duration-200 tap-effect">Despesa</button>
@@ -236,7 +258,7 @@
         </div>
 
         <div id="modal-simple-confirm" class="fixed inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-            <div id="modal-simple-confirm-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6 pb-10">
+            <div id="modal-simple-confirm-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6 pb-[env(safe-area-inset-bottom,30px)]">
                 <h3 class="text-xl font-bold text-white mb-2" id="simple-confirm-title">Excluir</h3>
                 <p class="text-sm text-gray-400 mb-8" id="simple-confirm-desc">Deseja realmente continuar?</p>
                 <div class="flex gap-4">
@@ -247,13 +269,13 @@
         </div>
 
         <div id="modal-repeat-confirm" class="fixed inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-            <div id="modal-repeat-confirm-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6 pb-10">
+            <div id="modal-repeat-confirm-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6 pb-[env(safe-area-inset-bottom,30px)]">
                 <h3 class="text-xl font-bold text-white mb-2" id="repeat-confirm-title">Transação Repetida</h3>
-                <p class="text-sm text-gray-400 mb-8">Esta é uma transação que se repete. Onde deseja aplicar a alteração?</p>
+                <p class="text-sm text-gray-400 mb-6">Esta é uma transação que se repete. Onde deseja aplicar a alteração?</p>
                 <div class="flex flex-col gap-3">
                     <button id="btn-repeat-all" onclick="executeRepeatAction('all')" class="w-full py-4 rounded-xl bg-roxo text-white font-bold tap-effect">Esta e as seguintes</button>
                     <button onclick="executeRepeatAction('single')" class="w-full py-4 rounded-xl bg-[#2C2C2E] text-white font-medium tap-effect">Somente esta</button>
-                    <button onclick="closeRepeatConfirm()" class="w-full py-4 rounded-xl bg-transparent text-gray-500 font-medium mt-2 tap-effect">Cancelar</button>
+                    <button onclick="closeRepeatConfirm()" class="w-full py-4 rounded-xl bg-transparent text-gray-500 font-medium mt-1 tap-effect">Cancelar</button>
                 </div>
             </div>
         </div>
@@ -265,7 +287,7 @@
                     <h3 class="text-lg font-medium text-white">Editar Categoria</h3>
                     <button type="button" onclick="document.getElementById('form-category').requestSubmit()" class="text-roxo font-bold p-2 tap-effect"><i class="ph ph-check text-2xl"></i></button>
                 </div>
-                <div class="p-5 pb-10">
+                <div class="p-5 pb-[env(safe-area-inset-bottom,40px)]">
                     <form id="form-category" onsubmit="saveCategoryEdit(event)">
                         <div class="flex items-center gap-4 mb-6">
                             <input type="color" id="edit-cat-color" class="w-14 h-14 rounded-full cursor-pointer bg-transparent tap-effect shadow-md">
@@ -280,7 +302,7 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'mobills_dark_final_v8';
+        const STORAGE_KEY = 'mobills_dark_final_v9';
         let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         
         let defaultCategories = [
@@ -289,7 +311,7 @@
             { id: 3, name: 'Compras', color: '#A855F7' }, 
             { id: 4, name: 'Outros', color: '#6B7280' }
         ];
-        let categories = JSON.parse(localStorage.getItem('mobills_cats_final_v8')) || defaultCategories;
+        let categories = JSON.parse(localStorage.getItem('mobills_cats_final_v9')) || defaultCategories;
 
         let currentType = 'expense';
         let currentRepetition = 'unica';
@@ -304,7 +326,6 @@
         let pendingAction = null; 
         let pendingData = null; 
 
-        // Formatação
         const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
         function handleAmountInput(e) {
@@ -319,66 +340,77 @@
             return parseFloat(val.replace(/\./g, '').replace(',', '.'));
         }
 
-        // Inicialização
         document.getElementById('date').valueAsDate = new Date();
         updateUI();
 
         // ----------------------------------------------------
-        // LÓGICA DE SWIPE (DESLIZAR O DEDO PARA MUDAR MÊS) E AUTO-MÊS
+        // LÓGICA DE SWIPE E MUDANÇA DE MÊS (COM ANIMAÇÃO DE DESLIZAR)
         // ----------------------------------------------------
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchEndX = 0;
-        let touchEndY = 0;
-
+        let touchStartX = 0; let touchStartY = 0;
+        let touchEndX = 0; let touchEndY = 0;
         const swipeZone = document.getElementById('swipe-zone');
 
         swipeZone.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
+            touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY;
         }, {passive: true});
 
         swipeZone.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX;
-            touchEndY = e.changedTouches[0].screenY;
+            touchEndX = e.changedTouches[0].screenX; touchEndY = e.changedTouches[0].screenY;
             handleSwipe();
         }, {passive: true});
 
         function handleSwipe() {
             const diffX = touchStartX - touchEndX;
             const diffY = touchStartY - touchEndY;
-            // Se o movimento horizontal for maior que o vertical e maior que 50px
+            // Se deslizou mais na horizontal do que na vertical
             if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 60) {
-                if (diffX > 0) changeMonth(1);  // Deslizou para a esquerda (Avança Mês)
-                else changeMonth(-1);           // Deslizou para a direita (Volta Mês)
+                if (diffX > 0) changeMonth(1);  // Deslizou para esquerda (Próximo)
+                else changeMonth(-1);           // Deslizou para direita (Anterior)
             }
         }
 
-        // AUTO MUDANÇA QUANDO VIRA O MÊS REAL (PWA Background refresh)
         document.addEventListener("visibilitychange", () => {
             if (document.visibilityState === "visible") {
                 let currentRealMonth = new Date().getMonth();
                 if (currentRealMonth !== lastKnownRealMonth) {
-                    displayDate = new Date(); // Reseta pro mes atual automaticamente
-                    lastKnownRealMonth = currentRealMonth;
-                    updateUI();
+                    displayDate = new Date(); lastKnownRealMonth = currentRealMonth; updateUI();
                 }
             }
         });
 
-        // ----------------------------------------------------
-        // NAVEGAÇÃO E UI
-        // ----------------------------------------------------
+        // Troca de Mês com Animação de Deslizamento Elegante
         function changeMonth(step) {
-            displayDate.setMonth(displayDate.getMonth() + step);
+            const animElements = document.querySelectorAll('.animate-month');
             const display = document.getElementById('current-month-display');
+            
+            // Define a classe de animação dependendo da direção
+            const outClass = step > 0 ? 'slide-out-left' : 'slide-out-right';
+            const inClass = step > 0 ? 'slide-in-right' : 'slide-in-left';
+
+            // Passo 1: Animação de saída
             display.style.opacity = 0;
+            animElements.forEach(el => {
+                el.classList.remove('slide-in-right', 'slide-in-left', 'slide-out-left', 'slide-out-right');
+                el.classList.add(outClass);
+            });
+
+            // Passo 2: Atualiza dados na metade da transição
             setTimeout(() => {
-                updateUI();
+                displayDate.setMonth(displayDate.getMonth() + step);
+                updateUI(); // Remonta as listas com os novos dados
+
+                // Passo 3: Animação de entrada
                 display.style.opacity = 1;
-            }, 150);
+                animElements.forEach(el => {
+                    el.classList.remove(outClass);
+                    el.classList.add(inClass);
+                });
+            }, 200); // 200ms é o tempo exato do keyframe CSS de saída
         }
 
+        // ----------------------------------------------------
+        // UI & REFRESH
+        // ----------------------------------------------------
         function toggleBalance() {
             isBalanceHidden = !isBalanceHidden;
             const eye = document.getElementById('eye-icon');
@@ -422,7 +454,7 @@
             updateCategoriesList();
             
             localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
-            localStorage.setItem('mobills_cats_final_v8', JSON.stringify(categories));
+            localStorage.setItem('mobills_cats_final_v9', JSON.stringify(categories));
         }
 
         // GRÁFICOS
@@ -467,7 +499,7 @@
             });
         }
 
-        // TRANSAÇÕES (VISUAL PLANO)
+        // TRANSAÇÕES
         function updateTransactionsList(filtered) {
             const list = document.getElementById('transactions-list');
             list.innerHTML = '';
@@ -501,6 +533,7 @@
                     if (t.category.toLowerCase().includes('carro')) icon = 'ph-car';
                     if (t.category.toLowerCase().includes('alimentação') || t.category.toLowerCase().includes('comida')) icon = 'ph-fork-knife';
                     if (t.category.toLowerCase().includes('compras')) icon = 'ph-shopping-bag';
+                    if (t.category.toLowerCase().includes('lazer')) icon = 'ph-popcorn';
 
                     let repName = 'Único';
                     if(t.repetition === 'fixa') repName = 'Fixo';
@@ -510,7 +543,7 @@
                         <div class="flex items-center justify-between cursor-pointer tap-effect py-3" onclick="openEditTransaction(${t.id})">
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-full flex items-center justify-center text-white" style="background-color: ${catColor}">
-                                    <i class="ph ${icon} text-2xl"></i>
+                                    <i class="ph ${icon} text-xl"></i>
                                 </div>
                                 <div>
                                     <p class="font-medium text-gray-100 text-[16px] mb-0.5">${t.desc}</p>
@@ -528,6 +561,7 @@
             });
         }
 
+        // LÓGICA DE SALVAR
         function saveTransaction(e) {
             e.preventDefault();
             const desc = document.getElementById('desc').value;
@@ -663,28 +697,22 @@
         }
 
         function openSimpleConfirm(title, desc) {
-            document.getElementById('simple-confirm-title').innerText = title;
-            document.getElementById('simple-confirm-desc').innerText = desc;
-            const m = document.getElementById('modal-simple-confirm');
-            const c = document.getElementById('modal-simple-confirm-content');
+            document.getElementById('simple-confirm-title').innerText = title; document.getElementById('simple-confirm-desc').innerText = desc;
+            const m = document.getElementById('modal-simple-confirm'); const c = document.getElementById('modal-simple-confirm-content');
             m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
         }
         function closeSimpleConfirm() {
-            const m = document.getElementById('modal-simple-confirm');
-            const c = document.getElementById('modal-simple-confirm-content');
+            const m = document.getElementById('modal-simple-confirm'); const c = document.getElementById('modal-simple-confirm-content');
             m.classList.add('opacity-0'); c.classList.add('translate-y-full'); setTimeout(() => m.classList.add('hidden'), 250);
         }
         function openRepeatConfirm(title, actionType) {
             document.getElementById('repeat-confirm-title').innerText = title;
-            const btnAll = document.getElementById('btn-repeat-all');
-            btnAll.className = actionType === 'delete' ? "w-full py-4 rounded-xl bg-red-500 text-white font-bold tap-effect" : "w-full py-4 rounded-xl bg-roxo text-white font-bold tap-effect";
-            const m = document.getElementById('modal-repeat-confirm');
-            const c = document.getElementById('modal-repeat-confirm-content');
+            document.getElementById('btn-repeat-all').className = actionType === 'delete' ? "w-full py-4 rounded-xl bg-red-500 text-white font-bold tap-effect" : "w-full py-4 rounded-xl bg-roxo text-white font-bold tap-effect";
+            const m = document.getElementById('modal-repeat-confirm'); const c = document.getElementById('modal-repeat-confirm-content');
             m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
         }
         function closeRepeatConfirm() {
-            const m = document.getElementById('modal-repeat-confirm');
-            const c = document.getElementById('modal-repeat-confirm-content');
+            const m = document.getElementById('modal-repeat-confirm'); const c = document.getElementById('modal-repeat-confirm-content');
             m.classList.add('opacity-0'); c.classList.add('translate-y-full'); setTimeout(() => m.classList.add('hidden'), 250);
         }
 
@@ -717,127 +745,86 @@
                     </div>
                 `;
             });
-            const m = document.getElementById('modal-category-select');
-            const c = document.getElementById('modal-category-select-content');
+            const m = document.getElementById('modal-category-select'); const c = document.getElementById('modal-category-select-content');
             m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
         }
         function closeCategorySelectModal() {
-            const m = document.getElementById('modal-category-select');
-            const c = document.getElementById('modal-category-select-content');
+            const m = document.getElementById('modal-category-select'); const c = document.getElementById('modal-category-select-content');
             m.classList.add('opacity-0'); c.classList.add('translate-y-full'); setTimeout(() => m.classList.add('hidden'), 250);
         }
         function selectCategory(name) {
-            document.getElementById('category').value = name;
-            document.getElementById('selected-category-display').innerText = name;
+            document.getElementById('category').value = name; document.getElementById('selected-category-display').innerText = name;
             document.getElementById('selected-category-display').classList.replace('text-gray-400', 'text-white');
             closeCategorySelectModal();
         }
         function addCategory(e) {
             e.preventDefault();
-            const name = document.getElementById('cat-name').value;
-            const color = document.getElementById('cat-color').value;
-            if(!name) return;
-            categories.push({ id: Date.now(), name, color });
-            document.getElementById('cat-name').value = '';
-            updateUI();
+            const name = document.getElementById('cat-name').value; const color = document.getElementById('cat-color').value;
+            if(!name) return; categories.push({ id: Date.now(), name, color }); document.getElementById('cat-name').value = ''; updateUI();
         }
         function saveCategoryEdit(e) {
             e.preventDefault();
-            const newName = document.getElementById('edit-cat-name').value;
-            const newColor = document.getElementById('edit-cat-color').value;
+            const newName = document.getElementById('edit-cat-name').value; const newColor = document.getElementById('edit-cat-color').value;
             const index = categories.findIndex(c => c.id === editingCatId);
             if (index > -1) {
-                const oldName = categories[index].name;
-                categories[index].name = newName; categories[index].color = newColor;
+                const oldName = categories[index].name; categories[index].name = newName; categories[index].color = newColor;
                 transactions.forEach(t => { if(t.category === oldName) t.category = newName; });
             }
             closeCategoryModal(); updateUI();
         }
-        function deleteCategory(id) {
-            pendingAction = 'delete_category'; pendingData = { catId: id };
-            openSimpleConfirm('Excluir Categoria', 'Transações atreladas a esta categoria ficarão sem marcação. Continuar?');
-        }
+        function deleteCategory(id) { pendingAction = 'delete_category'; pendingData = { catId: id }; openSimpleConfirm('Excluir Categoria', 'Transações atreladas a esta categoria ficarão sem marcação. Continuar?'); }
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             setTimeout(() => document.getElementById(`tab-${tabId}`).classList.add('active'), 10);
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 const icon = btn.querySelector('i');
-                if(btn.dataset.target === tabId) {
-                    btn.classList.replace('text-gray-500', 'text-roxo'); icon.classList.replace('ph', 'ph-fill');
-                } else {
-                    btn.classList.replace('text-roxo', 'text-gray-500'); icon.classList.replace('ph-fill', 'ph');
-                }
+                if(btn.dataset.target === tabId) { btn.classList.replace('text-gray-500', 'text-roxo'); icon.classList.replace('ph', 'ph-fill'); } 
+                else { btn.classList.replace('text-roxo', 'text-gray-500'); icon.classList.replace('ph-fill', 'ph'); }
             });
         }
-
         function openModal() {
             editingTxId = null;
             document.getElementById('modal-tx-title').innerText = 'Nova Transação';
-            document.getElementById('btn-delete-tx').classList.add('hidden');
-            document.getElementById('rep-section').style.display = 'block';
-            document.getElementById('continue-adding-wrapper').classList.remove('hidden');
-            document.getElementById('continue-adding').checked = false;
-            
-            document.getElementById('form').reset();
-            document.getElementById('date').valueAsDate = new Date();
-            document.getElementById('category').value = '';
-            document.getElementById('selected-category-display').innerText = 'Selecione a Categoria';
+            document.getElementById('btn-delete-tx').classList.add('hidden'); document.getElementById('rep-section').style.display = 'block';
+            document.getElementById('continue-adding-wrapper').classList.remove('hidden'); document.getElementById('continue-adding').checked = false;
+            document.getElementById('form').reset(); document.getElementById('date').valueAsDate = new Date();
+            document.getElementById('category').value = ''; document.getElementById('selected-category-display').innerText = 'Selecione a Categoria';
             document.getElementById('selected-category-display').classList.replace('text-white', 'text-gray-400');
-
             setType('expense'); setRepetition('unica');
-
             const m = document.getElementById('modal'); const c = document.getElementById('modal-content');
             m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
         }
-
         function openEditTransaction(id) {
-            const t = transactions.find(x => x.id === id);
-            if(!t) return;
-            editingTxId = id;
+            const t = transactions.find(x => x.id === id); if(!t) return; editingTxId = id;
             document.getElementById('modal-tx-title').innerText = 'Editar Transação';
-            document.getElementById('btn-delete-tx').classList.remove('hidden'); 
-            document.getElementById('rep-section').style.display = 'none'; 
+            document.getElementById('btn-delete-tx').classList.remove('hidden'); document.getElementById('rep-section').style.display = 'none'; 
             document.getElementById('continue-adding-wrapper').classList.add('hidden');
-            
             let numStr = t.amount.toFixed(2).replace(".", ",").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
             document.getElementById('amount').value = numStr;
-            document.getElementById('desc').value = t.desc.replace(/ \(\d+\/\d+\)$/, '');
-            document.getElementById('date').value = t.date;
-            document.getElementById('category').value = t.category;
-            document.getElementById('selected-category-display').innerText = t.category;
+            document.getElementById('desc').value = t.desc.replace(/ \(\d+\/\d+\)$/, ''); document.getElementById('date').value = t.date;
+            document.getElementById('category').value = t.category; document.getElementById('selected-category-display').innerText = t.category;
             document.getElementById('selected-category-display').classList.replace('text-gray-400', 'text-white');
-
             setType(t.type);
-
             const m = document.getElementById('modal'); const c = document.getElementById('modal-content');
             m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
         }
-
         function closeModal() {
             const m = document.getElementById('modal'); const c = document.getElementById('modal-content');
             m.classList.add('opacity-0'); c.classList.add('translate-y-full'); setTimeout(() => m.classList.add('hidden'), 250);
         }
-
         function openEditCategory(id) {
-            const cat = categories.find(c => c.id === id);
-            if(!cat) return;
-            editingCatId = id;
-            document.getElementById('edit-cat-name').value = cat.name;
-            document.getElementById('edit-cat-color').value = cat.color;
-
+            const cat = categories.find(c => c.id === id); if(!cat) return; editingCatId = id;
+            document.getElementById('edit-cat-name').value = cat.name; document.getElementById('edit-cat-color').value = cat.color;
             const m = document.getElementById('modal-category'); const c = document.getElementById('modal-category-content');
             m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
         }
-
         function closeCategoryModal() {
             const m = document.getElementById('modal-category'); const c = document.getElementById('modal-category-content');
             m.classList.add('opacity-0'); c.classList.add('translate-y-full'); setTimeout(() => m.classList.add('hidden'), 250);
         }
-
         function setType(type) {
-            currentType = type;
-            const btnExp = document.getElementById('btn-expense'); const btnInc = document.getElementById('btn-income');
+            currentType = type; const btnExp = document.getElementById('btn-expense'); const btnInc = document.getElementById('btn-income');
             if(type === 'expense') {
                 btnExp.className = 'flex-1 py-3 text-sm font-medium rounded-lg bg-red-500/20 text-red-500 border border-red-500/50 transition-all tap-effect';
                 btnInc.className = 'flex-1 py-3 text-sm font-medium rounded-lg text-gray-400 border border-transparent transition-all tap-effect';
@@ -846,10 +833,8 @@
                 btnExp.className = 'flex-1 py-3 text-sm font-medium rounded-lg text-gray-400 border border-transparent transition-all tap-effect';
             }
         }
-
         function setRepetition(type) {
-            currentRepetition = type;
-            const btnUnica = document.getElementById('btn-rep-unica'); const btnFixa = document.getElementById('btn-rep-fixa'); const btnParcelada = document.getElementById('btn-rep-parcelada'); const divInst = document.getElementById('installments-div');
+            currentRepetition = type; const btnUnica = document.getElementById('btn-rep-unica'); const btnFixa = document.getElementById('btn-rep-fixa'); const btnParcelada = document.getElementById('btn-rep-parcelada'); const divInst = document.getElementById('installments-div');
             [btnUnica, btnFixa, btnParcelada].forEach(b => b.className = 'flex-1 py-2 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 transition-colors tap-effect');
             if(type === 'unica') btnUnica.className = 'flex-1 py-2 text-sm rounded-lg bg-roxo text-white tap-effect';
             if(type === 'fixa') btnFixa.className = 'flex-1 py-2 text-sm rounded-lg bg-roxo text-white tap-effect';
@@ -857,39 +842,18 @@
             else { divInst.classList.add('hidden'); }
         }
 
-        // NOVO PADRÃO DE NOME DE BACKUP
         function exportData() {
-            const dataStr = JSON.stringify({ transactions, categories });
-            const blob = new Blob([dataStr], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `MeuControle_Backup.json`;
-            a.click();
-            URL.revokeObjectURL(url);
+            const dataStr = JSON.stringify({ transactions, categories }); const blob = new Blob([dataStr], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement('a');
+            a.href = url; a.download = `MeuControle_Backup.json`; a.click(); URL.revokeObjectURL(url);
         }
-
         function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
+            const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
             reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if(data.transactions) transactions = data.transactions;
-                    if(data.categories) categories = data.categories;
-                    updateUI();
-                    alert('Dados restaurados com sucesso!');
-                } catch (error) {
-                    alert('Erro ao ler o arquivo.');
-                }
-            };
-            reader.readAsText(file);
+                try { const data = JSON.parse(e.target.result); if(data.transactions) transactions = data.transactions; if(data.categories) categories = data.categories; updateUI(); alert('Dados restaurados com sucesso!'); } 
+                catch (error) { alert('Erro ao ler o arquivo.'); }
+            }; reader.readAsText(file);
         }
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
-        }
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {})); }
     </script>
 </body>
 </html>
