@@ -15,7 +15,7 @@
     
     <style>
         ::-webkit-scrollbar { display: none; }
-        body { background-color: #000000; color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #000000; color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow-x: hidden; }
         .app-container { background-color: #121212; }
         .card-bg { background-color: #1C1C1E; }
         
@@ -47,12 +47,12 @@
 </head>
 <body class="antialiased select-none">
 
-    <div class="max-w-md mx-auto app-container min-h-screen relative pb-24 shadow-2xl overflow-x-hidden">
+    <div id="swipe-zone" class="max-w-md mx-auto app-container min-h-screen relative pb-24 shadow-2xl overflow-x-hidden">
 
         <header class="sticky top-0 z-20 app-container pt-8 pb-6 border-b border-gray-800">
             <div class="flex justify-between items-center mb-6 w-4/5 mx-auto">
                 <button onclick="changeMonth(-1)" class="p-2 text-gray-400 hover:text-white tap-effect"><i class="ph ph-caret-left text-xl"></i></button>
-                <span id="current-month-display" class="font-medium text-gray-200 text-lg capitalize w-40 text-center tracking-wide">Fevereiro 2026</span>
+                <span id="current-month-display" class="font-medium text-gray-200 text-lg capitalize w-40 text-center tracking-wide transition-opacity duration-200">Fevereiro 2026</span>
                 <button onclick="changeMonth(1)" class="p-2 text-gray-400 hover:text-white tap-effect"><i class="ph ph-caret-right text-xl"></i></button>
             </div>
 
@@ -152,7 +152,6 @@
 
         <div id="modal" class="fixed inset-0 bg-black/90 z-40 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
             <div id="modal-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[95vh] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-                
                 <div class="flex justify-between items-center p-5 border-b border-gray-800">
                     <button type="button" onclick="closeModal()" class="text-gray-400 p-2 -ml-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
                     <h3 id="modal-tx-title" class="text-lg font-medium text-white">Nova Transação</h3>
@@ -163,8 +162,8 @@
                 <div class="overflow-y-auto p-5 pb-10">
                     <form id="form" onsubmit="saveTransaction(event)">
                         <div class="flex bg-[#121212] rounded-xl p-1 mb-6">
-                            <button type="button" id="btn-expense" onclick="setType('expense')" class="flex-1 py-3 text-sm font-medium rounded-lg bg-red-500/20 text-red-500 border border-red-500/50 transition-all duration-200">Despesa</button>
-                            <button type="button" id="btn-income" onclick="setType('income')" class="flex-1 py-3 text-sm font-medium rounded-lg text-gray-400 transition-all duration-200">Receita</button>
+                            <button type="button" id="btn-expense" onclick="setType('expense')" class="flex-1 py-3 text-sm font-medium rounded-lg bg-red-500/20 text-red-500 border border-red-500/50 transition-all duration-200 tap-effect">Despesa</button>
+                            <button type="button" id="btn-income" onclick="setType('income')" class="flex-1 py-3 text-sm font-medium rounded-lg text-gray-400 transition-all duration-200 tap-effect">Receita</button>
                         </div>
                         
                         <div class="mb-6">
@@ -281,7 +280,7 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'mobills_dark_final_v7';
+        const STORAGE_KEY = 'mobills_dark_final_v8';
         let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         
         let defaultCategories = [
@@ -290,7 +289,7 @@
             { id: 3, name: 'Compras', color: '#A855F7' }, 
             { id: 4, name: 'Outros', color: '#6B7280' }
         ];
-        let categories = JSON.parse(localStorage.getItem('mobills_cats_final_v7')) || defaultCategories;
+        let categories = JSON.parse(localStorage.getItem('mobills_cats_final_v8')) || defaultCategories;
 
         let currentType = 'expense';
         let currentRepetition = 'unica';
@@ -298,41 +297,86 @@
         let isBalanceHidden = false;
         
         let displayDate = new Date();
+        let lastKnownRealMonth = new Date().getMonth();
         
         let editingTxId = null;
         let editingCatId = null;
         let pendingAction = null; 
         let pendingData = null; 
 
-        // Formatação Oficial R$
+        // Formatação
         const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
-        // MÁSCARA DE MOEDA NO INPUT (Digita: 1000 -> Vira: 10,00)
         function handleAmountInput(e) {
             let value = e.target.value.replace(/\D/g, "");
-            if (value === "") {
-                e.target.value = "";
-                return;
-            }
+            if (value === "") { e.target.value = ""; return; }
             let num = (parseInt(value) / 100).toFixed(2);
             e.target.value = num.replace(".", ",").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
         }
 
-        // Converter string de máscara "1.234,50" para float "1234.50"
         function parseCurrency(val) {
             if(!val) return 0;
             return parseFloat(val.replace(/\./g, '').replace(',', '.'));
         }
 
+        // Inicialização
         document.getElementById('date').valueAsDate = new Date();
         updateUI();
+
+        // ----------------------------------------------------
+        // LÓGICA DE SWIPE (DESLIZAR O DEDO PARA MUDAR MÊS) E AUTO-MÊS
+        // ----------------------------------------------------
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
+        const swipeZone = document.getElementById('swipe-zone');
+
+        swipeZone.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, {passive: true});
+
+        swipeZone.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        }, {passive: true});
+
+        function handleSwipe() {
+            const diffX = touchStartX - touchEndX;
+            const diffY = touchStartY - touchEndY;
+            // Se o movimento horizontal for maior que o vertical e maior que 50px
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 60) {
+                if (diffX > 0) changeMonth(1);  // Deslizou para a esquerda (Avança Mês)
+                else changeMonth(-1);           // Deslizou para a direita (Volta Mês)
+            }
+        }
+
+        // AUTO MUDANÇA QUANDO VIRA O MÊS REAL (PWA Background refresh)
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") {
+                let currentRealMonth = new Date().getMonth();
+                if (currentRealMonth !== lastKnownRealMonth) {
+                    displayDate = new Date(); // Reseta pro mes atual automaticamente
+                    lastKnownRealMonth = currentRealMonth;
+                    updateUI();
+                }
+            }
+        });
 
         // ----------------------------------------------------
         // NAVEGAÇÃO E UI
         // ----------------------------------------------------
         function changeMonth(step) {
             displayDate.setMonth(displayDate.getMonth() + step);
-            updateUI();
+            const display = document.getElementById('current-month-display');
+            display.style.opacity = 0;
+            setTimeout(() => {
+                updateUI();
+                display.style.opacity = 1;
+            }, 150);
         }
 
         function toggleBalance() {
@@ -378,12 +422,10 @@
             updateCategoriesList();
             
             localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
-            localStorage.setItem('mobills_cats_final_v7', JSON.stringify(categories));
+            localStorage.setItem('mobills_cats_final_v8', JSON.stringify(categories));
         }
 
-        // ----------------------------------------------------
         // GRÁFICOS
-        // ----------------------------------------------------
         function updateChartAndLegend(categoryTotals) {
             const ctx = document.getElementById('expensesChart').getContext('2d');
             const legendDiv = document.getElementById('custom-legend');
@@ -414,28 +456,18 @@
             }
 
             if(myChart) myChart.destroy();
-
             if (data.length === 0) {
-                myChart = new Chart(ctx, {
-                    type: 'doughnut', data: { datasets: [{ data: [1], backgroundColor: ['#2C2C2E'], borderWidth: 0 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, cutout: '78%' }
-                });
+                myChart = new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [1], backgroundColor: ['#2C2C2E'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, cutout: '78%' } });
                 return;
             }
 
             myChart = new Chart(ctx, {
                 type: 'doughnut', data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }] },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, cutout: '78%', 
-                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                    animation: { animateScale: true, animateRotate: true, duration: 800, easing: 'easeOutQuart' }
-                }
+                options: { responsive: true, maintainAspectRatio: false, cutout: '78%', plugins: { legend: { display: false }, tooltip: { enabled: false } }, animation: { animateScale: true, animateRotate: true, duration: 800, easing: 'easeOutQuart' } }
             });
         }
 
-        // ----------------------------------------------------
-        // TRANSAÇÕES (LISTA PLANA IGUAL AO PRINT)
-        // ----------------------------------------------------
+        // TRANSAÇÕES (VISUAL PLANO)
         function updateTransactionsList(filtered) {
             const list = document.getElementById('transactions-list');
             list.innerHTML = '';
@@ -457,7 +489,6 @@
                 const dateObj = new Date(date + 'T12:00:00');
                 const dateHeader = `${dateObj.toLocaleDateString('pt-BR', { weekday: 'long' })}, ${dateObj.toLocaleDateString('pt-BR', { day: '2-digit' })}`;
                 
-                // Cabeçalho da data com linha inferior suave
                 let html = `<div class="mb-6"><h3 class="text-[13px] font-semibold text-gray-400 mb-2 capitalize border-b border-gray-800 pb-2">${dateHeader}</h3><div class="flex flex-col">`;
 
                 grouped[date].forEach(t => {
@@ -470,13 +501,11 @@
                     if (t.category.toLowerCase().includes('carro')) icon = 'ph-car';
                     if (t.category.toLowerCase().includes('alimentação') || t.category.toLowerCase().includes('comida')) icon = 'ph-fork-knife';
                     if (t.category.toLowerCase().includes('compras')) icon = 'ph-shopping-bag';
-                    if (t.category.toLowerCase().includes('lazer')) icon = 'ph-popcorn';
 
                     let repName = 'Único';
                     if(t.repetition === 'fixa') repName = 'Fixo';
                     if(t.repetition === 'parcelada') repName = 'Parcelado';
 
-                    // Removido o bg-color e bordas arredondadas. Adicionado py-3 para espaçamento natural
                     html += `
                         <div class="flex items-center justify-between cursor-pointer tap-effect py-3" onclick="openEditTransaction(${t.id})">
                             <div class="flex items-center gap-4">
@@ -499,22 +528,16 @@
             });
         }
 
-        // ----------------------------------------------------
-        // LÓGICA DE SALVAR
-        // ----------------------------------------------------
         function saveTransaction(e) {
             e.preventDefault();
             const desc = document.getElementById('desc').value;
-            // Parse a string formatada em float
             const rawAmount = document.getElementById('amount').value;
             const totalAmount = Math.abs(parseCurrency(rawAmount));
-            
             const category = document.getElementById('category').value;
             const dateInput = document.getElementById('date').value;
 
             if(!desc || isNaN(totalAmount) || totalAmount === 0 || !dateInput || !category) {
-                alert("Preencha todos os campos e selecione uma categoria.");
-                return;
+                alert("Preencha todos os campos."); return;
             }
 
             if (editingTxId) {
@@ -546,7 +569,6 @@
                 } else if (currentRepetition === 'parcelada') {
                     let parcels = parseInt(document.getElementById('installments-count').value) || 2;
                     let instType = document.querySelector('input[name="inst_type"]:checked').value;
-                    
                     let amountPerParcel = totalAmount;
                     if (instType === 'total') amountPerParcel = totalAmount / parcels;
 
@@ -555,7 +577,6 @@
                         transactions.push({ id: Date.now() + i, groupId, desc: `${desc} (${i+1}/${parcels})`, amount: amountPerParcel, date: d.toISOString().split('T')[0], ...baseObj });
                     }
                 } else if (currentRepetition === 'fixa') {
-                    // Fixa cria 10 anos de lançamentos (120 meses)
                     for(let i=0; i<120; i++) {
                         let d = new Date(baseDate); d.setMonth(d.getMonth() + i);
                         transactions.push({ id: Date.now() + i, groupId, desc: desc, amount: totalAmount, date: d.toISOString().split('T')[0], ...baseObj });
@@ -565,7 +586,6 @@
             
             updateUI();
             
-            // Lógica de "Continuar adicionando"
             if (editingTxId || !document.getElementById('continue-adding').checked) {
                 closeModal();
             } else {
@@ -642,55 +662,32 @@
             if(pendingAction === 'delete') closeModal();
         }
 
-        // ----------------------------------------------------
-        // CONFIRMAÇÕES NATIVAS (MODAIS)
-        // ----------------------------------------------------
         function openSimpleConfirm(title, desc) {
             document.getElementById('simple-confirm-title').innerText = title;
             document.getElementById('simple-confirm-desc').innerText = desc;
             const m = document.getElementById('modal-simple-confirm');
             const c = document.getElementById('modal-simple-confirm-content');
-            m.classList.remove('hidden');
-            void m.offsetWidth;
-            m.classList.remove('opacity-0');
-            c.classList.remove('translate-y-full');
+            m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
         }
-
         function closeSimpleConfirm() {
             const m = document.getElementById('modal-simple-confirm');
             const c = document.getElementById('modal-simple-confirm-content');
-            m.classList.add('opacity-0');
-            c.classList.add('translate-y-full');
-            setTimeout(() => m.classList.add('hidden'), 250);
+            m.classList.add('opacity-0'); c.classList.add('translate-y-full'); setTimeout(() => m.classList.add('hidden'), 250);
         }
-
         function openRepeatConfirm(title, actionType) {
             document.getElementById('repeat-confirm-title').innerText = title;
             const btnAll = document.getElementById('btn-repeat-all');
-            if (actionType === 'delete') {
-                btnAll.className = "w-full py-4 rounded-xl bg-red-500 text-white font-bold tap-effect";
-            } else {
-                btnAll.className = "w-full py-4 rounded-xl bg-roxo text-white font-bold tap-effect";
-            }
+            btnAll.className = actionType === 'delete' ? "w-full py-4 rounded-xl bg-red-500 text-white font-bold tap-effect" : "w-full py-4 rounded-xl bg-roxo text-white font-bold tap-effect";
             const m = document.getElementById('modal-repeat-confirm');
             const c = document.getElementById('modal-repeat-confirm-content');
-            m.classList.remove('hidden');
-            void m.offsetWidth;
-            m.classList.remove('opacity-0');
-            c.classList.remove('translate-y-full');
+            m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
         }
-
         function closeRepeatConfirm() {
             const m = document.getElementById('modal-repeat-confirm');
             const c = document.getElementById('modal-repeat-confirm-content');
-            m.classList.add('opacity-0');
-            c.classList.add('translate-y-full');
-            setTimeout(() => m.classList.add('hidden'), 250);
+            m.classList.add('opacity-0'); c.classList.add('translate-y-full'); setTimeout(() => m.classList.add('hidden'), 250);
         }
 
-        // ----------------------------------------------------
-        // CATEGORIAS
-        // ----------------------------------------------------
         function updateCategoriesList() {
             const list = document.getElementById('categories-list');
             list.innerHTML = '';
@@ -709,7 +706,6 @@
                 `;
             });
         }
-
         function openCategorySelectModal() {
             const list = document.getElementById('category-select-list');
             list.innerHTML = '';
@@ -723,27 +719,19 @@
             });
             const m = document.getElementById('modal-category-select');
             const c = document.getElementById('modal-category-select-content');
-            m.classList.remove('hidden');
-            void m.offsetWidth;
-            m.classList.remove('opacity-0');
-            c.classList.remove('translate-y-full');
+            m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
         }
-
         function closeCategorySelectModal() {
             const m = document.getElementById('modal-category-select');
             const c = document.getElementById('modal-category-select-content');
-            m.classList.add('opacity-0');
-            c.classList.add('translate-y-full');
-            setTimeout(() => m.classList.add('hidden'), 250);
+            m.classList.add('opacity-0'); c.classList.add('translate-y-full'); setTimeout(() => m.classList.add('hidden'), 250);
         }
-
         function selectCategory(name) {
             document.getElementById('category').value = name;
             document.getElementById('selected-category-display').innerText = name;
             document.getElementById('selected-category-display').classList.replace('text-gray-400', 'text-white');
             closeCategorySelectModal();
         }
-
         function addCategory(e) {
             e.preventDefault();
             const name = document.getElementById('cat-name').value;
@@ -753,44 +741,32 @@
             document.getElementById('cat-name').value = '';
             updateUI();
         }
-
         function saveCategoryEdit(e) {
             e.preventDefault();
             const newName = document.getElementById('edit-cat-name').value;
             const newColor = document.getElementById('edit-cat-color').value;
-            
             const index = categories.findIndex(c => c.id === editingCatId);
             if (index > -1) {
                 const oldName = categories[index].name;
-                categories[index].name = newName;
-                categories[index].color = newColor;
+                categories[index].name = newName; categories[index].color = newColor;
                 transactions.forEach(t => { if(t.category === oldName) t.category = newName; });
             }
-            closeCategoryModal();
-            updateUI();
+            closeCategoryModal(); updateUI();
         }
-
         function deleteCategory(id) {
-            pendingAction = 'delete_category';
-            pendingData = { catId: id };
+            pendingAction = 'delete_category'; pendingData = { catId: id };
             openSimpleConfirm('Excluir Categoria', 'Transações atreladas a esta categoria ficarão sem marcação. Continuar?');
         }
 
-        // ----------------------------------------------------
-        // MODAIS BASE
-        // ----------------------------------------------------
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             setTimeout(() => document.getElementById(`tab-${tabId}`).classList.add('active'), 10);
-
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 const icon = btn.querySelector('i');
                 if(btn.dataset.target === tabId) {
-                    btn.classList.replace('text-gray-500', 'text-roxo');
-                    icon.classList.replace('ph', 'ph-fill');
+                    btn.classList.replace('text-gray-500', 'text-roxo'); icon.classList.replace('ph', 'ph-fill');
                 } else {
-                    btn.classList.replace('text-roxo', 'text-gray-500');
-                    icon.classList.replace('ph-fill', 'ph');
+                    btn.classList.replace('text-roxo', 'text-gray-500'); icon.classList.replace('ph-fill', 'ph');
                 }
             });
         }
@@ -805,60 +781,42 @@
             
             document.getElementById('form').reset();
             document.getElementById('date').valueAsDate = new Date();
-            
             document.getElementById('category').value = '';
             document.getElementById('selected-category-display').innerText = 'Selecione a Categoria';
             document.getElementById('selected-category-display').classList.replace('text-white', 'text-gray-400');
 
-            setType('expense');
-            setRepetition('unica');
+            setType('expense'); setRepetition('unica');
 
-            const m = document.getElementById('modal');
-            const c = document.getElementById('modal-content');
-            m.classList.remove('hidden');
-            void m.offsetWidth;
-            m.classList.remove('opacity-0');
-            c.classList.remove('translate-y-full');
+            const m = document.getElementById('modal'); const c = document.getElementById('modal-content');
+            m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
         }
 
         function openEditTransaction(id) {
             const t = transactions.find(x => x.id === id);
             if(!t) return;
-            
             editingTxId = id;
             document.getElementById('modal-tx-title').innerText = 'Editar Transação';
             document.getElementById('btn-delete-tx').classList.remove('hidden'); 
             document.getElementById('rep-section').style.display = 'none'; 
             document.getElementById('continue-adding-wrapper').classList.add('hidden');
             
-            // Preenche o valor com a máscara
             let numStr = t.amount.toFixed(2).replace(".", ",").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
             document.getElementById('amount').value = numStr;
-            
-            // Remove o sufixo de parcelas para edição limpa
             document.getElementById('desc').value = t.desc.replace(/ \(\d+\/\d+\)$/, '');
             document.getElementById('date').value = t.date;
-            
             document.getElementById('category').value = t.category;
             document.getElementById('selected-category-display').innerText = t.category;
             document.getElementById('selected-category-display').classList.replace('text-gray-400', 'text-white');
 
             setType(t.type);
 
-            const m = document.getElementById('modal');
-            const c = document.getElementById('modal-content');
-            m.classList.remove('hidden');
-            void m.offsetWidth;
-            m.classList.remove('opacity-0');
-            c.classList.remove('translate-y-full');
+            const m = document.getElementById('modal'); const c = document.getElementById('modal-content');
+            m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
         }
 
         function closeModal() {
-            const m = document.getElementById('modal');
-            const c = document.getElementById('modal-content');
-            m.classList.add('opacity-0');
-            c.classList.add('translate-y-full');
-            setTimeout(() => m.classList.add('hidden'), 250);
+            const m = document.getElementById('modal'); const c = document.getElementById('modal-content');
+            m.classList.add('opacity-0'); c.classList.add('translate-y-full'); setTimeout(() => m.classList.add('hidden'), 250);
         }
 
         function openEditCategory(id) {
@@ -868,26 +826,18 @@
             document.getElementById('edit-cat-name').value = cat.name;
             document.getElementById('edit-cat-color').value = cat.color;
 
-            const m = document.getElementById('modal-category');
-            const c = document.getElementById('modal-category-content');
-            m.classList.remove('hidden');
-            void m.offsetWidth;
-            m.classList.remove('opacity-0');
-            c.classList.remove('translate-y-full');
+            const m = document.getElementById('modal-category'); const c = document.getElementById('modal-category-content');
+            m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
         }
 
         function closeCategoryModal() {
-            const m = document.getElementById('modal-category');
-            const c = document.getElementById('modal-category-content');
-            m.classList.add('opacity-0');
-            c.classList.add('translate-y-full');
-            setTimeout(() => m.classList.add('hidden'), 250);
+            const m = document.getElementById('modal-category'); const c = document.getElementById('modal-category-content');
+            m.classList.add('opacity-0'); c.classList.add('translate-y-full'); setTimeout(() => m.classList.add('hidden'), 250);
         }
 
         function setType(type) {
             currentType = type;
-            const btnExp = document.getElementById('btn-expense');
-            const btnInc = document.getElementById('btn-income');
+            const btnExp = document.getElementById('btn-expense'); const btnInc = document.getElementById('btn-income');
             if(type === 'expense') {
                 btnExp.className = 'flex-1 py-3 text-sm font-medium rounded-lg bg-red-500/20 text-red-500 border border-red-500/50 transition-all tap-effect';
                 btnInc.className = 'flex-1 py-3 text-sm font-medium rounded-lg text-gray-400 border border-transparent transition-all tap-effect';
@@ -899,33 +849,22 @@
 
         function setRepetition(type) {
             currentRepetition = type;
-            const btnUnica = document.getElementById('btn-rep-unica');
-            const btnFixa = document.getElementById('btn-rep-fixa');
-            const btnParcelada = document.getElementById('btn-rep-parcelada');
-            const divInst = document.getElementById('installments-div');
-
+            const btnUnica = document.getElementById('btn-rep-unica'); const btnFixa = document.getElementById('btn-rep-fixa'); const btnParcelada = document.getElementById('btn-rep-parcelada'); const divInst = document.getElementById('installments-div');
             [btnUnica, btnFixa, btnParcelada].forEach(b => b.className = 'flex-1 py-2 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 transition-colors tap-effect');
-
             if(type === 'unica') btnUnica.className = 'flex-1 py-2 text-sm rounded-lg bg-roxo text-white tap-effect';
             if(type === 'fixa') btnFixa.className = 'flex-1 py-2 text-sm rounded-lg bg-roxo text-white tap-effect';
-            if(type === 'parcelada') {
-                btnParcelada.className = 'flex-1 py-2 text-sm rounded-lg bg-roxo text-white tap-effect';
-                divInst.classList.remove('hidden');
-            } else {
-                divInst.classList.add('hidden');
-            }
+            if(type === 'parcelada') { btnParcelada.className = 'flex-1 py-2 text-sm rounded-lg bg-roxo text-white tap-effect'; divInst.classList.remove('hidden'); } 
+            else { divInst.classList.add('hidden'); }
         }
 
-        // ----------------------------------------------------
-        // BACKUP
-        // ----------------------------------------------------
+        // NOVO PADRÃO DE NOME DE BACKUP
         function exportData() {
             const dataStr = JSON.stringify({ transactions, categories });
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `meumobills_${new Date().toISOString().slice(0,10)}.json`;
+            a.download = `MeuControle_Backup.json`;
             a.click();
             URL.revokeObjectURL(url);
         }
