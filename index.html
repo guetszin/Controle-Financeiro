@@ -12,9 +12,11 @@
 <link rel="manifest" href="manifest.json">
 <style>
 ::-webkit-scrollbar{display:none}
-html,body{height:100%;margin:0;background:#1C1C1E;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+/* Uso de 100dvh resolve perfeitamente a altura no Safari iOS */
+html,body{height:100dvh;margin:0;background:#1C1C1E;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%}
 body{color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-.app{position:fixed;top:0;left:0;right:0;height:var(--app-h,100%)}
+/* .app travado nas bordas com display flex flex-col garante a proporção exata */
+.app{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;overflow:hidden}
 .app-container{background:#121212}
 .card-bg{background:#1C1C1E}
 .hdr{padding-top:calc(env(safe-area-inset-top,0px) + .25rem)}
@@ -41,9 +43,9 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:50%}
 </style>
 </head>
 <body class="antialiased select-none">
-<div class="app max-w-md mx-auto app-container relative flex flex-col overflow-hidden shadow-2xl">
+<div class="app max-w-md mx-auto app-container relative shadow-2xl">
 
-  <header id="swipe-zone" class="shrink-0 hdr app-container pb-4 border-b border-gray-800 z-20">
+  <header class="shrink-0 hdr app-container pb-4 border-b border-gray-800 z-20">
     <div class="flex justify-between items-center mb-2 w-4/5 mx-auto">
       <button onclick="changeMonth(-1)" class="p-2 text-gray-400 tap-effect"><i class="ph ph-caret-left text-xl"></i></button>
       <span id="current-month-display" class="font-medium text-gray-200 text-lg capitalize w-40 text-center tracking-wide transition-opacity duration-200"></span>
@@ -257,13 +259,24 @@ function handleAmountInput(e){
 }
 function parseCurrency(v){return v?parseFloat(v.replace(/\./g,'').replace(',','.')):0;}
 
-/* ---------- SWIPE: somente no cabeçalho (mês/saldo) ---------- */
+/* ---------- SWIPE EM QUALQUER LUGAR DA TELA ---------- */
 let tsX=0,tsY=0;
-const swipeZone=document.getElementById('swipe-zone');
-swipeZone.addEventListener('touchstart',e=>{tsX=e.changedTouches[0].screenX;tsY=e.changedTouches[0].screenY;},{passive:true});
-swipeZone.addEventListener('touchend',e=>{
+document.body.addEventListener('touchstart',e=>{
+  tsX=e.changedTouches[0].screenX;
+  tsY=e.changedTouches[0].screenY;
+},{passive:true});
+
+document.body.addEventListener('touchend',e=>{
+  // Previne mudança de mês se estiver deslizando listas horizontais (chips)
+  if(e.target.closest('.overflow-x-auto')) return;
+  // Previne se tiver algum modal aberto na tela
+  if(document.querySelector('.fixed.inset-0:not(.hidden)')) return;
+  
   const dx=tsX-e.changedTouches[0].screenX,dy=tsY-e.changedTouches[0].screenY;
-  if(Math.abs(dx)>Math.abs(dy)*1.5&&Math.abs(dx)>60)changeMonth(dx>0?1:-1);
+  // Movimento mais horizontal que vertical e maior que 50 pixels
+  if(Math.abs(dx)>Math.abs(dy)*1.5 && Math.abs(dx)>50){
+    changeMonth(dx>0?1:-1);
+  }
 },{passive:true});
 
 document.addEventListener('visibilitychange',()=>{
@@ -622,15 +635,6 @@ function importData(event){
   r.readAsText(file);
 }
 
-function fitScreen(){
-  const standalone=window.navigator.standalone||matchMedia('(display-mode: standalone)').matches;
-  const portrait=window.innerHeight>=window.innerWidth;
-  const h=(standalone&&portrait)?Math.max(window.innerHeight,screen.height,screen.width):window.innerHeight;
-  document.documentElement.style.setProperty('--app-h',h+'px');
-}
-fitScreen();
-['resize','orientationchange','pageshow'].forEach(ev=>window.addEventListener(ev,()=>setTimeout(fitScreen,50)));
-if(window.visualViewport)window.visualViewport.addEventListener('resize',fitScreen);
 setType('expense');setRepetition('unica');
 document.getElementById('date').value=todayStr();
 updateUI();
