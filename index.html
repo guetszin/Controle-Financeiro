@@ -2,11 +2,11 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<!-- Configuração exata para PWA tela cheia no iOS -->
+<!-- Configuração PWA -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#1C1C1E">
+<meta name="theme-color" content="#121212">
 <title>Controle Mobills</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -19,17 +19,18 @@
   --app-height: 100vh;
 }
 
+/* O fundo do iOS travado com inset: 0 */
 html, body {
+  position: fixed;
+  inset: 0;
   width: 100%;
-  height: 100vh;
-  height: var(--app-height);
+  height: 100%;
   margin: 0;
   padding: 0;
-  /* CAMUFLAGEM: Fundo igual ao da barra de navegação inferior */
-  background: #1C1C1E; 
+  background: #121212;
   overflow: hidden;
   overscroll-behavior: none;
-  touch-action: none;
+  touch-action: none; /* Previne scroll elástico falso do iOS */
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
@@ -40,16 +41,20 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
+/* O contêiner do aplicativo obedece apenas à altura calculada pelo JS */
 .app {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--app-height);
   max-width: 448px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  position: relative;
   background: #121212;
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  overflow: hidden;
 }
 
 .card-bg{background:#1C1C1E}
@@ -85,9 +90,25 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 .seg-on{background:rgba(124,58,237,.2);color:#A78BFA;border:1px solid rgba(124,58,237,.55)}
 .seg-off{color:#9CA3AF;border:1px solid transparent}
 .chip-on{background:#7C3AED;color:#fff}.chip-off{background:#2C2C2E;color:#d1d5db}
+
+/* Animação da Splash Screen */
+.splash-fade-out {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease-out;
+}
 </style>
 </head>
 <body class="antialiased select-none">
+
+<!-- SPLASH SCREEN DE CARREGAMENTO -->
+<div id="splash-screen" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#121212]">
+  <div class="w-20 h-20 bg-roxo rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(124,58,237,0.4)] mb-5 animate-pulse">
+    <i class="ph-fill ph-wallet text-4xl text-white"></i>
+  </div>
+  <h1 class="text-white font-bold text-2xl tracking-tight">Mobills</h1>
+</div>
+
 <div class="app">
 
   <!-- CABEÇALHO -->
@@ -171,7 +192,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     <button onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="more"><i class="ph ph-dots-three text-2xl mb-1"></i><span class="text-[10px] font-medium">Mais</span></button>
   </nav>
 
-  <!-- MODAIS -->
+  <!-- MODAIS (Ancorados no .app absoluto) -->
   <div id="modal-cat-detail" class="absolute inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
     <div id="modal-cat-detail-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[80vh]">
       <div class="flex justify-between items-center p-5 border-b border-gray-800">
@@ -292,24 +313,34 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </div>
 
 <script>
-// BLOCO DE PROTEÇÃO DO SAFARI IOS:
-// Calcula a altura da tela não só agora, mas "atrasado" para driblar a animação do iOS
+// --- LOGICA DA TELA E SPLASH SCREEN ---
 const setAppHeight = () => {
   document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
 };
-setAppHeight(); // Executa ao ler o script
+
+// Executa o cálculo inicial
+setAppHeight();
 window.addEventListener('resize', setAppHeight);
 window.addEventListener('orientationchange', setAppHeight);
 
-// O SEGREDO: Força recálculos instantes depois de abrir o Web App 
-// (quando a tela do iOS realmente assenta e para a animação)
-setTimeout(setAppHeight, 100);
-setTimeout(setAppHeight, 300);
-setTimeout(setAppHeight, 600);
-// ===================================
+// Ao carregar a página, aguardamos o iOS terminar de "assentar" e removemos a Splash Screen
+window.addEventListener('load', () => {
+  // Força o ajuste da tela durante os milissegundos iniciais onde o iOS falha
+  const intervals = [100, 300, 600, 900];
+  intervals.forEach(ms => setTimeout(setAppHeight, ms));
+  
+  // Após 1 segundo, a tela do PWA estará perfeita, então fade-out na Splash Screen
+  setTimeout(() => {
+    const splash = document.getElementById('splash-screen');
+    splash.classList.add('splash-fade-out');
+    // Remove do DOM para não pesar
+    setTimeout(() => splash.remove(), 500);
+  }, 1000);
+});
 
-const STORAGE_KEY='mobills_dark_final_v15';
-const CATS_KEY='mobills_cats_final_v15';
+// --- LÓGICA DO APLICATIVO ---
+const STORAGE_KEY='mobills_dark_final_v16';
+const CATS_KEY='mobills_cats_final_v16';
 const ICONS=['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus'];
 let transactions=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
 let categories=JSON.parse(localStorage.getItem(CATS_KEY))||[
