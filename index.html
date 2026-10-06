@@ -15,17 +15,14 @@
 <style>
 ::-webkit-scrollbar{display:none}
 
-/* 
-  A SOLUÇÃO DEFINITIVA (PURA CSS):
-  100vw e 100vh forçam o app a ignorar as barras fantasmas do iOS.
-  touch-action: none mata o "scroll invisível" que causava os cliques bugados.
-*/
+/* 100vw e 100lvh forçam o app a ignorar as barras fantasmas do iOS */
 html, body {
   margin: 0;
   padding: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #1C1C1E; /* Cor do rodapé para camuflar 100% a tela */
+  height: 100lvh; /* Passa por trás da URL no Safari e preenche o PWA */
+  background-color: #1C1C1E; 
   overflow: hidden;
   overscroll-behavior: none;
   touch-action: none; /* Trava totalmente a tela física */
@@ -54,8 +51,11 @@ body {
 
 .card-bg{background:#1C1C1E}
 
-/* Ajustes de Safe Area para notch e barra inferior */
-.hdr { padding-top: max(env(safe-area-inset-top), 16px); }
+/* Ajustes de Safe Area para notch e barra inferior com respiro extra para o Dynamic Island */
+.hdr { 
+  padding-top: calc(env(safe-area-inset-top, 24px) + 24px); 
+  padding-bottom: 16px;
+}
 .nav-safe { 
   padding-bottom: max(calc(env(safe-area-inset-bottom) + 12px), 24px); 
   padding-top: 0.75rem; 
@@ -65,7 +65,7 @@ body {
 #scroll, .overflow-y-auto {
   touch-action: pan-y;
   overscroll-behavior-y: contain;
-  -webkit-overflow-scrolling: touch; /* Rolagem suave nativa do iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
 .tab-content{display:none}
@@ -77,6 +77,18 @@ body {
 @keyframes sIR{from{transform:translateX(25px);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes sOR{to{transform:translateX(25px);opacity:0}}
 @keyframes sIL{from{transform:translateX(-25px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* Animação de carregamento da Splash Screen */
+@keyframes splashLoader {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.animate-splash-bar {
+  animation: splashLoader 1.5s ease-in-out infinite;
+}
+.splash-transition {
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 .text-roxo{color:#7C3AED}.bg-roxo{background:#7C3AED}.fab-button{background:#7C3AED}
 input[type=color]{-webkit-appearance:none;border:none;padding:0}
@@ -91,10 +103,28 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </style>
 </head>
 <body class="antialiased select-none">
+
+<!-- SPLASH SCREEN DE CARREGAMENTO PROFISSIONAL -->
+<div id="splash-screen" class="absolute inset-0 z-[9999] flex flex-col items-center justify-center bg-[#121212] splash-transition">
+  <!-- Ícone pulsante -->
+  <div class="relative flex items-center justify-center w-24 h-24 mb-6">
+    <div class="absolute inset-0 bg-roxo rounded-3xl animate-ping opacity-30"></div>
+    <div class="relative z-10 w-24 h-24 bg-roxo rounded-3xl flex items-center justify-center shadow-[0_0_40px_rgba(124,58,237,0.5)]">
+      <i class="ph-fill ph-wallet text-5xl text-white"></i>
+    </div>
+  </div>
+  <!-- Título -->
+  <h1 class="text-white font-extrabold text-3xl tracking-tight mb-4">Mobills</h1>
+  <!-- Barra de progresso -->
+  <div class="w-16 h-1 bg-[#2C2C2E] rounded-full overflow-hidden relative">
+    <div class="absolute top-0 left-0 h-full w-full bg-roxo rounded-full animate-splash-bar"></div>
+  </div>
+</div>
+
 <div class="app">
 
   <!-- CABEÇALHO -->
-  <header class="shrink-0 hdr pb-4 border-b border-gray-800 z-20" style="background:#121212">
+  <header class="shrink-0 hdr border-b border-gray-800 z-20" style="background:#121212">
     <div class="flex justify-between items-center mb-2 w-4/5 mx-auto">
       <button onclick="changeMonth(-1)" class="p-2 text-gray-400 tap-effect"><i class="ph ph-caret-left text-xl"></i></button>
       <span id="current-month-display" class="font-medium text-gray-200 text-lg capitalize w-40 text-center tracking-wide transition-opacity duration-200"></span>
@@ -174,7 +204,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     <button onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="more"><i class="ph ph-dots-three text-2xl mb-1"></i><span class="text-[10px] font-medium">Mais</span></button>
   </nav>
 
-  <!-- MODAIS (absolute inset-0 preenche exato o container de 100vh) -->
+  <!-- MODAIS -->
   <div id="modal-cat-detail" class="absolute inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
     <div id="modal-cat-detail-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[80vh]">
       <div class="flex justify-between items-center p-5 border-b border-gray-800">
@@ -295,8 +325,23 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </div>
 
 <script>
-const STORAGE_KEY='mobills_dark_final_v21';
-const CATS_KEY='mobills_cats_final_v21';
+// A Splash Screen dura 1.5 segundos para garantir que o visual do celular tenha assentado
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const splash = document.getElementById('splash-screen');
+    if(splash) {
+      splash.style.opacity = '0';
+      // Espera a animação de fade (600ms configurado na classe) antes de destruir o elemento
+      setTimeout(() => splash.remove(), 600); 
+    }
+  }, 1500); 
+});
+
+// =========================================================================
+// LÓGICA DO APLICATIVO MOBILLS
+// =========================================================================
+const STORAGE_KEY='mobills_dark_final_v22';
+const CATS_KEY='mobills_cats_final_v22';
 const ICONS=['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus'];
 let transactions=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
 let categories=JSON.parse(localStorage.getItem(CATS_KEY))||[
