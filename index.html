@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<!-- O viewport-fit=cover é essencial para o conteúdo vazar para a safe area -->
+<!-- viewport-fit=cover é essencial para passar por baixo da câmera e da barra inferior -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,19 +15,20 @@
 <style>
 ::-webkit-scrollbar{display:none}
 
-/* A SOLUÇÃO FINAL:
-   Usamos 100lvh (Large Viewport Height).
-   Isso diz ao iOS: "Ignore a barra de URL, me dê o tamanho físico do vidro". */
+/* 
+  A SOLUÇÃO DEFINITIVA (PURA CSS):
+  100vw e 100vh forçam o app a ignorar as barras fantasmas do iOS.
+  touch-action: none mata o "scroll invisível" que causava os cliques bugados.
+*/
 html, body {
   margin: 0;
   padding: 0;
-  width: 100%;
-  height: 100vh; /* Fallback para navegadores antigos */
-  height: 100lvh; /* Passa por trás da URL no Safari e preenche o PWA */
-  background: #1C1C1E; 
+  width: 100vw;
+  height: 100vh;
+  background-color: #1C1C1E; /* Cor do rodapé para camuflar 100% a tela */
   overflow: hidden;
   overscroll-behavior: none;
-  touch-action: none; /* Trava os cliques falsos */
+  touch-action: none; /* Trava totalmente a tela física */
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
@@ -38,36 +39,33 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* O App agora é absolute e herda a altura exata do lvh */
+/* O container principal simplesmente preenche esse espaço cravado */
 .app {
-  position: absolute;
-  top: 0; 
-  left: 0; 
-  right: 0;
+  width: 100%;
   height: 100%;
   max-width: 448px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  background: #121212;
+  background-color: #121212;
+  position: relative;
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
-  overflow: hidden;
-  z-index: 1;
 }
 
 .card-bg{background:#1C1C1E}
 
-/* Safe areas */
+/* Ajustes de Safe Area para notch e barra inferior */
 .hdr { padding-top: max(env(safe-area-inset-top), 16px); }
 .nav-safe { 
   padding-bottom: max(calc(env(safe-area-inset-bottom) + 12px), 24px); 
   padding-top: 0.75rem; 
 }
 
+/* Únicas áreas onde seu dedo pode arrastar (Lista de transações, etc) */
 #scroll, .overflow-y-auto {
   touch-action: pan-y;
   overscroll-behavior-y: contain;
-  -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: touch; /* Rolagem suave nativa do iOS */
 }
 
 .tab-content{display:none}
@@ -90,25 +88,9 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 .seg-on{background:rgba(124,58,237,.2);color:#A78BFA;border:1px solid rgba(124,58,237,.55)}
 .seg-off{color:#9CA3AF;border:1px solid transparent}
 .chip-on{background:#7C3AED;color:#fff}.chip-off{background:#2C2C2E;color:#d1d5db}
-
-/* Animação da Splash Screen */
-.splash-fade-out {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s ease-out;
-}
 </style>
 </head>
 <body class="antialiased select-none">
-
-<!-- SPLASH SCREEN DE CARREGAMENTO -->
-<div id="splash-screen" class="absolute inset-0 z-[9999] flex flex-col items-center justify-center bg-[#121212]">
-  <div class="w-20 h-20 bg-roxo rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(124,58,237,0.4)] mb-5 animate-pulse">
-    <i class="ph-fill ph-wallet text-4xl text-white"></i>
-  </div>
-  <h1 class="text-white font-bold text-2xl tracking-tight">Mobills</h1>
-</div>
-
 <div class="app">
 
   <!-- CABEÇALHO -->
@@ -192,7 +174,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     <button onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="more"><i class="ph ph-dots-three text-2xl mb-1"></i><span class="text-[10px] font-medium">Mais</span></button>
   </nav>
 
-  <!-- MODAIS (Totalmente aderidos à tela real) -->
+  <!-- MODAIS (absolute inset-0 preenche exato o container de 100vh) -->
   <div id="modal-cat-detail" class="absolute inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
     <div id="modal-cat-detail-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[80vh]">
       <div class="flex justify-between items-center p-5 border-b border-gray-800">
@@ -313,22 +295,8 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </div>
 
 <script>
-// Desativa a Splash Screen com suavidade
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    const splash = document.getElementById('splash-screen');
-    if(splash) {
-      splash.classList.add('splash-fade-out');
-      setTimeout(() => splash.remove(), 400); 
-    }
-  }, 300); 
-});
-
-// =========================================================================
-// LÓGICA DO APLICATIVO MOBILLS
-// =========================================================================
-const STORAGE_KEY='mobills_dark_final_v20';
-const CATS_KEY='mobills_cats_final_v20';
+const STORAGE_KEY='mobills_dark_final_v21';
+const CATS_KEY='mobills_cats_final_v21';
 const ICONS=['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus'];
 let transactions=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
 let categories=JSON.parse(localStorage.getItem(CATS_KEY))||[
