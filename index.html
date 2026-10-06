@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1C1C1E">
-<title>Controle Mobills</title>
+<title>Controle Financeiro</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -84,7 +84,7 @@ body {
   100% { transform: translateX(100%); }
 }
 .animate-splash-bar {
-  animation: splashLoader 1.5s ease-in-out infinite;
+  animation: splashLoader 1.2s ease-in-out infinite;
 }
 .splash-transition {
   transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -105,7 +105,8 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 <body class="antialiased select-none">
 
 <!-- SPLASH SCREEN DE CARREGAMENTO PROFISSIONAL -->
-<div id="splash-screen" class="absolute inset-0 z-[9999] flex flex-col items-center justify-center bg-[#121212] splash-transition">
+<!-- SPLASH SCREEN DE CARREGAMENTO -->
+<div id="splash-screen" class="fixed top-0 left-0 w-screen h-[100dvh] z-[9999] flex flex-col items-center justify-center bg-[#121212]">
   <!-- Ícone pulsante -->
   <div class="relative flex items-center justify-center w-24 h-24 mb-6">
     <div class="absolute inset-0 bg-roxo rounded-3xl animate-ping opacity-30"></div>
@@ -114,7 +115,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     </div>
   </div>
   <!-- Título -->
-  <h1 class="text-white font-extrabold text-3xl tracking-tight mb-4">Mobills</h1>
+  <h1 class="text-white font-extrabold text-3xl tracking-tight mb-4">Controle Financeiro</h1>
   <!-- Barra de progresso -->
   <div class="w-16 h-1 bg-[#2C2C2E] rounded-full overflow-hidden relative">
     <div class="absolute top-0 left-0 h-full w-full bg-roxo rounded-full animate-splash-bar"></div>
@@ -150,7 +151,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
   <div id="scroll" class="flex-1 overflow-y-auto overscroll-contain px-4 pt-5 pb-10">
     <main id="tab-home" class="tab-content active animate-month">
       <div class="card-bg rounded-3xl p-5 shadow-lg">
-        <h2 class="text-gray-300 font-medium mb-5">Despesas por categoria</h2>
+        <h2 class="text-gray-300 font-medium mb-5">Despesas por Categoria</h2>
         <div class="relative w-40 h-40 mx-auto mb-5"><canvas id="expensesChart"></canvas></div>
         <div id="custom-legend" class="space-y-1"></div>
       </div>
@@ -159,8 +160,8 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     <main id="tab-transactions" class="tab-content animate-month">
       <div class="flex bg-[#1C1C1E] rounded-xl p-1 mb-3">
         <button id="sub-avulsas" onclick="setTxTab('avulsas')" class="flex-1 py-2.5 text-sm font-medium rounded-lg tap-effect">Avulsas</button>
-        <button id="sub-fixas" onclick="setTxTab('fixas')" class="flex-1 py-2.5 text-sm font-medium rounded-lg tap-effect">Fixas</button>
         <button id="sub-parceladas" onclick="setTxTab('parceladas')" class="flex-1 py-2.5 text-sm font-medium rounded-lg tap-effect">Parceladas</button>
+        <button id="sub-fixas" onclick="setTxTab('fixas')" class="flex-1 py-2.5 text-sm font-medium rounded-lg tap-effect">Fixas</button>
       </div>
       <div id="tx-chips" class="flex gap-2 overflow-x-auto pb-3"></div>
       <div id="tx-summary" class="card-bg rounded-2xl p-4 mb-5 flex justify-between"></div>
@@ -196,10 +197,21 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
   </div>
 
   <!-- BARRA DE NAVEGAÇÃO -->
+  <!-- BARRA DE NAVEGAÇÃO -->
   <nav class="shrink-0 card-bg border-t border-gray-800 px-6 nav-safe flex justify-between items-center z-30 relative w-full">
     <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-roxo w-14 tap-effect" data-target="home"><i class="ph-fill ph-house text-2xl mb-1"></i><span class="text-[10px] font-medium">Principal</span></button>
     <button onclick="switchTab('transactions')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="transactions"><i class="ph ph-list-dashes text-2xl mb-1"></i><span class="text-[10px] font-medium">Transações</span></button>
-    <div class="relative -top-6"><button onclick="openModal()" class="fab-button text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-[0_8px_16px_rgba(124,58,237,0.4)] tap-effect">+</button></div>
+    
+    <!-- Espaçador vazio para manter o design flexível da barra -->
+    <div class="w-14"></div>
+    
+    <!-- Botão (+) CRAVADO no exato centro e com o ícone perfeito -->
+    <div class="absolute left-1/2 -translate-x-1/2 -top-6">
+      <button onclick="openModal()" class="fab-button text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-[0_8px_16px_rgba(124,58,237,0.4)] tap-effect leading-none">
+        <i class="ph ph-plus"></i>
+      </button>
+    </div>
+    
     <button onclick="switchTab('categories')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="categories"><i class="ph ph-squares-four text-2xl mb-1"></i><span class="text-[10px] font-medium">Categorias</span></button>
     <button onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="more"><i class="ph ph-dots-three text-2xl mb-1"></i><span class="text-[10px] font-medium">Mais</span></button>
   </nav>
@@ -338,10 +350,10 @@ window.addEventListener('load', () => {
 });
 
 // =========================================================================
-// LÓGICA DO APLICATIVO MOBILLS
+// LÓGICA DO APLICATIVO CONTROLE FINANCEIRO
 // =========================================================================
-const STORAGE_KEY='mobills_dark_final_v22';
-const CATS_KEY='mobills_cats_final_v22';
+const STORAGE_KEY='controle_financeiro_final_v22';
+const CATS_KEY='controle_financeiro_cats_final_v22';
 const ICONS=['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus'];
 let transactions=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
 let categories=JSON.parse(localStorage.getItem(CATS_KEY))||[
