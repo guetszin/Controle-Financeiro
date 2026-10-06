@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<!-- A Meta Tag exata e perfeita para PWAs no iOS -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#121212">
 <title>Controle Mobills</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,41 +13,50 @@
 <link rel="manifest" href="manifest.json">
 <style>
 ::-webkit-scrollbar{display:none}
-/* O segredo para não vazar a tela no Safari iOS */
+
+/* Trava absoluta nas bordas físicas da tela (Garante que não falte espaço no notch/home bar) */
 html, body {
+  position: fixed;
+  inset: 0; /* top: 0, right: 0, bottom: 0, left: 0 */
+  width: 100%;
+  height: 100%;
   margin: 0;
   padding: 0;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh; 
-  min-height: -webkit-fill-available; /* Hack oficial da Apple */
-  background: #1C1C1E;
+  background: #1C1C1E; /* Fundo idêntico ao do menu inferior */
   overflow: hidden;
   overscroll-behavior: none;
   -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
+
 body {
   color: #fff;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  display: flex;
-  justify-content: center;
 }
-/* O app não usa mais position fixed/absolute, ele preenche o body exato */
+
+/* O container principal acompanha exatamente as bordas, centrado no desktop */
 .app {
-  width: 100%;
-  height: 100%;
-  min-height: -webkit-fill-available;
-  max-width: 448px; /* Mantém bonito no tablet/PC */
+  position: absolute;
+  inset: 0; 
+  max-width: 448px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
   background: #121212;
-  position: relative;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
+
 .card-bg{background:#1C1C1E}
-.hdr{padding-top:calc(env(safe-area-inset-top,0px) + .25rem)}
-.nav-safe{padding-bottom:max(calc(env(safe-area-inset-bottom,0px) - 14px),10px);padding-top:.5rem}
+
+/* Cálculos de Safe Area 100% seguros para iOS */
+.hdr { padding-top: calc(env(safe-area-inset-top, 0px) + 0.75rem); }
+.nav-safe { 
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem); 
+  padding-top: 0.75rem; 
+}
+
 .tab-content{display:none}
 .tab-content.active{display:block;animation:smoothEnter .3s ease-out forwards}
 @keyframes smoothEnter{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
@@ -57,6 +66,7 @@ body {
 @keyframes sIR{from{transform:translateX(25px);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes sOR{to{transform:translateX(25px);opacity:0}}
 @keyframes sIL{from{transform:translateX(-25px);opacity:0}to{transform:translateX(0);opacity:1}}
+
 .text-roxo{color:#7C3AED}.bg-roxo{background:#7C3AED}.fab-button{background:#7C3AED}
 input[type=color]{-webkit-appearance:none;border:none;padding:0}
 input[type=color]::-webkit-color-swatch-wrapper{padding:0}
@@ -144,7 +154,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     </main>
   </div>
 
-  <!-- BARRA DE NAVEGAÇÃO -->
+  <!-- BARRA DE NAVEGAÇÃO (Com padding resolvido) -->
   <nav class="shrink-0 card-bg border-t border-gray-800 px-6 nav-safe flex justify-between items-center z-30 relative w-full">
     <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-roxo w-14 tap-effect" data-target="home"><i class="ph-fill ph-house text-2xl mb-1"></i><span class="text-[10px] font-medium">Principal</span></button>
     <button onclick="switchTab('transactions')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="transactions"><i class="ph ph-list-dashes text-2xl mb-1"></i><span class="text-[10px] font-medium">Transações</span></button>
@@ -153,7 +163,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     <button onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="more"><i class="ph ph-dots-three text-2xl mb-1"></i><span class="text-[10px] font-medium">Mais</span></button>
   </nav>
 
-  <!-- MODAIS (Invisíveis até serem abertos) -->
+  <!-- MODAIS (Usando 'absolute inset-0' para ficar perfeitamente no container) -->
   <div id="modal-cat-detail" class="absolute inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
     <div id="modal-cat-detail-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[80vh]">
       <div class="flex justify-between items-center p-5 border-b border-gray-800">
@@ -274,8 +284,8 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </div>
 
 <script>
-const STORAGE_KEY='mobills_dark_final_v11';
-const CATS_KEY='mobills_cats_final_v11';
+const STORAGE_KEY='mobills_dark_final_v12';
+const CATS_KEY='mobills_cats_final_v12';
 const ICONS=['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus'];
 let transactions=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
 let categories=JSON.parse(localStorage.getItem(CATS_KEY))||[
