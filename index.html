@@ -15,21 +15,28 @@
 <style>
 ::-webkit-scrollbar{display:none}
 
-/* O SEGREDO DEFINITIVO PARA WEB APPS IOS:
-   Usar height: 100% em vez de fixed ou vh/dvh. 
-   Isso previne o "bug do clique falso" e ignora a lógica de barra do Safari. */
+:root {
+  --app-height: 100vh;
+}
+
+/* 
+  O SEGREDO DEFINITIVO PARA IOS:
+  Travar a altura exata calculada pelo JS e usar touch-action: none
+  Isso impede o "bounce" do Safari e corrige os toques falsos.
+*/
 html, body {
   width: 100%;
-  height: 100%;
+  height: 100vh;
+  height: var(--app-height);
   margin: 0;
   padding: 0;
-  background: #1C1C1E; /* Mesma cor do menu para mesclar com o rodapé físico */
+  background: #121212;
   overflow: hidden;
   overscroll-behavior: none;
+  touch-action: none; /* Impede que o iOS arraste a tela inteira */
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
-  position: relative; /* Mantém os filhos ancorados aqui */
 }
 
 body {
@@ -37,26 +44,31 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* O container principal estica para as extremidades exatas do body (100%) */
 .app {
-  position: absolute;
-  top: 0; right: 0; bottom: 0; left: 0;
+  width: 100%;
+  height: 100%;
   max-width: 448px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  position: relative;
   background: #121212;
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
 .card-bg{background:#1C1C1E}
 
-/* Ajustes dinâmicos do Safe Area (Notch e barra de Início) */
+/* Safe Area garantida */
 .hdr { padding-top: calc(env(safe-area-inset-top, 0px) + 0.75rem); }
 .nav-safe { 
   padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px); 
   padding-top: 0.75rem; 
+}
+
+/* Áreas que podem rolar são liberadas especificamente */
+#scroll, .overflow-y-auto {
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
 }
 
 .tab-content{display:none}
@@ -165,7 +177,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     <button onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="more"><i class="ph ph-dots-three text-2xl mb-1"></i><span class="text-[10px] font-medium">Mais</span></button>
   </nav>
 
-  <!-- MODAIS (Ancorados perfeitamente ao container `.app`) -->
+  <!-- MODAIS -->
   <div id="modal-cat-detail" class="absolute inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
     <div id="modal-cat-detail-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[80vh]">
       <div class="flex justify-between items-center p-5 border-b border-gray-800">
@@ -286,8 +298,16 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </div>
 
 <script>
-const STORAGE_KEY='mobills_dark_final_v13';
-const CATS_KEY='mobills_cats_final_v13';
+// Calcula e atualiza a altura exata da tela sempre que ela muda
+const setAppHeight = () => {
+  document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+};
+window.addEventListener('resize', setAppHeight);
+window.addEventListener('orientationchange', setAppHeight);
+setAppHeight(); // Executa imediatamente ao abrir
+
+const STORAGE_KEY='mobills_dark_final_v14';
+const CATS_KEY='mobills_cats_final_v14';
 const ICONS=['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus'];
 let transactions=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
 let categories=JSON.parse(localStorage.getItem(CATS_KEY))||[
