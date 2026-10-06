@@ -2,7 +2,6 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<!-- Configuração PWA -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,8 +14,10 @@
 <style>
 ::-webkit-scrollbar{display:none}
 
-/* TRAVA ABSOLUTA DE HARDWARE NO IOS:
-   Usar fixed com inset 0 blinda o app contra a falha de altura do Safari na animação de abertura. */
+:root {
+  --app-height: 100vh;
+}
+
 html, body {
   position: fixed;
   inset: 0;
@@ -38,10 +39,12 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* O contêiner principal preenche perfeitamente o viewport travado */
 .app {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--app-height);
   max-width: 448px;
   margin: 0 auto;
   display: flex;
@@ -85,7 +88,6 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 .seg-off{color:#9CA3AF;border:1px solid transparent}
 .chip-on{background:#7C3AED;color:#fff}.chip-off{background:#2C2C2E;color:#d1d5db}
 
-/* Animação da Splash Screen */
 .splash-fade-out {
   opacity: 0;
   pointer-events: none;
@@ -95,7 +97,6 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </head>
 <body class="antialiased select-none">
 
-<!-- SPLASH SCREEN DE CARREGAMENTO (Cobre qualquer falha de animação inicial do iOS) -->
 <div id="splash-screen" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#121212]">
   <div class="w-20 h-20 bg-roxo rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(124,58,237,0.4)] mb-5 animate-pulse">
     <i class="ph-fill ph-wallet text-4xl text-white"></i>
@@ -307,16 +308,37 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </div>
 
 <script>
-// Removemos o cálculo dinâmico de innerHeight via JS e deixamos o CSS puro travar o viewport.
-// Isso impede qualquer atraso ou falha de leitura de altura durante a animação de zoom do iOS.
+// --- MOTOR DE ALTURA DINÂMICA BLINDADO PARA IOS ---
+const setAppHeight = () => {
+  // Lê a altura exata da janela de visualização do navegador
+  const h = window.innerHeight;
+  document.documentElement.style.setProperty('--app-height', `${h}px`);
+};
+
+// Sincroniza em tempo real com requestAnimationFrame para sincronizar com o fim da animação do iOS
+const forceSync = () => {
+  requestAnimationFrame(() => {
+    setAppHeight();
+    setTimeout(setAppHeight, 50);
+    setTimeout(setAppHeight, 150);
+    setTimeout(setAppHeight, 350);
+  });
+};
+
+forceSync();
+window.addEventListener('resize', forceSync);
+window.addEventListener('orientationchange', forceSync);
+
+// Remove a splash screen com segurança após o layout estabilizar por completo
 window.addEventListener('load', () => {
+  forceSync();
   setTimeout(() => {
     const splash = document.getElementById('splash-screen');
-    if(splash) {
+    if (splash) {
       splash.classList.add('splash-fade-out');
       setTimeout(() => splash.remove(), 400);
     }
-  }, 700);
+  }, 900);
 });
 
 // --- LÓGICA DO APLICATIVO ---
@@ -365,6 +387,7 @@ document.body.addEventListener('touchend',e=>{
 
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){
+    forceSync();
     const m=new Date().getMonth();
     if(m!==lastKnownRealMonth){displayDate=new Date();lastKnownRealMonth=m;updateUI();}
   }
@@ -564,7 +587,7 @@ function selectIcon(i){
     document.getElementById('btn-new-icon').innerHTML = `<i class="ph ph-${i} text-xl"></i>`;
   } else {
     editCatIcon = i;
-    document.getElementById('btn-edit-icon').innerHTML = `<i class="ph ph-${i} text-2xl"></i>`;
+    document.getElementById('btn-edit-icon').innerHTML = `<i class="ph ph-${editCatIcon} text-2xl"></i>`;
   }
   closeIconSelect();
 }
