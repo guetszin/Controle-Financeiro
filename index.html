@@ -12,9 +12,9 @@
 <link rel="manifest" href="manifest.json">
 <style>
 ::-webkit-scrollbar{display:none}
-html,body{height:100%;margin:0;background:#000;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+html,body{height:100%;margin:0;background:#1C1C1E;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%}
 body{color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-.app{position:fixed;top:0;left:0;right:0;bottom:0}
+.app{position:fixed;top:0;left:0;right:0;height:var(--app-h,100%)}
 .app-container{background:#121212}
 .card-bg{background:#1C1C1E}
 .hdr{padding-top:calc(env(safe-area-inset-top,0px) + .25rem)}
@@ -622,6 +622,15 @@ function importData(event){
   r.readAsText(file);
 }
 
+function fitScreen(){
+  const standalone=window.navigator.standalone||matchMedia('(display-mode: standalone)').matches;
+  const portrait=window.innerHeight>=window.innerWidth;
+  const h=(standalone&&portrait)?Math.max(window.innerHeight,screen.height,screen.width):window.innerHeight;
+  document.documentElement.style.setProperty('--app-h',h+'px');
+}
+fitScreen();
+['resize','orientationchange','pageshow'].forEach(ev=>window.addEventListener(ev,()=>setTimeout(fitScreen,50)));
+if(window.visualViewport)window.visualViewport.addEventListener('resize',fitScreen);
 setType('expense');setRepetition('unica');
 document.getElementById('date').value=todayStr();
 updateUI();
