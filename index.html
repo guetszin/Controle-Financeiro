@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<!-- view-port blindado para PWAs no iOS -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,15 +15,17 @@
 <style>
 ::-webkit-scrollbar{display:none}
 
-:root {
-  --app-height: 100vh;
-}
-
+/* 
+  TRAVA DEFINITIVA: 
+  Usamos 100dvh forçado combinado com position fixed nas bordas.
+  Isso impede que o Safari calcule a altura pensando na barra de URL.
+*/
 html, body {
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
   margin: 0;
   padding: 0;
   background: #121212;
@@ -41,10 +44,7 @@ body {
 
 .app {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--app-height);
+  inset: 0;
   max-width: 448px;
   margin: 0 auto;
   display: flex;
@@ -97,6 +97,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </head>
 <body class="antialiased select-none">
 
+<!-- SPLASH SCREEN -->
 <div id="splash-screen" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#121212]">
   <div class="w-20 h-20 bg-roxo rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(124,58,237,0.4)] mb-5 animate-pulse">
     <i class="ph-fill ph-wallet text-4xl text-white"></i>
@@ -308,40 +309,15 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </div>
 
 <script>
-// --- MOTOR DE ALTURA DINÂMICA BLINDADO PARA IOS ---
-const setAppHeight = () => {
-  // Lê a altura exata da janela de visualização do navegador
-  const h = window.innerHeight;
-  document.documentElement.style.setProperty('--app-height', `${h}px`);
-};
-
-// Sincroniza em tempo real com requestAnimationFrame para sincronizar com o fim da animação do iOS
-const forceSync = () => {
-  requestAnimationFrame(() => {
-    setAppHeight();
-    setTimeout(setAppHeight, 50);
-    setTimeout(setAppHeight, 150);
-    setTimeout(setAppHeight, 350);
-  });
-};
-
-forceSync();
-window.addEventListener('resize', forceSync);
-window.addEventListener('orientationchange', forceSync);
-
-// Remove a splash screen com segurança após o layout estabilizar por completo
+// Remove a Splash Screen assim que o DOM carregar perfeitamente
 window.addEventListener('load', () => {
-  forceSync();
   setTimeout(() => {
     const splash = document.getElementById('splash-screen');
-    if (splash) {
-      splash.classList.add('splash-fade-out');
-      setTimeout(() => splash.remove(), 400);
-    }
-  }, 900);
+    splash.classList.add('splash-fade-out');
+    setTimeout(() => splash.remove(), 400);
+  }, 600);
 });
 
-// --- LÓGICA DO APLICATIVO ---
 const STORAGE_KEY='mobills_dark_final_v17';
 const CATS_KEY='mobills_cats_final_v17';
 const ICONS=['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus'];
@@ -387,7 +363,6 @@ document.body.addEventListener('touchend',e=>{
 
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){
-    forceSync();
     const m=new Date().getMonth();
     if(m!==lastKnownRealMonth){displayDate=new Date();lastKnownRealMonth=m;updateUI();}
   }
