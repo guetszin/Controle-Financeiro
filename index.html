@@ -50,12 +50,13 @@ body {
 
 .card-bg{background:#1C1C1E}
 
-/* Cálculos de Safe Area com respiro maior no topo para não bater no Notch */
+/* Topo: margem extra para afastar do Notch/Ilha Dinâmica */
 .hdr { 
-  padding-top: calc(env(safe-area-inset-top, 20px) + 1.5rem); 
+  padding-top: calc(env(safe-area-inset-top, 0px) + 1.75rem); 
 }
+/* Baixo: revertido para a versão anterior que estava com o encaixe perfeito */
 .nav-safe { 
-  padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 0.75rem); 
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem); 
   padding-top: 0.75rem; 
 }
 
@@ -286,8 +287,8 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </div>
 
 <script>
-const STORAGE_KEY='mobills_dark_final_v13';
-const CATS_KEY='mobills_cats_final_v13';
+const STORAGE_KEY='mobills_dark_final_v14';
+const CATS_KEY='mobills_cats_final_v14';
 const ICONS=['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus'];
 let transactions=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
 let categories=JSON.parse(localStorage.getItem(CATS_KEY))||[
