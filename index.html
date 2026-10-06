@@ -113,16 +113,13 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 
 <!-- SPLASH SCREEN DE CARREGAMENTO -->
 <div id="splash-screen" class="fixed top-0 left-0 right-0 bottom-0 z-[9999] flex flex-col items-center justify-center bg-[#121212] splash-transition">
-  <!-- Ícone pulsante -->
   <div class="relative flex items-center justify-center w-24 h-24 mb-6">
     <div class="absolute inset-0 bg-roxo rounded-3xl animate-ping opacity-30"></div>
     <div class="relative z-10 w-24 h-24 bg-roxo rounded-3xl flex items-center justify-center shadow-[0_0_40px_rgba(124,58,237,0.5)]">
       <i class="ph-fill ph-wallet text-5xl text-white"></i>
     </div>
   </div>
-  <!-- Título -->
   <h1 class="text-white font-extrabold text-3xl tracking-tight mb-4">Controle Financeiro</h1>
-  <!-- Barra de progresso -->
   <div class="w-16 h-1 bg-[#2C2C2E] rounded-full overflow-hidden relative">
     <div class="absolute top-0 left-0 h-full w-full bg-roxo rounded-full animate-splash-bar"></div>
   </div>
@@ -164,13 +161,21 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     </main>
 
     <main id="tab-transactions" class="tab-content animate-month">
-      <div class="flex bg-[#1C1C1E] rounded-xl p-1 mb-3">
-        <button id="sub-avulsas" onclick="setTxTab('avulsas')" class="flex-1 py-2.5 text-sm font-medium rounded-lg tap-effect">Avulsas</button>
-        <button id="sub-parceladas" onclick="setTxTab('parceladas')" class="flex-1 py-2.5 text-sm font-medium rounded-lg tap-effect">Parceladas</button>
-        <button id="sub-fixas" onclick="setTxTab('fixas')" class="flex-1 py-2.5 text-sm font-medium rounded-lg tap-effect">Fixas</button>
+      <div class="flex bg-[#1C1C1E] rounded-xl p-1 mb-4 overflow-x-auto gap-1">
+        <button id="sub-avulsas" onclick="setTxTab('avulsas')" class="flex-1 min-w-[75px] py-2.5 text-xs font-medium rounded-lg tap-effect">Avulsas</button>
+        <button id="sub-parceladas" onclick="setTxTab('parceladas')" class="flex-1 min-w-[75px] py-2.5 text-xs font-medium rounded-lg tap-effect">Parceladas</button>
+        <button id="sub-fixas" onclick="setTxTab('fixas')" class="flex-1 min-w-[75px] py-2.5 text-xs font-medium rounded-lg tap-effect">Fixas</button>
+        <button id="sub-receitas" onclick="setTxTab('receitas')" class="flex-1 min-w-[75px] py-2.5 text-xs font-medium rounded-lg tap-effect">Receitas</button>
       </div>
-      <div id="tx-chips" class="flex gap-2 overflow-x-auto pb-3"></div>
-      <div id="tx-summary" class="card-bg rounded-2xl p-4 mb-5 flex justify-between"></div>
+      
+      <div class="flex justify-between items-center mb-4 px-1">
+        <div id="tx-summary" class="flex-1"></div>
+        <button onclick="openFilterModal()" class="flex items-center gap-2 bg-[#2C2C2E] px-4 py-2 rounded-full tap-effect shadow-md shrink-0 ml-2">
+          <i class="ph ph-funnel text-roxo text-lg"></i>
+          <span id="active-filter-text" class="text-sm font-medium text-gray-200 truncate max-w-[100px]">Filtrar</span>
+        </button>
+      </div>
+      
       <div id="transactions-list"></div>
     </main>
 
@@ -221,7 +226,25 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     <button onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="more"><i class="ph ph-dots-three text-2xl mb-1"></i><span class="text-[10px] font-medium">Mais</span></button>
   </nav>
 
-  <!-- MODAIS -->
+  <!-- MODAL FILTRO DE CATEGORIAS -->
+  <div id="modal-filter" class="absolute inset-0 bg-black/90 z-[58] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+    <div id="modal-filter-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[70vh]">
+      <div class="flex justify-between items-center p-5 border-b border-gray-800">
+        <h3 class="text-lg font-medium text-white">Filtrar Categoria</h3>
+        <button type="button" onclick="closeFilterModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
+      </div>
+      <div class="overflow-y-auto p-2" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))">
+        <!-- Botão Limpar Filtro -->
+        <div class="flex items-center gap-4 p-4 border-b border-gray-800 cursor-pointer tap-effect" onclick="applyFilter(-1)">
+          <div class="w-9 h-9 rounded-full flex items-center justify-center bg-red-500/10 text-red-500"><i class="ph ph-x text-lg"></i></div>
+          <span class="text-red-400 text-[17px] font-medium">Limpar Filtro</span>
+        </div>
+        <div id="filter-category-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAIS RESTANTES -->
   <div id="modal-cat-detail" class="absolute inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
     <div id="modal-cat-detail-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[80vh]">
       <div class="flex justify-between items-center p-5 border-b border-gray-800">
@@ -244,9 +267,11 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
       </div>
       <div class="overflow-y-auto p-5" style="padding-bottom:calc(2rem + env(safe-area-inset-bottom,0px))">
         <form id="form" onsubmit="saveTransaction(event)">
+          <!-- Tipos de Transação (Adicionado Neutro) -->
           <div class="flex bg-[#121212] rounded-xl p-1 mb-6">
-            <button type="button" id="btn-expense" onclick="setType('expense')" class="flex-1 py-3 text-sm font-medium rounded-lg tap-effect">Despesa</button>
-            <button type="button" id="btn-income" onclick="setType('income')" class="flex-1 py-3 text-sm font-medium rounded-lg tap-effect">Receita</button>
+            <button type="button" id="btn-expense" onclick="setType('expense')" class="flex-1 py-3 text-xs font-medium rounded-lg tap-effect">Despesa</button>
+            <button type="button" id="btn-income" onclick="setType('income')" class="flex-1 py-3 text-xs font-medium rounded-lg tap-effect">Receita</button>
+            <button type="button" id="btn-neutral" onclick="setType('neutral')" class="flex-1 py-3 text-xs font-medium rounded-lg tap-effect">Neutro</button>
           </div>
           <div class="mb-6">
             <label class="text-xs text-gray-500 mb-1 block">Valor</label>
@@ -257,8 +282,12 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
             <i class="ph ph-tag text-gray-400 text-xl mr-3"></i><div id="selected-category-display" class="flex-1 text-gray-400 text-lg">Selecione a Categoria</div><i class="ph ph-caret-down text-gray-500"></i>
           </div>
           <input type="hidden" id="category">
-          <div id="date-wrapper" class="mb-6 flex items-center border-b border-gray-700 py-3"><i class="ph ph-calendar text-gray-400 text-xl mr-3"></i><input type="date" id="date" required class="w-full bg-transparent outline-none text-white text-lg" style="color-scheme:dark"></div>
+          
+          <div id="date-wrapper" class="mb-6 flex items-center border-b border-gray-700 py-3">
+            <i class="ph ph-calendar text-gray-400 text-xl mr-3"></i><input type="date" id="date" required class="w-full bg-transparent outline-none text-white text-lg" style="color-scheme:dark">
+          </div>
 
+          <!-- Apenas aparece para Despesa ou Neutro -->
           <div id="rep-section" class="mb-2">
             <label class="text-xs text-gray-500 mb-2 block">Repetição</label>
             <div class="flex bg-[#121212] rounded-xl p-1">
@@ -348,7 +377,6 @@ window.addEventListener('load', () => {
     const splash = document.getElementById('splash-screen');
     if(splash) {
       splash.classList.add('splash-fade-out');
-      // Espera a animação de fade (500ms configurado na classe) antes de destruir o elemento
       setTimeout(() => splash.remove(), 500); 
     }
   }, 1500); 
@@ -357,8 +385,8 @@ window.addEventListener('load', () => {
 // =========================================================================
 // LÓGICA DO APLICATIVO CONTROLE FINANCEIRO
 // =========================================================================
-const STORAGE_KEY='controle_financeiro_final_v22';
-const CATS_KEY='controle_financeiro_cats_final_v22';
+const STORAGE_KEY='controle_financeiro_final_v24';
+const CATS_KEY='controle_financeiro_cats_final_v24';
 const ICONS=['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus'];
 let transactions=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
 let categories=JSON.parse(localStorage.getItem(CATS_KEY))||[
@@ -423,25 +451,35 @@ function monthTx(){
   const m=displayDate.getMonth(),y=displayDate.getFullYear();
   return transactions.filter(t=>{const d=new Date(t.date+'T12:00:00');return d.getMonth()===m&&d.getFullYear()===y;});
 }
+
 function updateUI(){
   const names=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   document.getElementById('current-month-display').innerText=`${names[displayDate.getMonth()]} ${displayDate.getFullYear()}`;
   const list=monthTx();
   let inc=0,exp=0;
-  list.forEach(t=>{if(t.type==='income')inc+=t.amount;else exp+=t.amount;});
+  
+  list.forEach(t=>{
+    if(t.type==='income') inc+=t.amount;
+    else if(t.type==='expense') exp+=t.amount;
+    // O tipo 'neutral' não afeta os totais
+  });
+  
   document.getElementById('header-balance').innerText=formatCurrency(inc-exp);
   document.getElementById('dash-income').innerText=formatCurrency(inc);
   document.getElementById('dash-expense').innerText=formatCurrency(exp);
+  
   updateChartAndLegend(list);
   updateTransactionsList(list);
   updateCategoriesList();
   if(detailCat!==null)renderCatDetail();
+  
   localStorage.setItem(STORAGE_KEY,JSON.stringify(transactions));
   localStorage.setItem(CATS_KEY,JSON.stringify(categories));
 }
 
 function updateChartAndLegend(list){
   const totals={};
+  // Mostra apenas despesas reais no gráfico, ignora neutro e receita
   list.forEach(t=>{if(t.type==='expense')totals[t.category]=(totals[t.category]||0)+t.amount;});
   sortedCats=Object.entries(totals).sort((a,b)=>b[1]-a[1]).map(([name,total])=>{const c=getCat(name);return{name,total,color:c?c.color:'#6B7280',icon:c?c.icon:'tag'};});
   const sum=sortedCats.reduce((s,c)=>s+c.total,0);
@@ -454,6 +492,7 @@ function updateChartAndLegend(list){
       </div>
       <div class="flex items-center gap-2 shrink-0"><span class="text-red-400 font-medium text-sm">${formatCurrency(c.total)}</span><i class="ph ph-caret-right text-gray-600"></i></div>
     </div>`).join(''):'<p class="text-sm text-center text-gray-500 mt-2">Nenhum gasto registrado neste mês.</p>';
+  
   if(myChart)myChart.destroy();
   const ctx=document.getElementById('expensesChart').getContext('2d');
   const base={responsive:true,maintainAspectRatio:false,cutout:'78%',plugins:{legend:{display:false},tooltip:{enabled:false}}};
@@ -483,41 +522,94 @@ function renderCatDetail(){
 function groupMin(){
   const g={}; transactions.forEach(t=>{if(t.groupId&&(!g[t.groupId]||t.date<g[t.groupId]))g[t.groupId]=t.date;}); return g;
 }
+
+// Corrigido texto para "Registro: data"
 function subText(t,gm){
-  if(t.repetition==='fixa'||t.repetition==='parcelada')return `${esc(t.category)} • Registrada em ${fmtBR(gm[t.groupId]||t.date)}`;
+  if(t.repetition==='fixa'||t.repetition==='parcelada') return `${esc(t.category)} • Registro: ${fmtBR(gm[t.groupId]||t.date)}`;
   return `${esc(t.category)} • Única`;
 }
+
 function txRow(t,sub){
-  const c=getCat(t.category),col=c?c.color:'#6B7280',ic=c?c.icon:'tag',inc=t.type==='income';
+  const c=getCat(t.category), col=c?c.color:'#6B7280', ic=c?c.icon:'tag';
+  
+  // Cores: Verde (Receita), Vermelho (Despesa), Azul-cinza (Neutro)
+  let amtCol = 'text-red-500';
+  if(t.type === 'income') amtCol = 'text-green-500';
+  else if(t.type === 'neutral') amtCol = 'text-blue-400';
+  
   return `<div class="flex items-center justify-between cursor-pointer tap-effect py-3" onclick="openEditTransaction(${t.id})">
     <div class="flex items-center gap-4 min-w-0"><div class="w-12 h-12 rounded-full flex items-center justify-center text-white shrink-0" style="background:${col}"><i class="ph ph-${ic} text-xl"></i></div>
     <div class="min-w-0"><p class="font-medium text-gray-100 text-[16px] mb-0.5 truncate">${esc(t.desc)}</p><p class="text-[12px] text-gray-500 truncate">${sub}</p></div></div>
-    <p class="font-medium ${inc?'text-green-500':'text-red-500'} text-[15px] shrink-0 ml-3">${formatCurrency(t.amount)}</p></div>`;
+    <p class="font-medium ${amtCol} text-[15px] shrink-0 ml-3">${formatCurrency(t.amount)}</p></div>`;
 }
+
 function setTxTab(t){txTab=t;updateUI();}
-function setCatFilter(i){catFilter=i<0?'all':categories[i].name;updateUI();}
+
+/* --- LÓGICA DO FILTRO --- */
+function openFilterModal() {
+  document.getElementById('filter-category-list').innerHTML = categories.map((c, i) => `
+    <div class="flex items-center gap-4 p-4 border-b border-gray-800 cursor-pointer tap-effect" onclick="applyFilter(${i})">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center text-white" style="background:${c.color}"><i class="ph ph-${c.icon} text-lg"></i></div>
+      <span class="text-white text-[17px] font-medium">${esc(c.name)}</span>
+    </div>
+  `).join('');
+  showSheet('modal-filter', 'modal-filter-content');
+}
+function closeFilterModal() { hideSheet('modal-filter', 'modal-filter-content'); }
+function applyFilter(i) {
+  catFilter = i < 0 ? 'all' : categories[i].name;
+  closeFilterModal();
+  updateUI();
+}
 
 function updateTransactionsList(monthList){
-  ['avulsas','fixas','parceladas'].forEach(k=>{document.getElementById('sub-'+k).className='flex-1 py-2.5 text-sm font-medium rounded-lg tap-effect '+(k===txTab?'seg-on':'seg-off');});
-  document.getElementById('tx-chips').innerHTML=
-    `<button onclick="setCatFilter(-1)" class="shrink-0 px-4 py-2 rounded-full text-sm tap-effect ${catFilter==='all'?'chip-on':'chip-off'}">Todas</button>`+
-    categories.map((c,i)=>`<button onclick="setCatFilter(${i})" class="shrink-0 px-4 py-2 rounded-full text-sm flex items-center gap-1.5 tap-effect ${catFilter===c.name?'chip-on':'chip-off'}"><i class="ph ph-${c.icon}"></i>${esc(c.name)}</button>`).join('');
+  ['avulsas','parceladas','fixas','receitas'].forEach(k=>{
+    const btn = document.getElementById('sub-'+k);
+    if(btn) btn.className='flex-1 min-w-[75px] py-2.5 text-xs font-medium rounded-lg tap-effect '+(k===txTab?'seg-on':'seg-off');
+  });
+
+  document.getElementById('active-filter-text').innerText = catFilter === 'all' ? 'Filtrar' : esc(catFilter);
 
   const pass=t=>catFilter==='all'||t.category===catFilter;
   const fm=monthList.filter(pass);
   const list=document.getElementById('transactions-list');
   const rep=t=>t.repetition||'unica';
-  const view=fm.filter(t=>txTab==='avulsas'?rep(t)==='unica':txTab==='fixas'?rep(t)==='fixa':rep(t)==='parcelada');
-  const spent=view.reduce((a,t)=>a+(t.type==='expense'?t.amount:0),0);
-  const tabName={avulsas:'Avulsas',fixas:'Fixas',parceladas:'Parceladas'}[txTab];
+  
+  const view = fm.filter(t => {
+    if (txTab === 'receitas') return t.type === 'income';
+    // Para as outras abas, ignoramos receitas e trazemos despesas + neutros
+    if (t.type === 'income') return false;
+    
+    if (txTab === 'avulsas') return rep(t) === 'unica';
+    if (txTab === 'fixas') return rep(t) === 'fixa';
+    if (txTab === 'parceladas') return rep(t) === 'parcelada';
+    return false;
+  });
+
+  const spent = view.reduce((a,t)=>a+(t.type==='expense'?t.amount:0),0);
+  const earned = view.reduce((a,t)=>a+(t.type==='income'?t.amount:0),0);
+  const valToShow = txTab === 'receitas' ? earned : spent;
+  const colorToShow = txTab === 'receitas' ? 'text-green-500' : 'text-red-400';
+  const labelToShow = txTab === 'receitas' ? 'Entradas do mês' : 'Gastos do mês';
+
+  const tabName={avulsas:'Avulsas',fixas:'Fixas',parceladas:'Parceladas',receitas:'Receitas'}[txTab];
   document.getElementById('tx-summary').innerHTML=
-    `<div><p class="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Gastos do mês</p><p class="font-bold text-xl text-red-400">${formatCurrency(spent)}</p></div>
-     <div class="text-right self-center min-w-0"><p class="text-xs text-gray-500 truncate">${tabName}</p><p class="text-xs text-gray-500 truncate">${catFilter==='all'?'Todas as categorias':esc(catFilter)}</p></div>`;
+    `<div>
+       <p class="text-[11px] text-gray-400 uppercase tracking-wider mb-1">${labelToShow}</p>
+       <p class="font-bold text-xl ${colorToShow}">${formatCurrency(valToShow)}</p>
+     </div>
+     <div class="text-right self-center min-w-0">
+       <p class="text-xs text-gray-500 truncate">${tabName}</p>
+       <p class="text-xs text-gray-500 truncate">${catFilter==='all'?'Todas as categorias':esc(catFilter)}</p>
+     </div>`;
+
   if(!view.length){
     list.innerHTML=`<div class="text-center py-12 text-gray-500"><i class="ph ph-receipt text-5xl mb-3 opacity-30"></i><p>Nenhuma transação aqui.</p></div>`;return;
   }
+  
   const gm=groupMin();
   if(txTab!=='avulsas'){ list.innerHTML=view.sort((a,b)=>a.date<b.date?1:-1).map(t=>txRow(t,subText(t,gm))).join('');return; }
+  
   const grouped={};view.forEach(t=>(grouped[t.date]=grouped[t.date]||[]).push(t));
   list.innerHTML=Object.keys(grouped).sort().reverse().map(date=>{
     const d=new Date(date+'T12:00:00');
@@ -528,8 +620,11 @@ function updateTransactionsList(monthList){
 
 function saveTransaction(e){
   e.preventDefault();
-  const desc=document.getElementById('desc').value, total=Math.abs(parseCurrency(document.getElementById('amount').value)), category=document.getElementById('category').value, dateInput=document.getElementById('date').value;
+  const desc=document.getElementById('desc').value, total=Math.abs(parseCurrency(document.getElementById('amount').value)), category=document.getElementById('category').value;
+  let dateInput = document.getElementById('date').value;
+  
   if(!desc||isNaN(total)||total===0||!dateInput||!category){alert('Preencha todos os campos.');return;}
+  
   if(editingTxId){
     const index=transactions.findIndex(t=>t.id===editingTxId);
     if(index>-1){
@@ -549,6 +644,7 @@ function saveTransaction(e){
   }
   updateUI();closeModal();
 }
+
 function deleteTransactionAction(){
   if(!editingTxId)return;
   const t=transactions.find(x=>x.id===editingTxId);if(!t)return;
@@ -670,44 +766,75 @@ function resetCatDisplay(name){
   d.innerText=name||'Selecione a Categoria';
   if(name)d.classList.replace('text-gray-400','text-white');else d.classList.replace('text-white','text-gray-400');
 }
+
 function openModal(){
   editingTxId=null;
   document.getElementById('modal-tx-title').innerText='Nova Transação';
   document.getElementById('btn-delete-tx').classList.add('hidden');
-  document.getElementById('rep-section').style.display='block';
   document.getElementById('form').reset();
   document.getElementById('date').value=todayStr();
   document.getElementById('category').value='';resetCatDisplay('');
-  setType('expense');setRepetition('unica');
+  setType('expense');
   showSheet('modal','modal-content');
 }
+
 function openEditTransaction(id){
   const t=transactions.find(x=>x.id===id);if(!t)return;editingTxId=id;
   document.getElementById('modal-tx-title').innerText='Editar Transação';
   document.getElementById('btn-delete-tx').classList.remove('hidden');
-  document.getElementById('rep-section').style.display='none';
-  document.getElementById('date-wrapper').classList.remove('hidden');
   document.getElementById('amount').value=t.amount.toFixed(2).replace('.',',').replace(/(\d)(?=(\d{3})+(?!\d))/g,'$1.');
   document.getElementById('desc').value=t.desc.replace(/ \(\d+\/\d+\)$/,'');
   document.getElementById('date').value=t.date;
   document.getElementById('category').value=t.category;resetCatDisplay(t.category);
-  setType(t.type);showSheet('modal','modal-content');
+  setType(t.type); // Carrega tipo, que atualiza data/repetition visualmente
+  showSheet('modal','modal-content');
 }
 function closeModal(){hideSheet('modal','modal-content');}
+
 function setType(type){
-  currentType=type;
-  const e=document.getElementById('btn-expense'),i=document.getElementById('btn-income'),base='flex-1 py-3 text-sm font-medium rounded-lg transition-all tap-effect ';
-  e.className=base+(type==='expense'?'bg-red-500/20 text-red-500 border border-red-500/50':'text-gray-400 border border-transparent');
-  i.className=base+(type==='income'?'bg-green-500/20 text-green-500 border border-green-500/50':'text-gray-400 border border-transparent');
+  currentType = type;
+  const e = document.getElementById('btn-expense');
+  const i = document.getElementById('btn-income');
+  const n = document.getElementById('btn-neutral');
+  const base = 'flex-1 py-3 text-xs font-medium rounded-lg transition-all tap-effect ';
+  
+  e.className = base + (type === 'expense' ? 'bg-red-500/20 text-red-500 border border-red-500/50' : 'text-gray-400 border border-transparent');
+  i.className = base + (type === 'income' ? 'bg-green-500/20 text-green-500 border border-green-500/50' : 'text-gray-400 border border-transparent');
+  n.className = base + (type === 'neutral' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50' : 'text-gray-400 border border-transparent');
+  
+  const repSec = document.getElementById('rep-section');
+  const dateWrap = document.getElementById('date-wrapper');
+
+  // Receita não mostra repeticao nem data
+  if(type === 'income') {
+    repSec.style.display = 'none';
+    dateWrap.classList.add('hidden');
+    currentRepetition = 'unica';
+  } else {
+    repSec.style.display = 'block';
+    dateWrap.classList.remove('hidden');
+    setRepetition(currentRepetition || 'unica');
+  }
 }
+
 function setRepetition(type){
-  currentRepetition=type;
-  const base='flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect ';
-  [['unica','btn-rep-unica'],['fixa','btn-rep-fixa'],['parcelada','btn-rep-parcelada']].forEach(([k,id])=>{document.getElementById(id).className=base+(k===type?'seg-on':'seg-off');});
-  document.getElementById('installments-div').classList.toggle('hidden',type!=='parcelada');
-  const dw=document.getElementById('date-wrapper');
-  if(type==='unica')dw.classList.remove('hidden'); else{dw.classList.add('hidden');document.getElementById('date').value=todayStr();}
+  currentRepetition = type;
+  const base = 'flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect ';
+  [['unica','btn-rep-unica'],['fixa','btn-rep-fixa'],['parcelada','btn-rep-parcelada']].forEach(([k,id])=>{
+    document.getElementById(id).className = base + (k===type ? 'seg-on' : 'seg-off');
+  });
+  document.getElementById('installments-div').classList.toggle('hidden', type !== 'parcelada');
+  const dw = document.getElementById('date-wrapper');
+  
+  if(currentType === 'income') return; // Receita já ocultou
+  
+  if(type === 'unica') dw.classList.remove('hidden'); 
+  else {
+    dw.classList.add('hidden');
+    document.getElementById('date').value = todayStr();
+  }
 }
+
 function exportData(){
   const blob=new Blob([JSON.stringify({transactions,categories})],{type:'application/json'});
   const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='MeuControle_Backup.json';a.click();URL.revokeObjectURL(url);
