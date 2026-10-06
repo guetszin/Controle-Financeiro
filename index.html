@@ -19,7 +19,7 @@
   --app-height: 100vh;
 }
 
-/* O fundo do iOS travado com inset: 0 */
+/* Fundo total esticado cobrindo qualquer falha de safe area inferior */
 html, body {
   position: fixed;
   inset: 0;
@@ -27,10 +27,10 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  background: #121212;
+  background: #1C1C1E; /* Cor exata do menu inferior para camuflar */
   overflow: hidden;
   overscroll-behavior: none;
-  touch-action: none; /* Previne scroll elástico falso do iOS */
+  touch-action: none;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
@@ -41,7 +41,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* O contêiner do aplicativo obedece apenas à altura calculada pelo JS */
+/* O contêiner usa altura absoluta calculada com folga de preenchimento inferior */
 .app {
   position: absolute;
   top: 0;
@@ -91,22 +91,22 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 .seg-off{color:#9CA3AF;border:1px solid transparent}
 .chip-on{background:#7C3AED;color:#fff}.chip-off{background:#2C2C2E;color:#d1d5db}
 
-/* Animação da Splash Screen */
+/* Animação suave para sumir com a Splash Screen */
 .splash-fade-out {
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.5s ease-out;
+  transition: opacity 0.4s ease-out;
 }
 </style>
 </head>
 <body class="antialiased select-none">
 
-<!-- SPLASH SCREEN DE CARREGAMENTO -->
+<!-- SPLASH SCREEN DE CARREGAMENTO INTELIGENTE -->
 <div id="splash-screen" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#121212]">
   <div class="w-20 h-20 bg-roxo rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(124,58,237,0.4)] mb-5 animate-pulse">
     <i class="ph-fill ph-wallet text-4xl text-white"></i>
   </div>
-  <h1 class="text-white font-bold text-2xl tracking-tight">Controle Financeiro</h1>
+  <h1 class="text-white font-bold text-2xl tracking-tight">Mobills</h1>
 </div>
 
 <div class="app">
@@ -192,7 +192,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     <button onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="more"><i class="ph ph-dots-three text-2xl mb-1"></i><span class="text-[10px] font-medium">Mais</span></button>
   </nav>
 
-  <!-- MODAIS (Ancorados no .app absoluto) -->
+  <!-- MODAIS -->
   <div id="modal-cat-detail" class="absolute inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
     <div id="modal-cat-detail-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[80vh]">
       <div class="flex justify-between items-center p-5 border-b border-gray-800">
@@ -313,34 +313,43 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </div>
 
 <script>
-// --- LOGICA DA TELA E SPLASH SCREEN ---
+// --- MOTOR DE RECÁLCULO INTELIGENTE DO IOS (ANTI-BARRA PRETA) ---
 const setAppHeight = () => {
-  document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+  // Usa o innerHeight real do navegador ou força o tamanho máximo da janela se o iOS falhar
+  const h = window.innerHeight > 0 ? window.innerHeight : screen.height;
+  document.documentElement.style.setProperty('--app-height', `${h}px`);
 };
 
-// Executa o cálculo inicial
 setAppHeight();
 window.addEventListener('resize', setAppHeight);
 window.addEventListener('orientationchange', setAppHeight);
 
-// Ao carregar a página, aguardamos o iOS terminar de "assentar" e removemos a Splash Screen
+// O SEGREDO: Fila de recálculos usando requestAnimationFrame do navegador.
+// Isso garante que a Splash Screen só vai sumir EXATAMENTE no quadro (frame) 
+// em que o iOS renderizou a tela por completo, eliminando qualquer lag visual.
 window.addEventListener('load', () => {
-  // Força o ajuste da tela durante os milissegundos iniciais onde o iOS falha
-  const intervals = [100, 300, 600, 900];
-  intervals.forEach(ms => setTimeout(setAppHeight, ms));
+  const checkAndReveal = () => {
+    setAppHeight();
+    requestAnimationFrame(() => {
+      setAppHeight();
+      setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        if (splash) {
+          splash.classList.add('splash-fade-out');
+          setTimeout(() => splash.remove(), 400);
+        }
+      }, 150); // Delay curto e seguro após o motor estabilizar
+    });
+  };
   
-  // Após 1 segundo, a tela do PWA estará perfeita, então fade-out na Splash Screen
-  setTimeout(() => {
-    const splash = document.getElementById('splash-screen');
-    splash.classList.add('splash-fade-out');
-    // Remove do DOM para não pesar
-    setTimeout(() => splash.remove(), 500);
-  }, 1000);
+  // Força checagens em cascata para cobrir qualquer lentidão do WebKit
+  setTimeout(checkAndReveal, 200);
+  setTimeout(checkAndReveal, 500);
 });
+// ===============================================================
 
-// --- LÓGICA DO APLICATIVO ---
-const STORAGE_KEY='mobills_dark_final_v16';
-const CATS_KEY='mobills_cats_final_v16';
+const STORAGE_KEY='mobills_dark_final_v17';
+const CATS_KEY='mobills_cats_final_v17';
 const ICONS=['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus'];
 let transactions=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
 let categories=JSON.parse(localStorage.getItem(CATS_KEY))||[
@@ -384,7 +393,7 @@ document.body.addEventListener('touchend',e=>{
 
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){
-    setAppHeight(); // Recalcula altura ao voltar para o app
+    setAppHeight();
     const m=new Date().getMonth();
     if(m!==lastKnownRealMonth){displayDate=new Date();lastKnownRealMonth=m;updateUI();}
   }
@@ -584,7 +593,7 @@ function selectIcon(i){
     document.getElementById('btn-new-icon').innerHTML = `<i class="ph ph-${i} text-xl"></i>`;
   } else {
     editCatIcon = i;
-    document.getElementById('btn-edit-icon').innerHTML = `<i class="ph ph-${i} text-2xl"></i>`;
+    document.getElementById('btn-edit-icon').innerHTML = `<i class="ph ph-${editCatIcon} text-2xl"></i>`;
   }
   closeIconSelect();
 }
