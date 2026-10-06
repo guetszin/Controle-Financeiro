@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<!-- Configuração exata para PWA tela cheia no iOS -->
+<!-- Configuração exata para PWA nativo no iOS -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,22 +15,20 @@
 <style>
 ::-webkit-scrollbar{display:none}
 
-:root {
-  --app-height: 100%;
-}
-
-/* O Fundo do documento SEMPRE ocupa 100% físico, mascarando o buraco preto */
+/* 
+  O SEGREDO DEFINITIVO PARA WEB APP:
+  Sem 100vh, sem 100%. Pregado fisicamente aos 4 cantos da tela (inset: 0).
+*/
 html, body {
   position: fixed;
-  inset: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   width: 100%;
-  height: 100%; /* Nunca use a variável de altura aqui, senão o buraco aparece */
   margin: 0;
   padding: 0;
-  background: #1C1C1E; /* Mesma cor da navbar */
+  background: #121212;
   overflow: hidden;
   overscroll-behavior: none;
-  touch-action: none;
+  touch-action: none; /* Impede o efeito "elástico" da tela inteira no iOS */
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
@@ -41,14 +39,10 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* O App sim obedece a altura do Javascript para sincronizar o clique (Touch Bug Fix) */
+/* O contêiner também não usa 'height'. Ele estica pelas coordenadas absolute */
 .app {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100%; 
-  height: var(--app-height); /* Encaixe milimétrico via JS */
+  top: 0; left: 0; right: 0; bottom: 0;
   max-width: 448px;
   margin: 0 auto;
   display: flex;
@@ -60,12 +54,14 @@ body {
 
 .card-bg{background:#1C1C1E}
 
+/* Respeito milimétrico ao Notch e Barra inferior (Home Bar) */
 .hdr { padding-top: calc(env(safe-area-inset-top, 0px) + 0.75rem); }
 .nav-safe { 
   padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px); 
   padding-top: 0.75rem; 
 }
 
+/* Permite rolar APENAS as áreas que precisam de rolagem */
 #scroll, .overflow-y-auto {
   touch-action: pan-y;
   overscroll-behavior-y: contain;
@@ -92,7 +88,6 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 .seg-off{color:#9CA3AF;border:1px solid transparent}
 .chip-on{background:#7C3AED;color:#fff}.chip-off{background:#2C2C2E;color:#d1d5db}
 
-/* Animação da Splash Screen */
 .splash-fade-out {
   opacity: 0;
   pointer-events: none;
@@ -193,7 +188,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     <button onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="more"><i class="ph ph-dots-three text-2xl mb-1"></i><span class="text-[10px] font-medium">Mais</span></button>
   </nav>
 
-  <!-- MODAIS (Ancorados no .app absoluto) -->
+  <!-- MODAIS (Usam 'absolute inset-0' para ficar cravados na área física do App) -->
   <div id="modal-cat-detail" class="absolute inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
     <div id="modal-cat-detail-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[80vh]">
       <div class="flex justify-between items-center p-5 border-b border-gray-800">
@@ -314,57 +309,22 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </div>
 
 <script>
-// =========================================================================
-// O SOLUCIONADOR DO "IOS PWA HEIGHT BUG": Polling agressivo + Splash Screen
-// =========================================================================
-let lastHeight = 0;
-const setAppHeight = () => {
-  // Usa innerHeight ou, se a visualViewport estiver disponível e for maior, usa ela.
-  let vh = window.innerHeight;
-  if (window.visualViewport && window.visualViewport.height > vh) {
-    vh = window.visualViewport.height;
-  }
-  
-  // Apenas ajusta se a altura for válida e tiver mudado
-  if (vh > 0 && vh !== lastHeight) {
-    document.documentElement.style.setProperty('--app-height', `${vh}px`);
-    lastHeight = vh;
-  }
-};
-
-// Faz o ajuste imediato
-setAppHeight();
-
-// Polling Agressivo: A cada 50ms durante 2.5 segundos, o Javascript verifica 
-// a altura da tela de novo. Quando o iOS termina a animação de "zoom" na tela 
-// inicial, ele devolve a altura corrigida, e o nosso código captura na hora.
-let pollCount = 0;
-const heightPoller = setInterval(() => {
-  setAppHeight();
-  pollCount++;
-  if (pollCount > 50) clearInterval(heightPoller); // Para após 2500ms
-}, 50);
-
-// Ao concluir todo o carregamento e passar 1 segundo (tempo seguro pro iOS focar), remove a Splash
+// --- LOGICA DA SPLASH SCREEN ---
+// Sem nenhum cálculo de tela, apenas removemos a Splash Screen após 1 segundo.
+// O CSS cuida de todo o enquadramento usando 'inset: 0'.
 window.addEventListener('load', () => {
   setTimeout(() => {
     const splash = document.getElementById('splash-screen');
     if(splash) {
       splash.classList.add('splash-fade-out');
-      setTimeout(() => splash.remove(), 500); // Remove o DOM após o fade
+      setTimeout(() => splash.remove(), 500); 
     }
   }, 1000);
 });
 
-window.addEventListener('resize', setAppHeight);
-window.addEventListener('orientationchange', setAppHeight);
-if(window.visualViewport) window.visualViewport.addEventListener('resize', setAppHeight);
-
-// =========================================================================
-// LÓGICA DO APLICATIVO MOBILLS
-// =========================================================================
-const STORAGE_KEY='mobills_dark_final_v17';
-const CATS_KEY='mobills_cats_final_v17';
+// --- LÓGICA DO APLICATIVO ---
+const STORAGE_KEY='mobills_dark_final_v18';
+const CATS_KEY='mobills_cats_final_v18';
 const ICONS=['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus'];
 let transactions=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
 let categories=JSON.parse(localStorage.getItem(CATS_KEY))||[
@@ -408,7 +368,6 @@ document.body.addEventListener('touchend',e=>{
 
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){
-    setAppHeight(); // Recalcula altura ao voltar
     const m=new Date().getMonth();
     if(m!==lastKnownRealMonth){displayDate=new Date();lastKnownRealMonth=m;updateUI();}
   }
