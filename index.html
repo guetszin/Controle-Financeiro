@@ -1,859 +1,632 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Controle Mobills</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
-    <link rel="manifest" href="manifest.json">
-    
-    <style>
-        ::-webkit-scrollbar { display: none; }
-        body { background-color: #000000; color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow-x: hidden; }
-        .app-container { background-color: #121212; }
-        .card-bg { background-color: #1C1C1E; }
-        
-        /* Proteção para a barra inferior do iPhone (Home Indicator) */
-        .nav-safe-area {
-            padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 16px));
-            padding-top: 0.5rem;
-        }
-        .content-safe-area {
-            padding-bottom: calc(7rem + env(safe-area-inset-bottom, 16px));
-        }
-
-        .tab-content { display: none; }
-        .tab-content.active { 
-            display: block; 
-            animation: smoothEnter 0.3s ease-out forwards;
-        }
-
-        @keyframes smoothEnter {
-            0% { opacity: 0; transform: translateY(8px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ---------------------------------------------------
-           ANIMAÇÕES DIRECIONAIS DOS MESES (SLIDE IN/OUT)
-           --------------------------------------------------- */
-        .slide-out-left { animation: slideOutLeft 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        .slide-in-right { animation: slideInRight 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        .slide-out-right { animation: slideOutRight 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        .slide-in-left { animation: slideInLeft 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-
-        @keyframes slideOutLeft { to { transform: translateX(-25px); opacity: 0; } }
-        @keyframes slideInRight { from { transform: translateX(25px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes slideOutRight { to { transform: translateX(25px); opacity: 0; } }
-        @keyframes slideInLeft { from { transform: translateX(-25px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        
-        .text-roxo { color: #7C3AED; }
-        .bg-roxo { background-color: #7C3AED; }
-        .fab-button { background-color: #7C3AED; }
-        
-        input[type="color"] { -webkit-appearance: none; border: none; padding: 0; }
-        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
-        
-        .tap-effect { transition: transform 0.1s, opacity 0.1s; }
-        .tap-effect:active { transform: scale(0.97); opacity: 0.8; }
-
-        .modal-content-transition { transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
-        .modal-backdrop-transition { transition: opacity 0.25s ease-out; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Controle Mobills</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="manifest" href="manifest.json">
+<style>
+::-webkit-scrollbar{display:none}
+html,body{height:100%;margin:0;background:#000;overflow:hidden}
+body{color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.app{height:100vh;height:100dvh}
+.app-container{background:#121212}
+.card-bg{background:#1C1C1E}
+.hdr{padding-top:calc(env(safe-area-inset-top,0px) + 1rem)}
+.nav-safe{padding-bottom:max(env(safe-area-inset-bottom,0px),10px);padding-top:.5rem}
+.tab-content{display:none}
+.tab-content.active{display:block;animation:smoothEnter .3s ease-out forwards}
+@keyframes smoothEnter{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+.slide-out-left{animation:sOL .2s forwards}.slide-in-right{animation:sIR .2s forwards}
+.slide-out-right{animation:sOR .2s forwards}.slide-in-left{animation:sIL .2s forwards}
+@keyframes sOL{to{transform:translateX(-25px);opacity:0}}
+@keyframes sIR{from{transform:translateX(25px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes sOR{to{transform:translateX(25px);opacity:0}}
+@keyframes sIL{from{transform:translateX(-25px);opacity:0}to{transform:translateX(0);opacity:1}}
+.text-roxo{color:#7C3AED}.bg-roxo{background:#7C3AED}.fab-button{background:#7C3AED}
+input[type=color]{-webkit-appearance:none;border:none;padding:0}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+input[type=color]::-webkit-color-swatch{border:none;border-radius:50%}
+.tap-effect{transition:transform .1s,opacity .1s}.tap-effect:active{transform:scale(.97);opacity:.8}
+.modal-content-transition{transition:transform .35s cubic-bezier(.16,1,.3,1)}
+.modal-backdrop-transition{transition:opacity .25s ease-out}
+.seg-on{background:rgba(124,58,237,.2);color:#A78BFA;border:1px solid rgba(124,58,237,.55)}
+.seg-off{color:#9CA3AF;border:1px solid transparent}
+.chip-on{background:#7C3AED;color:#fff}.chip-off{background:#2C2C2E;color:#d1d5db}
+</style>
 </head>
 <body class="antialiased select-none">
+<div class="app max-w-md mx-auto app-container relative flex flex-col overflow-hidden shadow-2xl">
 
-    <div id="swipe-zone" class="max-w-md mx-auto app-container min-h-screen relative content-safe-area shadow-2xl overflow-x-hidden">
-
-        <header class="sticky top-0 z-20 app-container pt-12 pb-6 border-b border-gray-800">
-            <div class="flex justify-between items-center mb-6 w-4/5 mx-auto">
-                <button onclick="changeMonth(-1)" class="p-2 text-gray-400 hover:text-white tap-effect"><i class="ph ph-caret-left text-xl"></i></button>
-                <span id="current-month-display" class="font-medium text-gray-200 text-lg capitalize w-40 text-center tracking-wide transition-opacity duration-200">Fevereiro 2026</span>
-                <button onclick="changeMonth(1)" class="p-2 text-gray-400 hover:text-white tap-effect"><i class="ph ph-caret-right text-xl"></i></button>
-            </div>
-
-            <div class="animate-month flex flex-col items-center mb-8">
-                <p class="text-sm text-gray-400 mb-1">Saldo atual em contas</p>
-                <h1 id="header-balance" class="text-4xl font-bold text-white tracking-tight mb-3">R$ 0,00</h1>
-                <button onclick="toggleBalance()" class="text-gray-400 p-2 rounded-full hover:bg-gray-800 tap-effect">
-                    <i class="ph ph-eye text-xl" id="eye-icon"></i>
-                </button>
-            </div>
-
-            <div class="animate-month flex justify-center gap-4 px-4">
-                <div class="flex items-center gap-3 w-1/2 justify-end">
-                    <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center shrink-0 shadow-lg shadow-green-500/20">
-                        <i class="ph ph-arrow-up text-white text-xl font-bold"></i>
-                    </div>
-                    <div>
-                        <p class="text-[11px] text-gray-400 uppercase tracking-wider">Receitas</p>
-                        <p id="dash-income" class="text-green-500 font-bold text-lg tracking-tight">R$ 0,00</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3 w-1/2 justify-start border-l border-gray-800 pl-4">
-                    <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center shrink-0 shadow-lg shadow-red-500/20">
-                        <i class="ph ph-arrow-down text-white text-xl font-bold"></i>
-                    </div>
-                    <div>
-                        <p class="text-[11px] text-gray-400 uppercase tracking-wider">Despesas</p>
-                        <p id="dash-expense" class="text-red-500 font-bold text-lg tracking-tight">R$ 0,00</p>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <main id="tab-home" class="tab-content active px-4 mt-6 animate-month">
-            <div class="card-bg rounded-3xl p-5 shadow-lg">
-                <h2 class="text-gray-300 font-medium mb-6">Despesas por categoria</h2>
-                <div class="flex flex-col gap-6">
-                    <div class="relative w-40 h-40 mx-auto shrink-0 transition-transform hover:scale-105">
-                        <canvas id="expensesChart"></canvas>
-                    </div>
-                    <div id="custom-legend" class="space-y-3 px-2"></div>
-                </div>
-            </div>
-        </main>
-
-        <main id="tab-transactions" class="tab-content px-4 mt-6 animate-month">
-            <h2 class="text-xl font-medium text-white mb-6">Transações</h2>
-            <div id="transactions-list"></div>
-        </main>
-
-        <main id="tab-categories" class="tab-content px-4 mt-6">
-            <h2 class="text-xl font-medium text-white mb-6">Categorias</h2>
-            <div class="card-bg rounded-2xl p-4 mb-6 shadow-md">
-                <form onsubmit="addCategory(event)" class="flex gap-3 items-center">
-                    <input type="color" id="cat-color" value="#7C3AED" class="w-10 h-10 rounded-full cursor-pointer bg-transparent tap-effect">
-                    <input type="text" id="cat-name" placeholder="Nome da categoria" required class="flex-1 bg-[#2C2C2E] text-white rounded-xl p-3 outline-none focus:ring-1 focus:ring-purple-500">
-                    <button type="submit" class="bg-roxo text-white px-4 py-3 rounded-xl font-bold tap-effect shadow-lg shadow-purple-500/30">+</button>
-                </form>
-            </div>
-            <div id="categories-list" class="space-y-3"></div>
-        </main>
-
-        <main id="tab-more" class="tab-content px-4 mt-6">
-            <h2 class="text-xl font-medium text-white mb-6">Mais Opções</h2>
-            <div class="card-bg rounded-2xl p-4 space-y-4 shadow-md">
-                <button onclick="exportData()" class="w-full bg-[#2C2C2E] text-white py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect">
-                    <i class="ph ph-export text-xl text-roxo"></i> Fazer Backup (Exportar)
-                </button>
-                <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
-                <button onclick="document.getElementById('importFile').click()" class="w-full bg-[#2C2C2E] text-white py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect">
-                    <i class="ph ph-import text-xl text-roxo"></i> Restaurar Backup
-                </button>
-            </div>
-        </main>
-
-        <nav class="fixed bottom-0 max-w-md w-full left-1/2 -translate-x-1/2 card-bg border-t border-gray-800 px-6 nav-safe-area flex justify-between items-center z-30">
-            <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-roxo w-14 tap-effect" data-target="home">
-                <i class="ph-fill ph-house text-2xl mb-1"></i>
-                <span class="text-[10px] font-medium">Principal</span>
-            </button>
-            <button onclick="switchTab('transactions')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="transactions">
-                <i class="ph ph-list-dashes text-2xl mb-1"></i>
-                <span class="text-[10px] font-medium">Transações</span>
-            </button>
-            <div class="relative -top-6">
-                <button onclick="openModal()" class="fab-button text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-[0_8px_16px_rgba(124,58,237,0.4)] tap-effect">+</button>
-            </div>
-            <button onclick="switchTab('categories')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="categories">
-                <i class="ph ph-squares-four text-2xl mb-1"></i>
-                <span class="text-[10px] font-medium">Categorias</span>
-            </button>
-            <button onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="more">
-                <i class="ph ph-dots-three text-2xl mb-1"></i>
-                <span class="text-[10px] font-medium">Mais</span>
-            </button>
-        </nav>
-
-        <div id="modal" class="fixed inset-0 bg-black/90 z-40 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-            <div id="modal-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[95vh] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-                <div class="flex justify-between items-center p-5 border-b border-gray-800">
-                    <button type="button" onclick="closeModal()" class="text-gray-400 p-2 -ml-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
-                    <h3 id="modal-tx-title" class="text-lg font-medium text-white">Nova Transação</h3>
-                    <button type="button" id="btn-delete-tx" onclick="deleteTransactionAction()" class="text-red-500 hidden p-2 tap-effect"><i class="ph ph-trash text-2xl"></i></button>
-                    <button type="button" onclick="document.getElementById('form').requestSubmit()" class="text-roxo font-bold p-2 -mr-2 tap-effect"><i class="ph ph-check text-2xl"></i></button>
-                </div>
-
-                <div class="overflow-y-auto p-5 pb-[10vh]">
-                    <form id="form" onsubmit="saveTransaction(event)">
-                        <div class="flex bg-[#121212] rounded-xl p-1 mb-6">
-                            <button type="button" id="btn-expense" onclick="setType('expense')" class="flex-1 py-3 text-sm font-medium rounded-lg bg-red-500/20 text-red-500 border border-red-500/50 transition-all duration-200 tap-effect">Despesa</button>
-                            <button type="button" id="btn-income" onclick="setType('income')" class="flex-1 py-3 text-sm font-medium rounded-lg text-gray-400 transition-all duration-200 tap-effect">Receita</button>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label class="text-xs text-gray-500 mb-1 block">Valor</label>
-                            <input type="tel" id="amount" inputmode="numeric" oninput="handleAmountInput(event)" required class="w-full text-4xl font-bold text-white bg-transparent border-b border-gray-700 py-2 outline-none focus:border-roxo" placeholder="0,00">
-                        </div>
-                        
-                        <div class="mb-5 flex items-center border-b border-gray-700 py-3">
-                            <i class="ph ph-pencil-simple text-gray-400 text-xl mr-3"></i>
-                            <input type="text" id="desc" required class="w-full bg-transparent outline-none text-white text-lg" placeholder="Descrição">
-                        </div>
-
-                        <div class="mb-5 flex items-center border-b border-gray-700 py-3 cursor-pointer tap-effect" onclick="openCategorySelectModal()">
-                            <i class="ph ph-tag text-gray-400 text-xl mr-3"></i>
-                            <div id="selected-category-display" class="flex-1 text-gray-400 text-lg">Selecione a Categoria</div>
-                            <i class="ph ph-caret-down text-gray-500"></i>
-                        </div>
-                        <input type="hidden" id="category" required>
-
-                        <div class="mb-6 flex items-center border-b border-gray-700 py-3">
-                            <i class="ph ph-calendar text-gray-400 text-xl mr-3"></i>
-                            <input type="date" id="date" required class="w-full bg-transparent outline-none text-white text-lg" style="color-scheme: dark;">
-                        </div>
-
-                        <div id="rep-section" class="mb-4">
-                            <label class="text-xs text-gray-500 mb-2 block">Repetição</label>
-                            <div class="flex gap-2">
-                                <button type="button" id="btn-rep-unica" onclick="setRepetition('unica')" class="flex-1 py-2 text-sm rounded-lg bg-roxo text-white tap-effect">Única</button>
-                                <button type="button" id="btn-rep-fixa" onclick="setRepetition('fixa')" class="flex-1 py-2 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 tap-effect">Fixa</button>
-                                <button type="button" id="btn-rep-parcelada" onclick="setRepetition('parcelada')" class="flex-1 py-2 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 tap-effect">Parcelada</button>
-                            </div>
-                            
-                            <div id="installments-div" class="hidden mt-4 flex flex-col gap-3 border-b border-gray-700 pb-4 pt-2">
-                                <div class="flex items-center">
-                                    <i class="ph ph-copy text-gray-400 text-xl mr-3"></i>
-                                    <input type="number" id="installments-count" min="2" max="48" inputmode="numeric" placeholder="Qtd. parcelas (ex: 3)" class="w-full bg-transparent outline-none text-white text-lg">
-                                </div>
-                                <div class="flex gap-4 pl-8 mt-2">
-                                    <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer tap-effect">
-                                        <input type="radio" name="inst_type" value="total" checked class="w-4 h-4 accent-roxo"> Valor Total
-                                    </label>
-                                    <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer tap-effect">
-                                        <input type="radio" name="inst_type" value="parcela" class="w-4 h-4 accent-roxo"> Valor da Parcela
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="continue-adding-wrapper" class="mt-8 flex items-center justify-between">
-                            <span class="text-sm font-medium text-gray-300">Continuar adicionando</span>
-                            <label class="relative inline-flex items-center cursor-pointer tap-effect">
-                                <input type="checkbox" id="continue-adding" class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:bg-roxo peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-                            </label>
-                        </div>
-                        <button type="submit" class="hidden">Salvar</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div id="modal-category-select" class="fixed inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-            <div id="modal-category-select-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[70vh]">
-                <div class="flex justify-between items-center p-5 border-b border-gray-800">
-                    <h3 class="text-lg font-medium text-white">Selecione a Categoria</h3>
-                    <button type="button" onclick="closeCategorySelectModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
-                </div>
-                <div class="overflow-y-auto p-2 pb-10" id="category-select-list"></div>
-            </div>
-        </div>
-
-        <div id="modal-simple-confirm" class="fixed inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-            <div id="modal-simple-confirm-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6 pb-[env(safe-area-inset-bottom,30px)]">
-                <h3 class="text-xl font-bold text-white mb-2" id="simple-confirm-title">Excluir</h3>
-                <p class="text-sm text-gray-400 mb-8" id="simple-confirm-desc">Deseja realmente continuar?</p>
-                <div class="flex gap-4">
-                    <button onclick="closeSimpleConfirm()" class="flex-1 py-4 rounded-xl bg-[#2C2C2E] text-white font-medium tap-effect">Cancelar</button>
-                    <button onclick="executeSimpleConfirm()" class="flex-1 py-4 rounded-xl bg-red-500 text-white font-bold tap-effect">Confirmar</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="modal-repeat-confirm" class="fixed inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-            <div id="modal-repeat-confirm-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6 pb-[env(safe-area-inset-bottom,30px)]">
-                <h3 class="text-xl font-bold text-white mb-2" id="repeat-confirm-title">Transação Repetida</h3>
-                <p class="text-sm text-gray-400 mb-6">Esta é uma transação que se repete. Onde deseja aplicar a alteração?</p>
-                <div class="flex flex-col gap-3">
-                    <button id="btn-repeat-all" onclick="executeRepeatAction('all')" class="w-full py-4 rounded-xl bg-roxo text-white font-bold tap-effect">Esta e as seguintes</button>
-                    <button onclick="executeRepeatAction('single')" class="w-full py-4 rounded-xl bg-[#2C2C2E] text-white font-medium tap-effect">Somente esta</button>
-                    <button onclick="closeRepeatConfirm()" class="w-full py-4 rounded-xl bg-transparent text-gray-500 font-medium mt-1 tap-effect">Cancelar</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="modal-category" class="fixed inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-            <div id="modal-category-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col">
-                <div class="flex justify-between items-center p-5 border-b border-gray-800">
-                    <button type="button" onclick="closeCategoryModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
-                    <h3 class="text-lg font-medium text-white">Editar Categoria</h3>
-                    <button type="button" onclick="document.getElementById('form-category').requestSubmit()" class="text-roxo font-bold p-2 tap-effect"><i class="ph ph-check text-2xl"></i></button>
-                </div>
-                <div class="p-5 pb-[env(safe-area-inset-bottom,40px)]">
-                    <form id="form-category" onsubmit="saveCategoryEdit(event)">
-                        <div class="flex items-center gap-4 mb-6">
-                            <input type="color" id="edit-cat-color" class="w-14 h-14 rounded-full cursor-pointer bg-transparent tap-effect shadow-md">
-                            <input type="text" id="edit-cat-name" required class="flex-1 bg-[#2C2C2E] text-white rounded-xl p-4 outline-none focus:ring-1 focus:ring-purple-500 transition-all text-lg" placeholder="Nome da Categoria">
-                        </div>
-                        <button type="submit" class="hidden">Salvar</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
+  <header id="swipe-zone" class="shrink-0 hdr app-container pb-4 border-b border-gray-800 z-20">
+    <div class="flex justify-between items-center mb-4 w-4/5 mx-auto">
+      <button onclick="changeMonth(-1)" class="p-2 text-gray-400 tap-effect"><i class="ph ph-caret-left text-xl"></i></button>
+      <span id="current-month-display" class="font-medium text-gray-200 text-lg capitalize w-40 text-center tracking-wide transition-opacity duration-200"></span>
+      <button onclick="changeMonth(1)" class="p-2 text-gray-400 tap-effect"><i class="ph ph-caret-right text-xl"></i></button>
     </div>
+    <div class="animate-month flex flex-col items-center mb-5">
+      <p class="text-sm text-gray-400 mb-1">Saldo Atual</p>
+      <h1 id="header-balance" class="text-4xl font-bold text-white tracking-tight">R$ 0,00</h1>
+    </div>
+    <div class="animate-month flex justify-center gap-4 px-4">
+      <div class="flex items-center gap-3 w-1/2 justify-end">
+        <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center shrink-0 shadow-lg shadow-green-500/20"><i class="ph ph-arrow-up text-white text-xl font-bold"></i></div>
+        <div><p class="text-[11px] text-gray-400 uppercase tracking-wider">Receitas</p><p id="dash-income" class="text-green-500 font-bold text-lg tracking-tight">R$ 0,00</p></div>
+      </div>
+      <div class="flex items-center gap-3 w-1/2 justify-start border-l border-gray-800 pl-4">
+        <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center shrink-0 shadow-lg shadow-red-500/20"><i class="ph ph-arrow-down text-white text-xl font-bold"></i></div>
+        <div><p class="text-[11px] text-gray-400 uppercase tracking-wider">Despesas</p><p id="dash-expense" class="text-red-500 font-bold text-lg tracking-tight">R$ 0,00</p></div>
+      </div>
+    </div>
+  </header>
 
-    <script>
-        const STORAGE_KEY = 'mobills_dark_final_v9';
-        let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        
-        let defaultCategories = [
-            { id: 1, name: 'Carro', color: '#DC2626' }, 
-            { id: 2, name: 'Alimentação', color: '#F59E0B' }, 
-            { id: 3, name: 'Compras', color: '#A855F7' }, 
-            { id: 4, name: 'Outros', color: '#6B7280' }
-        ];
-        let categories = JSON.parse(localStorage.getItem('mobills_cats_final_v9')) || defaultCategories;
+  <div id="scroll" class="flex-1 overflow-y-auto overscroll-contain px-4 pt-5 pb-10">
+    <main id="tab-home" class="tab-content active animate-month">
+      <div class="card-bg rounded-3xl p-5 shadow-lg">
+        <h2 class="text-gray-300 font-medium mb-5">Despesas por categoria</h2>
+        <div class="relative w-40 h-40 mx-auto mb-5"><canvas id="expensesChart"></canvas></div>
+        <div id="custom-legend" class="space-y-1"></div>
+      </div>
+    </main>
 
-        let currentType = 'expense';
-        let currentRepetition = 'unica';
-        let myChart = null;
-        let isBalanceHidden = false;
-        
-        let displayDate = new Date();
-        let lastKnownRealMonth = new Date().getMonth();
-        
-        let editingTxId = null;
-        let editingCatId = null;
-        let pendingAction = null; 
-        let pendingData = null; 
+    <main id="tab-transactions" class="tab-content animate-month">
+      <div class="flex bg-[#1C1C1E] rounded-xl p-1 mb-3">
+        <button id="sub-avulsas" onclick="setTxTab('avulsas')" class="flex-1 py-2.5 text-sm font-medium rounded-lg tap-effect">Avulsas</button>
+        <button id="sub-fixas" onclick="setTxTab('fixas')" class="flex-1 py-2.5 text-sm font-medium rounded-lg tap-effect">Fixas</button>
+        <button id="sub-parceladas" onclick="setTxTab('parceladas')" class="flex-1 py-2.5 text-sm font-medium rounded-lg tap-effect">Parceladas</button>
+      </div>
+      <div id="tx-chips" class="flex gap-2 overflow-x-auto pb-3"></div>
+      <div id="tx-summary" class="card-bg rounded-2xl p-4 mb-5 flex justify-between"></div>
+      <div id="transactions-list"></div>
+    </main>
 
-        const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+    <main id="tab-categories" class="tab-content">
+      <h2 class="text-xl font-medium text-white mb-5">Categorias</h2>
+      <div class="card-bg rounded-2xl p-4 mb-6 shadow-md">
+        <form onsubmit="addCategory(event)">
+          <div class="flex gap-3 items-center mb-4">
+            <input type="color" id="cat-color" value="#7C3AED" class="w-10 h-10 rounded-full cursor-pointer bg-transparent tap-effect">
+            <input type="text" id="cat-name" placeholder="Nome da categoria" required class="flex-1 min-w-0 bg-[#2C2C2E] text-white rounded-xl p-3 outline-none focus:ring-1 focus:ring-purple-500">
+            <button type="submit" class="bg-roxo text-white px-4 py-3 rounded-xl font-bold tap-effect">+</button>
+          </div>
+          <div id="new-icon-picker" class="flex flex-wrap gap-2"></div>
+        </form>
+      </div>
+      <div id="categories-list" class="space-y-3"></div>
+    </main>
 
-        function handleAmountInput(e) {
-            let value = e.target.value.replace(/\D/g, "");
-            if (value === "") { e.target.value = ""; return; }
-            let num = (parseInt(value) / 100).toFixed(2);
-            e.target.value = num.replace(".", ",").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+    <main id="tab-more" class="tab-content">
+      <h2 class="text-xl font-medium text-white mb-5">Mais Opções</h2>
+      <div class="card-bg rounded-2xl p-4 space-y-4 shadow-md">
+        <button onclick="exportData()" class="w-full bg-[#2C2C2E] text-white py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect"><i class="ph ph-export text-xl text-roxo"></i> Fazer Backup (Exportar)</button>
+        <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
+        <button onclick="document.getElementById('importFile').click()" class="w-full bg-[#2C2C2E] text-white py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect"><i class="ph ph-import text-xl text-roxo"></i> Restaurar Backup</button>
+      </div>
+    </main>
+  </div>
+
+  <nav class="shrink-0 card-bg border-t border-gray-800 px-6 nav-safe flex justify-between items-center z-30 relative">
+    <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-roxo w-14 tap-effect" data-target="home"><i class="ph-fill ph-house text-2xl mb-1"></i><span class="text-[10px] font-medium">Principal</span></button>
+    <button onclick="switchTab('transactions')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="transactions"><i class="ph ph-list-dashes text-2xl mb-1"></i><span class="text-[10px] font-medium">Transações</span></button>
+    <div class="relative -top-6"><button onclick="openModal()" class="fab-button text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-[0_8px_16px_rgba(124,58,237,0.4)] tap-effect">+</button></div>
+    <button onclick="switchTab('categories')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="categories"><i class="ph ph-squares-four text-2xl mb-1"></i><span class="text-[10px] font-medium">Categorias</span></button>
+    <button onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="more"><i class="ph ph-dots-three text-2xl mb-1"></i><span class="text-[10px] font-medium">Mais</span></button>
+  </nav>
+
+  <!-- Detalhe da categoria -->
+  <div id="modal-cat-detail" class="fixed inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+    <div id="modal-cat-detail-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[80vh]">
+      <div class="flex justify-between items-center p-5 border-b border-gray-800">
+        <div class="flex items-center gap-3 min-w-0"><div id="cd-icon" class="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0"></div><div class="min-w-0"><h3 id="cd-title" class="text-lg font-medium text-white truncate"></h3><p id="cd-total" class="text-sm text-red-400"></p></div></div>
+        <button type="button" onclick="closeCatDetail()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
+      </div>
+      <div class="overflow-y-auto px-5 py-2" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))" id="cd-list"></div>
+    </div>
+  </div>
+
+  <!-- Nova / editar transação -->
+  <div id="modal" class="fixed inset-0 bg-black/90 z-[55] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+    <div id="modal-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[95vh] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+      <div class="flex justify-between items-center p-5 border-b border-gray-800">
+        <button type="button" onclick="closeModal()" class="text-gray-400 p-2 -ml-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
+        <h3 id="modal-tx-title" class="text-lg font-medium text-white">Nova Transação</h3>
+        <div class="flex">
+          <button type="button" id="btn-delete-tx" onclick="deleteTransactionAction()" class="text-red-500 hidden p-2 tap-effect"><i class="ph ph-trash text-2xl"></i></button>
+          <button type="button" onclick="document.getElementById('form').requestSubmit()" class="text-roxo font-bold p-2 -mr-2 tap-effect"><i class="ph ph-check text-2xl"></i></button>
+        </div>
+      </div>
+      <div class="overflow-y-auto p-5" style="padding-bottom:calc(2rem + env(safe-area-inset-bottom,0px))">
+        <form id="form" onsubmit="saveTransaction(event)">
+          <div class="flex bg-[#121212] rounded-xl p-1 mb-6">
+            <button type="button" id="btn-expense" onclick="setType('expense')" class="flex-1 py-3 text-sm font-medium rounded-lg tap-effect">Despesa</button>
+            <button type="button" id="btn-income" onclick="setType('income')" class="flex-1 py-3 text-sm font-medium rounded-lg tap-effect">Receita</button>
+          </div>
+          <div class="mb-6">
+            <label class="text-xs text-gray-500 mb-1 block">Valor</label>
+            <input type="tel" id="amount" inputmode="numeric" oninput="handleAmountInput(event)" required class="w-full text-4xl font-bold text-white bg-transparent border-b border-gray-700 py-2 outline-none focus:border-roxo" placeholder="0,00">
+          </div>
+          <div class="mb-5 flex items-center border-b border-gray-700 py-3"><i class="ph ph-pencil-simple text-gray-400 text-xl mr-3"></i><input type="text" id="desc" required class="w-full bg-transparent outline-none text-white text-lg" placeholder="Descrição"></div>
+          <div class="mb-5 flex items-center border-b border-gray-700 py-3 cursor-pointer tap-effect" onclick="openCategorySelectModal()">
+            <i class="ph ph-tag text-gray-400 text-xl mr-3"></i><div id="selected-category-display" class="flex-1 text-gray-400 text-lg">Selecione a Categoria</div><i class="ph ph-caret-down text-gray-500"></i>
+          </div>
+          <input type="hidden" id="category">
+          <div id="date-wrapper" class="mb-6 flex items-center border-b border-gray-700 py-3"><i class="ph ph-calendar text-gray-400 text-xl mr-3"></i><input type="date" id="date" required class="w-full bg-transparent outline-none text-white text-lg" style="color-scheme:dark"></div>
+
+          <div id="rep-section" class="mb-2">
+            <label class="text-xs text-gray-500 mb-2 block">Repetição</label>
+            <div class="flex bg-[#121212] rounded-xl p-1">
+              <button type="button" id="btn-rep-unica" onclick="setRepetition('unica')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-receipt text-base"></i>Única</button>
+              <button type="button" id="btn-rep-fixa" onclick="setRepetition('fixa')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-repeat text-base"></i>Fixa</button>
+              <button type="button" id="btn-rep-parcelada" onclick="setRepetition('parcelada')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-credit-card text-base"></i>Parcelada</button>
+            </div>
+            <div id="installments-div" class="hidden mt-4 bg-[#121212] rounded-xl p-4 flex flex-col gap-4">
+              <div class="flex items-center"><i class="ph ph-copy text-gray-400 text-xl mr-3"></i><input type="number" id="installments-count" min="2" max="48" inputmode="numeric" placeholder="Quantidade de parcelas" class="w-full bg-transparent outline-none text-white text-lg"></div>
+              <div class="flex gap-2">
+                <label class="flex-1 cursor-pointer"><input type="radio" name="inst_type" value="total" checked class="sr-only peer"><span class="block text-center py-2.5 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 border border-transparent peer-checked:bg-[#7C3AED]/20 peer-checked:text-purple-300 peer-checked:border-[#7C3AED]/60">Valor total</span></label>
+                <label class="flex-1 cursor-pointer"><input type="radio" name="inst_type" value="parcela" class="sr-only peer"><span class="block text-center py-2.5 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 border border-transparent peer-checked:bg-[#7C3AED]/20 peer-checked:text-purple-300 peer-checked:border-[#7C3AED]/60">Valor da parcela</span></label>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="hidden">Salvar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-category-select" class="fixed inset-0 bg-black/90 z-[58] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+    <div id="modal-category-select-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[70vh]">
+      <div class="flex justify-between items-center p-5 border-b border-gray-800"><h3 class="text-lg font-medium text-white">Selecione a Categoria</h3><button type="button" onclick="closeCategorySelectModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button></div>
+      <div class="overflow-y-auto p-2" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))" id="category-select-list"></div>
+    </div>
+  </div>
+
+  <div id="modal-simple-confirm" class="fixed inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+    <div id="modal-simple-confirm-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))">
+      <h3 class="text-xl font-bold text-white mb-2" id="simple-confirm-title">Excluir</h3>
+      <p class="text-sm text-gray-400 mb-8" id="simple-confirm-desc"></p>
+      <div class="flex gap-4"><button onclick="closeSimpleConfirm()" class="flex-1 py-4 rounded-xl bg-[#2C2C2E] text-white font-medium tap-effect">Cancelar</button><button onclick="executeSimpleConfirm()" class="flex-1 py-4 rounded-xl bg-red-500 text-white font-bold tap-effect">Confirmar</button></div>
+    </div>
+  </div>
+
+  <div id="modal-repeat-confirm" class="fixed inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+    <div id="modal-repeat-confirm-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))">
+      <h3 class="text-xl font-bold text-white mb-2" id="repeat-confirm-title">Transação Repetida</h3>
+      <p class="text-sm text-gray-400 mb-6">Esta é uma transação que se repete. Onde deseja aplicar a alteração?</p>
+      <div class="flex flex-col gap-3">
+        <button id="btn-repeat-all" onclick="executeRepeatAction('all')" class="w-full py-4 rounded-xl bg-roxo text-white font-bold tap-effect">Esta e as seguintes</button>
+        <button onclick="executeRepeatAction('single')" class="w-full py-4 rounded-xl bg-[#2C2C2E] text-white font-medium tap-effect">Somente esta</button>
+        <button onclick="closeRepeatConfirm()" class="w-full py-4 rounded-xl bg-transparent text-gray-500 font-medium tap-effect">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-category" class="fixed inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+    <div id="modal-category-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col">
+      <div class="flex justify-between items-center p-5 border-b border-gray-800">
+        <button type="button" onclick="closeCategoryModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
+        <h3 class="text-lg font-medium text-white">Editar Categoria</h3>
+        <button type="button" onclick="document.getElementById('form-category').requestSubmit()" class="text-roxo font-bold p-2 tap-effect"><i class="ph ph-check text-2xl"></i></button>
+      </div>
+      <div class="p-5" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))">
+        <form id="form-category" onsubmit="saveCategoryEdit(event)">
+          <div class="flex items-center gap-4 mb-5">
+            <input type="color" id="edit-cat-color" class="w-14 h-14 rounded-full cursor-pointer bg-transparent tap-effect">
+            <input type="text" id="edit-cat-name" required class="flex-1 min-w-0 bg-[#2C2C2E] text-white rounded-xl p-4 outline-none focus:ring-1 focus:ring-purple-500 text-lg" placeholder="Nome da Categoria">
+          </div>
+          <div id="edit-icon-picker" class="flex flex-wrap gap-2"></div>
+          <button type="submit" class="hidden">Salvar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY='mobills_dark_final_v9';
+const CATS_KEY='mobills_cats_final_v9';
+const ICONS=['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus'];
+let transactions=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
+let categories=JSON.parse(localStorage.getItem(CATS_KEY))||[
+  {id:1,name:'Carro',color:'#DC2626',icon:'car'},{id:2,name:'Alimentação',color:'#F59E0B',icon:'fork-knife'},
+  {id:3,name:'Compras',color:'#A855F7',icon:'shopping-bag'},{id:4,name:'Outros',color:'#6B7280',icon:'tag'}];
+const legacyIcon={carro:'car','alimentação':'fork-knife',comida:'fork-knife',compras:'shopping-bag',lazer:'game-controller'};
+categories.forEach(c=>{if(!c.icon)c.icon=legacyIcon[c.name.toLowerCase()]||'tag';});
+
+let currentType='expense',currentRepetition='unica',myChart=null;
+let displayDate=new Date(),lastKnownRealMonth=new Date().getMonth();
+let editingTxId=null,editingCatId=null,pendingAction=null,pendingData=null;
+let txTab='avulsas',catFilter='all',sortedCats=[],detailCat=null;
+let newCatIcon='tag',editCatIcon='tag';
+
+const formatCurrency=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);
+const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const fmtBR=d=>d.split('-').reverse().join('/');
+const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
+const getCat=name=>categories.find(c=>c.name===name);
+
+function handleAmountInput(e){
+  let v=e.target.value.replace(/\D/g,'');
+  if(v===''){e.target.value='';return;}
+  e.target.value=(parseInt(v)/100).toFixed(2).replace('.',',').replace(/(\d)(?=(\d{3})+(?!\d))/g,'$1.');
+}
+function parseCurrency(v){return v?parseFloat(v.replace(/\./g,'').replace(',','.')):0;}
+
+/* ---------- SWIPE: somente no cabeçalho (mês/saldo) ---------- */
+let tsX=0,tsY=0;
+const swipeZone=document.getElementById('swipe-zone');
+swipeZone.addEventListener('touchstart',e=>{tsX=e.changedTouches[0].screenX;tsY=e.changedTouches[0].screenY;},{passive:true});
+swipeZone.addEventListener('touchend',e=>{
+  const dx=tsX-e.changedTouches[0].screenX,dy=tsY-e.changedTouches[0].screenY;
+  if(Math.abs(dx)>Math.abs(dy)*1.5&&Math.abs(dx)>60)changeMonth(dx>0?1:-1);
+},{passive:true});
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'){
+    const m=new Date().getMonth();
+    if(m!==lastKnownRealMonth){displayDate=new Date();lastKnownRealMonth=m;updateUI();}
+  }
+});
+
+function changeMonth(step){
+  const els=document.querySelectorAll('.animate-month'),disp=document.getElementById('current-month-display');
+  const out=step>0?'slide-out-left':'slide-out-right',inn=step>0?'slide-in-right':'slide-in-left';
+  disp.style.opacity=0;
+  els.forEach(el=>{el.classList.remove('slide-in-right','slide-in-left','slide-out-left','slide-out-right');el.classList.add(out);});
+  setTimeout(()=>{
+    displayDate.setDate(1);displayDate.setMonth(displayDate.getMonth()+step);updateUI();
+    disp.style.opacity=1;
+    els.forEach(el=>{el.classList.remove(out);el.classList.add(inn);});
+  },200);
+}
+
+/* ---------- UI ---------- */
+function monthTx(){
+  const m=displayDate.getMonth(),y=displayDate.getFullYear();
+  return transactions.filter(t=>{const d=new Date(t.date+'T12:00:00');return d.getMonth()===m&&d.getFullYear()===y;});
+}
+function updateUI(){
+  const names=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('current-month-display').innerText=`${names[displayDate.getMonth()]} ${displayDate.getFullYear()}`;
+  const list=monthTx();
+  let inc=0,exp=0;
+  list.forEach(t=>{if(t.type==='income')inc+=t.amount;else exp+=t.amount;});
+  document.getElementById('header-balance').innerText=formatCurrency(inc-exp);
+  document.getElementById('dash-income').innerText=formatCurrency(inc);
+  document.getElementById('dash-expense').innerText=formatCurrency(exp);
+  updateChartAndLegend(list);
+  updateTransactionsList(list);
+  updateCategoriesList();
+  renderPickers();
+  if(detailCat!==null)renderCatDetail();
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(transactions));
+  localStorage.setItem(CATS_KEY,JSON.stringify(categories));
+}
+
+/* ---------- Gráfico + legenda ordenada e clicável ---------- */
+function updateChartAndLegend(list){
+  const totals={};
+  list.forEach(t=>{if(t.type==='expense')totals[t.category]=(totals[t.category]||0)+t.amount;});
+  sortedCats=Object.entries(totals).sort((a,b)=>b[1]-a[1]).map(([name,total])=>{const c=getCat(name);return{name,total,color:c?c.color:'#6B7280',icon:c?c.icon:'tag'};});
+  const sum=sortedCats.reduce((s,c)=>s+c.total,0);
+  const legend=document.getElementById('custom-legend');
+  legend.innerHTML=sortedCats.length?sortedCats.map((c,i)=>`
+    <div onclick="openCatDetail(${i})" class="flex justify-between items-center py-2.5 cursor-pointer tap-effect">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-9 h-9 rounded-full flex items-center justify-center text-white shrink-0" style="background:${c.color}"><i class="ph ph-${c.icon} text-lg"></i></div>
+        <div class="min-w-0"><p class="text-gray-200 font-medium text-sm truncate">${esc(c.name)}</p><p class="text-[11px] text-gray-500">${Math.round(c.total/sum*100)}%</p></div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0"><span class="text-red-400 font-medium text-sm">${formatCurrency(c.total)}</span><i class="ph ph-caret-right text-gray-600"></i></div>
+    </div>`).join(''):'<p class="text-sm text-center text-gray-500 mt-2">Nenhum gasto registrado neste mês.</p>';
+  if(myChart)myChart.destroy();
+  const ctx=document.getElementById('expensesChart').getContext('2d');
+  const base={responsive:true,maintainAspectRatio:false,cutout:'78%',plugins:{legend:{display:false},tooltip:{enabled:false}}};
+  myChart=sortedCats.length
+    ?new Chart(ctx,{type:'doughnut',data:{labels:sortedCats.map(c=>c.name),datasets:[{data:sortedCats.map(c=>c.total),backgroundColor:sortedCats.map(c=>c.color),borderWidth:0}]},options:{...base,animation:{duration:800,easing:'easeOutQuart'}}})
+    :new Chart(ctx,{type:'doughnut',data:{datasets:[{data:[1],backgroundColor:['#2C2C2E'],borderWidth:0}]},options:base});
+}
+
+/* ---------- Detalhe da categoria ---------- */
+function openCatDetail(i){
+  detailCat=sortedCats[i].name;renderCatDetail();
+  const m=document.getElementById('modal-cat-detail'),c=document.getElementById('modal-cat-detail-content');
+  m.classList.remove('hidden');void m.offsetWidth;m.classList.remove('opacity-0');c.classList.remove('translate-y-full');
+}
+function closeCatDetail(){
+  detailCat=null;
+  const m=document.getElementById('modal-cat-detail'),c=document.getElementById('modal-cat-detail-content');
+  m.classList.add('opacity-0');c.classList.add('translate-y-full');setTimeout(()=>m.classList.add('hidden'),250);
+}
+function renderCatDetail(){
+  const cat=getCat(detailCat),col=cat?cat.color:'#6B7280';
+  const items=monthTx().filter(t=>t.type==='expense'&&t.category===detailCat).sort((a,b)=>b.amount-a.amount);
+  document.getElementById('cd-icon').style.background=col;
+  document.getElementById('cd-icon').innerHTML=`<i class="ph ph-${cat?cat.icon:'tag'} text-xl"></i>`;
+  document.getElementById('cd-title').innerText=detailCat;
+  document.getElementById('cd-total').innerText=formatCurrency(items.reduce((s,t)=>s+t.amount,0));
+  const gm=groupMin();
+  document.getElementById('cd-list').innerHTML=items.length?items.map(t=>txRow(t,subText(t,gm))).join(''):'<p class="text-center text-gray-500 py-8">Nenhuma despesa.</p>';
+}
+
+/* ---------- Transações ---------- */
+function groupMin(){
+  const g={};
+  transactions.forEach(t=>{if(t.groupId&&(!g[t.groupId]||t.date<g[t.groupId]))g[t.groupId]=t.date;});
+  return g;
+}
+function subText(t,gm){
+  if(t.repetition==='fixa'||t.repetition==='parcelada')return `${esc(t.category)} • Registrada em ${fmtBR(gm[t.groupId]||t.date)}`;
+  return `${esc(t.category)} • Única`;
+}
+function txRow(t,sub){
+  const c=getCat(t.category),col=c?c.color:'#6B7280',ic=c?c.icon:'tag',inc=t.type==='income';
+  return `<div class="flex items-center justify-between cursor-pointer tap-effect py-3" onclick="openEditTransaction(${t.id})">
+    <div class="flex items-center gap-4 min-w-0"><div class="w-12 h-12 rounded-full flex items-center justify-center text-white shrink-0" style="background:${col}"><i class="ph ph-${ic} text-xl"></i></div>
+    <div class="min-w-0"><p class="font-medium text-gray-100 text-[16px] mb-0.5 truncate">${esc(t.desc)}</p><p class="text-[12px] text-gray-500 truncate">${sub}</p></div></div>
+    <p class="font-medium ${inc?'text-green-500':'text-red-500'} text-[15px] shrink-0 ml-3">${formatCurrency(t.amount)}</p></div>`;
+}
+function setTxTab(t){txTab=t;updateUI();}
+function setCatFilter(i){catFilter=i<0?'all':categories[i].name;updateUI();}
+
+function updateTransactionsList(monthList){
+  ['avulsas','fixas','parceladas'].forEach(k=>{document.getElementById('sub-'+k).className='flex-1 py-2.5 text-sm font-medium rounded-lg tap-effect '+(k===txTab?'seg-on':'seg-off');});
+  document.getElementById('tx-chips').innerHTML=
+    `<button onclick="setCatFilter(-1)" class="shrink-0 px-4 py-2 rounded-full text-sm tap-effect ${catFilter==='all'?'chip-on':'chip-off'}">Todas</button>`+
+    categories.map((c,i)=>`<button onclick="setCatFilter(${i})" class="shrink-0 px-4 py-2 rounded-full text-sm flex items-center gap-1.5 tap-effect ${catFilter===c.name?'chip-on':'chip-off'}"><i class="ph ph-${c.icon}"></i>${esc(c.name)}</button>`).join('');
+
+  const pass=t=>catFilter==='all'||t.category===catFilter;
+  const today=todayStr();
+  let general=0;
+  transactions.forEach(t=>{if(t.date<=today&&pass(t))general+=t.type==='income'?t.amount:-t.amount;});
+  const fm=monthList.filter(pass);
+  let monthBal=0;fm.forEach(t=>monthBal+=t.type==='income'?t.amount:-t.amount);
+  const cls=v=>v<0?'text-red-400':'text-green-400';
+  document.getElementById('tx-summary').innerHTML=
+    `<div><p class="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Saldo geral</p><p class="font-bold text-lg ${cls(general)}">${formatCurrency(general)}</p></div>
+     <div class="text-right"><p class="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Saldo do mês</p><p class="font-bold text-lg ${cls(monthBal)}">${formatCurrency(monthBal)}</p></div>`;
+
+  const list=document.getElementById('transactions-list');
+  const rep=t=>t.repetition||'unica';
+  const view=fm.filter(t=>txTab==='avulsas'?rep(t)==='unica':txTab==='fixas'?rep(t)==='fixa':rep(t)==='parcelada');
+  if(!view.length){
+    const msg={avulsas:'Nenhuma transação neste mês.',fixas:'Nenhuma transação fixa neste mês.',parceladas:'Nenhuma compra parcelada neste mês.'}[txTab];
+    list.innerHTML=`<div class="text-center py-12 text-gray-500"><i class="ph ph-receipt text-5xl mb-3 opacity-30"></i><p>${msg}</p></div>`;return;
+  }
+  const gm=groupMin();
+  if(txTab!=='avulsas'){
+    list.innerHTML=view.sort((a,b)=>a.date<b.date?1:-1).map(t=>txRow(t,subText(t,gm))).join('');return;
+  }
+  const grouped={};view.forEach(t=>(grouped[t.date]=grouped[t.date]||[]).push(t));
+  list.innerHTML=Object.keys(grouped).sort().reverse().map(date=>{
+    const d=new Date(date+'T12:00:00');
+    const h=`${d.toLocaleDateString('pt-BR',{weekday:'long'})}, ${d.toLocaleDateString('pt-BR',{day:'2-digit'})}`;
+    return `<div class="mb-5"><h3 class="text-[13px] font-semibold text-gray-400 mb-1 capitalize border-b border-gray-800 pb-2">${h}</h3>${grouped[date].map(t=>txRow(t,subText(t,gm))).join('')}</div>`;
+  }).join('');
+}
+
+/* ---------- Salvar / excluir ---------- */
+function saveTransaction(e){
+  e.preventDefault();
+  const desc=document.getElementById('desc').value;
+  const total=Math.abs(parseCurrency(document.getElementById('amount').value));
+  const category=document.getElementById('category').value;
+  const dateInput=document.getElementById('date').value;
+  if(!desc||isNaN(total)||total===0||!dateInput||!category){alert('Preencha todos os campos.');return;}
+
+  if(editingTxId){
+    const index=transactions.findIndex(t=>t.id===editingTxId);
+    if(index>-1){
+      const t=transactions[index];
+      const grouped=t.groupId?transactions.some(x=>x.groupId===t.groupId&&x.id!==t.id):false;
+      if(grouped){pendingAction='edit';pendingData={desc,totalAmount:total,category,dateInput};openRepeatConfirm('Editar Transação','edit');return;}
+      Object.assign(t,{desc,amount:total,type:currentType,category,date:dateInput});
+    }
+  }else{
+    const base=new Date(dateInput+'T12:00:00'),groupId=Date.now().toString();
+    const b={type:currentType,category,repetition:currentRepetition};
+    if(currentRepetition==='unica'){
+      transactions.push({id:Date.now(),desc,amount:total,date:dateInput,...b});
+    }else if(currentRepetition==='parcelada'){
+      const n=parseInt(document.getElementById('installments-count').value)||2;
+      const per=document.querySelector('input[name="inst_type"]:checked').value==='total'?total/n:total;
+      for(let i=0;i<n;i++){const d=new Date(base);d.setMonth(d.getMonth()+i);
+        transactions.push({id:Date.now()+i,groupId,desc:`${desc} (${i+1}/${n})`,amount:per,date:d.toISOString().split('T')[0],...b});}
+    }else{
+      for(let i=0;i<120;i++){const d=new Date(base);d.setMonth(d.getMonth()+i);
+        transactions.push({id:Date.now()+i,groupId,desc,amount:total,date:d.toISOString().split('T')[0],...b});}
+    }
+  }
+  updateUI();closeModal();
+}
+function deleteTransactionAction(){
+  if(!editingTxId)return;
+  const t=transactions.find(x=>x.id===editingTxId);if(!t)return;
+  pendingAction='delete';
+  if(t.groupId&&transactions.some(x=>x.groupId===t.groupId&&x.id!==t.id))openRepeatConfirm('Excluir Transação','delete');
+  else openSimpleConfirm('Excluir Transação','Deseja realmente excluir esta transação?');
+}
+function executeRepeatAction(scope){
+  const t=transactions.find(x=>x.id===editingTxId);if(!t)return;
+  const index=transactions.findIndex(x=>x.id===editingTxId);
+  if(pendingAction==='delete'){
+    transactions=scope==='all'?transactions.filter(x=>!(x.groupId===t.groupId&&x.date>=t.date)):transactions.filter(x=>x.id!==editingTxId);
+  }else if(pendingAction==='edit'){
+    const{desc,totalAmount,category,dateInput}=pendingData;
+    if(scope==='all'){
+      transactions.forEach(x=>{
+        if(x.groupId===t.groupId&&x.date>=t.date){
+          const m=x.desc.match(/ \(\d+\/\d+\)$/);
+          x.desc=m?desc+m[0]:desc;x.amount=totalAmount;x.type=currentType;x.category=category;
+          if(x.id===t.id)x.date=dateInput;
         }
+      });
+    }else{
+      Object.assign(transactions[index],{desc,amount:totalAmount,type:currentType,category,date:dateInput,groupId:null,repetition:'unica'});
+    }
+  }
+  updateUI();closeRepeatConfirm();closeModal();
+}
+function executeSimpleConfirm(){
+  const wasDelete=pendingAction==='delete';
+  if(wasDelete)transactions=transactions.filter(x=>x.id!==editingTxId);
+  else if(pendingAction==='delete_category')categories=categories.filter(c=>c.id!==pendingData.catId);
+  updateUI();closeSimpleConfirm();
+  if(wasDelete)closeModal();
+}
 
-        function parseCurrency(val) {
-            if(!val) return 0;
-            return parseFloat(val.replace(/\./g, '').replace(',', '.'));
-        }
+/* ---------- Modais utilitários ---------- */
+function showSheet(mid,cid){const m=document.getElementById(mid),c=document.getElementById(cid);m.classList.remove('hidden');void m.offsetWidth;m.classList.remove('opacity-0');c.classList.remove('translate-y-full');}
+function hideSheet(mid,cid){const m=document.getElementById(mid),c=document.getElementById(cid);m.classList.add('opacity-0');c.classList.add('translate-y-full');setTimeout(()=>m.classList.add('hidden'),250);}
+function openSimpleConfirm(t,d){document.getElementById('simple-confirm-title').innerText=t;document.getElementById('simple-confirm-desc').innerText=d;showSheet('modal-simple-confirm','modal-simple-confirm-content');}
+function closeSimpleConfirm(){hideSheet('modal-simple-confirm','modal-simple-confirm-content');}
+function openRepeatConfirm(title,type){
+  document.getElementById('repeat-confirm-title').innerText=title;
+  document.getElementById('btn-repeat-all').className='w-full py-4 rounded-xl text-white font-bold tap-effect '+(type==='delete'?'bg-red-500':'bg-roxo');
+  showSheet('modal-repeat-confirm','modal-repeat-confirm-content');
+}
+function closeRepeatConfirm(){hideSheet('modal-repeat-confirm','modal-repeat-confirm-content');}
 
-        document.getElementById('date').valueAsDate = new Date();
-        updateUI();
+/* ---------- Categorias ---------- */
+function iconPickerHTML(sel,fn){
+  return ICONS.map(i=>`<button type="button" onclick="${fn}('${i}')" class="w-11 h-11 rounded-xl flex items-center justify-center tap-effect ${i===sel?'bg-roxo text-white':'bg-[#2C2C2E] text-gray-300'}"><i class="ph ph-${i} text-xl"></i></button>`).join('');
+}
+function renderPickers(){
+  document.getElementById('new-icon-picker').innerHTML=iconPickerHTML(newCatIcon,'pickNewIcon');
+  document.getElementById('edit-icon-picker').innerHTML=iconPickerHTML(editCatIcon,'pickEditIcon');
+}
+function pickNewIcon(i){newCatIcon=i;renderPickers();}
+function pickEditIcon(i){editCatIcon=i;renderPickers();}
+function updateCategoriesList(){
+  document.getElementById('categories-list').innerHTML=categories.map(c=>`
+    <div class="card-bg p-4 rounded-xl flex items-center justify-between">
+      <div class="flex items-center gap-4 min-w-0"><div class="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0" style="background:${c.color}"><i class="ph ph-${c.icon} text-xl"></i></div><span class="font-medium text-gray-100 truncate">${esc(c.name)}</span></div>
+      <div class="flex gap-2 shrink-0"><button onclick="openEditCategory(${c.id})" class="p-2 text-gray-500 tap-effect"><i class="ph ph-pencil-simple text-xl"></i></button><button onclick="deleteCategory(${c.id})" class="p-2 text-gray-500 tap-effect"><i class="ph ph-trash text-xl"></i></button></div>
+    </div>`).join('');
+}
+function addCategory(e){
+  e.preventDefault();
+  const name=document.getElementById('cat-name').value.trim(),color=document.getElementById('cat-color').value;
+  if(!name)return;
+  categories.push({id:Date.now(),name,color,icon:newCatIcon});
+  document.getElementById('cat-name').value='';newCatIcon='tag';updateUI();
+}
+function openEditCategory(id){
+  const c=categories.find(x=>x.id===id);if(!c)return;editingCatId=id;editCatIcon=c.icon||'tag';
+  document.getElementById('edit-cat-name').value=c.name;document.getElementById('edit-cat-color').value=c.color;
+  renderPickers();showSheet('modal-category','modal-category-content');
+}
+function closeCategoryModal(){hideSheet('modal-category','modal-category-content');}
+function saveCategoryEdit(e){
+  e.preventDefault();
+  const name=document.getElementById('edit-cat-name').value.trim(),color=document.getElementById('edit-cat-color').value;
+  const c=categories.find(x=>x.id===editingCatId);
+  if(c){const old=c.name;c.name=name;c.color=color;c.icon=editCatIcon;transactions.forEach(t=>{if(t.category===old)t.category=name;});if(catFilter===old)catFilter=name;}
+  closeCategoryModal();updateUI();
+}
+function deleteCategory(id){pendingAction='delete_category';pendingData={catId:id};openSimpleConfirm('Excluir Categoria','Transações atreladas a esta categoria ficarão sem marcação. Continuar?');}
 
-        // ----------------------------------------------------
-        // LÓGICA DE SWIPE E MUDANÇA DE MÊS (COM ANIMAÇÃO DE DESLIZAR)
-        // ----------------------------------------------------
-        let touchStartX = 0; let touchStartY = 0;
-        let touchEndX = 0; let touchEndY = 0;
-        const swipeZone = document.getElementById('swipe-zone');
+function openCategorySelectModal(){
+  document.getElementById('category-select-list').innerHTML=categories.map(c=>`
+    <div class="flex items-center gap-4 p-4 border-b border-gray-800 cursor-pointer tap-effect" onclick="selectCategory(${c.id})">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center text-white" style="background:${c.color}"><i class="ph ph-${c.icon} text-lg"></i></div>
+      <span class="text-white text-[17px] font-medium">${esc(c.name)}</span></div>`).join('');
+  showSheet('modal-category-select','modal-category-select-content');
+}
+function closeCategorySelectModal(){hideSheet('modal-category-select','modal-category-select-content');}
+function selectCategory(id){
+  const c=categories.find(x=>x.id===id);if(!c)return;
+  document.getElementById('category').value=c.name;
+  const d=document.getElementById('selected-category-display');d.innerText=c.name;d.classList.replace('text-gray-400','text-white');
+  closeCategorySelectModal();
+}
 
-        swipeZone.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY;
-        }, {passive: true});
+/* ---------- Abas / modal de transação ---------- */
+function switchTab(id){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  setTimeout(()=>document.getElementById('tab-'+id).classList.add('active'),10);
+  document.getElementById('scroll').scrollTop=0;
+  document.querySelectorAll('.nav-btn').forEach(btn=>{
+    const icon=btn.querySelector('i');
+    if(btn.dataset.target===id){btn.classList.replace('text-gray-500','text-roxo');icon.classList.replace('ph','ph-fill');}
+    else{btn.classList.replace('text-roxo','text-gray-500');icon.classList.replace('ph-fill','ph');}
+  });
+}
+function resetCatDisplay(name){
+  const d=document.getElementById('selected-category-display');
+  d.innerText=name||'Selecione a Categoria';
+  if(name)d.classList.replace('text-gray-400','text-white');else d.classList.replace('text-white','text-gray-400');
+}
+function openModal(){
+  editingTxId=null;
+  document.getElementById('modal-tx-title').innerText='Nova Transação';
+  document.getElementById('btn-delete-tx').classList.add('hidden');
+  document.getElementById('rep-section').style.display='block';
+  document.getElementById('form').reset();
+  document.getElementById('date').value=todayStr();
+  document.getElementById('category').value='';resetCatDisplay('');
+  setType('expense');setRepetition('unica');
+  showSheet('modal','modal-content');
+}
+function openEditTransaction(id){
+  const t=transactions.find(x=>x.id===id);if(!t)return;editingTxId=id;
+  document.getElementById('modal-tx-title').innerText='Editar Transação';
+  document.getElementById('btn-delete-tx').classList.remove('hidden');
+  document.getElementById('rep-section').style.display='none';
+  document.getElementById('date-wrapper').classList.remove('hidden');
+  document.getElementById('amount').value=t.amount.toFixed(2).replace('.',',').replace(/(\d)(?=(\d{3})+(?!\d))/g,'$1.');
+  document.getElementById('desc').value=t.desc.replace(/ \(\d+\/\d+\)$/,'');
+  document.getElementById('date').value=t.date;
+  document.getElementById('category').value=t.category;resetCatDisplay(t.category);
+  setType(t.type);showSheet('modal','modal-content');
+}
+function closeModal(){hideSheet('modal','modal-content');}
+function setType(type){
+  currentType=type;
+  const e=document.getElementById('btn-expense'),i=document.getElementById('btn-income');
+  const base='flex-1 py-3 text-sm font-medium rounded-lg transition-all tap-effect ';
+  e.className=base+(type==='expense'?'bg-red-500/20 text-red-500 border border-red-500/50':'text-gray-400 border border-transparent');
+  i.className=base+(type==='income'?'bg-green-500/20 text-green-500 border border-green-500/50':'text-gray-400 border border-transparent');
+}
+function setRepetition(type){
+  currentRepetition=type;
+  const base='flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect ';
+  [['unica','btn-rep-unica'],['fixa','btn-rep-fixa'],['parcelada','btn-rep-parcelada']].forEach(([k,id])=>{
+    document.getElementById(id).className=base+(k===type?'seg-on':'seg-off');
+  });
+  document.getElementById('installments-div').classList.toggle('hidden',type!=='parcelada');
+  const dw=document.getElementById('date-wrapper');
+  if(type==='unica')dw.classList.remove('hidden');
+  else{dw.classList.add('hidden');document.getElementById('date').value=todayStr();}
+}
 
-        swipeZone.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX; touchEndY = e.changedTouches[0].screenY;
-            handleSwipe();
-        }, {passive: true});
+/* ---------- Backup ---------- */
+function exportData(){
+  const blob=new Blob([JSON.stringify({transactions,categories})],{type:'application/json'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='MeuControle_Backup.json';a.click();URL.revokeObjectURL(url);
+}
+function importData(event){
+  const file=event.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      if(d.transactions)transactions=d.transactions;
+      if(d.categories){categories=d.categories;categories.forEach(c=>{if(!c.icon)c.icon=legacyIcon[c.name.toLowerCase()]||'tag';});}
+      updateUI();alert('Dados restaurados com sucesso!');
+    }catch(err){alert('Erro ao ler o arquivo.');}
+  };
+  r.readAsText(file);
+}
 
-        function handleSwipe() {
-            const diffX = touchStartX - touchEndX;
-            const diffY = touchStartY - touchEndY;
-            // Se deslizou mais na horizontal do que na vertical
-            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 60) {
-                if (diffX > 0) changeMonth(1);  // Deslizou para esquerda (Próximo)
-                else changeMonth(-1);           // Deslizou para direita (Anterior)
-            }
-        }
-
-        document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "visible") {
-                let currentRealMonth = new Date().getMonth();
-                if (currentRealMonth !== lastKnownRealMonth) {
-                    displayDate = new Date(); lastKnownRealMonth = currentRealMonth; updateUI();
-                }
-            }
-        });
-
-        // Troca de Mês com Animação de Deslizamento Elegante
-        function changeMonth(step) {
-            const animElements = document.querySelectorAll('.animate-month');
-            const display = document.getElementById('current-month-display');
-            
-            // Define a classe de animação dependendo da direção
-            const outClass = step > 0 ? 'slide-out-left' : 'slide-out-right';
-            const inClass = step > 0 ? 'slide-in-right' : 'slide-in-left';
-
-            // Passo 1: Animação de saída
-            display.style.opacity = 0;
-            animElements.forEach(el => {
-                el.classList.remove('slide-in-right', 'slide-in-left', 'slide-out-left', 'slide-out-right');
-                el.classList.add(outClass);
-            });
-
-            // Passo 2: Atualiza dados na metade da transição
-            setTimeout(() => {
-                displayDate.setMonth(displayDate.getMonth() + step);
-                updateUI(); // Remonta as listas com os novos dados
-
-                // Passo 3: Animação de entrada
-                display.style.opacity = 1;
-                animElements.forEach(el => {
-                    el.classList.remove(outClass);
-                    el.classList.add(inClass);
-                });
-            }, 200); // 200ms é o tempo exato do keyframe CSS de saída
-        }
-
-        // ----------------------------------------------------
-        // UI & REFRESH
-        // ----------------------------------------------------
-        function toggleBalance() {
-            isBalanceHidden = !isBalanceHidden;
-            const eye = document.getElementById('eye-icon');
-            eye.classList.replace(isBalanceHidden ? 'ph-eye' : 'ph-eye-closed', isBalanceHidden ? 'ph-eye-closed' : 'ph-eye');
-            updateUI();
-        }
-
-        function updateUI() {
-            const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            document.getElementById('current-month-display').innerText = `${monthNames[displayDate.getMonth()]} ${displayDate.getFullYear()}`;
-
-            const currentMonthIdx = displayDate.getMonth();
-            const currentYear = displayDate.getFullYear();
-
-            const filteredTransactions = transactions.filter(t => {
-                const tDate = new Date(t.date + 'T12:00:00'); 
-                return tDate.getMonth() === currentMonthIdx && tDate.getFullYear() === currentYear;
-            });
-
-            let monthIncome = 0; 
-            let monthExpense = 0;
-            let categoryTotals = {};
-
-            filteredTransactions.forEach(t => {
-                if (t.type === 'income') { 
-                    monthIncome += t.amount; 
-                } else {
-                    monthExpense += t.amount;
-                    categoryTotals[t.category] = (categoryTotals[t.category] || 0) + t.amount;
-                }
-            });
-
-            const monthBalance = monthIncome - monthExpense;
-            
-            document.getElementById('header-balance').innerText = isBalanceHidden ? '••••••' : formatCurrency(monthBalance);
-            document.getElementById('dash-income').innerText = isBalanceHidden ? '••••••' : formatCurrency(monthIncome);
-            document.getElementById('dash-expense').innerText = isBalanceHidden ? '••••••' : formatCurrency(monthExpense);
-
-            updateChartAndLegend(categoryTotals);
-            updateTransactionsList(filteredTransactions);
-            updateCategoriesList();
-            
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
-            localStorage.setItem('mobills_cats_final_v9', JSON.stringify(categories));
-        }
-
-        // GRÁFICOS
-        function updateChartAndLegend(categoryTotals) {
-            const ctx = document.getElementById('expensesChart').getContext('2d');
-            const legendDiv = document.getElementById('custom-legend');
-            legendDiv.innerHTML = '';
-
-            const labels = Object.keys(categoryTotals);
-            const data = Object.values(categoryTotals);
-            
-            const colors = labels.map(label => {
-                const cat = categories.find(c => c.name === label);
-                return cat ? cat.color : '#6B7280';
-            });
-
-            if (data.length === 0) {
-                legendDiv.innerHTML = '<p class="text-sm text-center text-gray-500 mt-4">Nenhum gasto registrado neste mês.</p>';
-            } else {
-                labels.forEach((label, index) => {
-                    legendDiv.innerHTML += `
-                        <div class="flex justify-between items-center text-sm p-1">
-                            <div class="flex items-center gap-3">
-                                <div class="w-3 h-3 rounded-full shadow-sm" style="background-color: ${colors[index]}"></div>
-                                <span class="text-gray-200 font-medium">${label}</span>
-                            </div>
-                            <span class="text-red-400 font-medium">${formatCurrency(data[index])}</span>
-                        </div>
-                    `;
-                });
-            }
-
-            if(myChart) myChart.destroy();
-            if (data.length === 0) {
-                myChart = new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [1], backgroundColor: ['#2C2C2E'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, cutout: '78%' } });
-                return;
-            }
-
-            myChart = new Chart(ctx, {
-                type: 'doughnut', data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }] },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '78%', plugins: { legend: { display: false }, tooltip: { enabled: false } }, animation: { animateScale: true, animateRotate: true, duration: 800, easing: 'easeOutQuart' } }
-            });
-        }
-
-        // TRANSAÇÕES
-        function updateTransactionsList(filtered) {
-            const list = document.getElementById('transactions-list');
-            list.innerHTML = '';
-
-            if (filtered.length === 0) {
-                list.innerHTML = `<div class="text-center py-12 text-gray-500"><i class="ph ph-receipt text-5xl mb-3 opacity-30"></i><p>Nenhuma transação neste mês.</p></div>`;
-                return;
-            }
-
-            const grouped = filtered.reduce((acc, t) => {
-                if (!acc[t.date]) acc[t.date] = [];
-                acc[t.date].push(t);
-                return acc;
-            }, {});
-
-            const sortedDates = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a));
-
-            sortedDates.forEach(date => {
-                const dateObj = new Date(date + 'T12:00:00');
-                const dateHeader = `${dateObj.toLocaleDateString('pt-BR', { weekday: 'long' })}, ${dateObj.toLocaleDateString('pt-BR', { day: '2-digit' })}`;
-                
-                let html = `<div class="mb-6"><h3 class="text-[13px] font-semibold text-gray-400 mb-2 capitalize border-b border-gray-800 pb-2">${dateHeader}</h3><div class="flex flex-col">`;
-
-                grouped[date].forEach(t => {
-                    const isIncome = t.type === 'income';
-                    const colorClass = isIncome ? 'text-green-500' : 'text-red-500';
-                    const catObj = categories.find(c => c.name === t.category);
-                    const catColor = catObj ? catObj.color : '#6B7280';
-
-                    let icon = isIncome ? 'ph-trend-up' : 'ph-tag';
-                    if (t.category.toLowerCase().includes('carro')) icon = 'ph-car';
-                    if (t.category.toLowerCase().includes('alimentação') || t.category.toLowerCase().includes('comida')) icon = 'ph-fork-knife';
-                    if (t.category.toLowerCase().includes('compras')) icon = 'ph-shopping-bag';
-                    if (t.category.toLowerCase().includes('lazer')) icon = 'ph-popcorn';
-
-                    let repName = 'Único';
-                    if(t.repetition === 'fixa') repName = 'Fixo';
-                    if(t.repetition === 'parcelada') repName = 'Parcelado';
-
-                    html += `
-                        <div class="flex items-center justify-between cursor-pointer tap-effect py-3" onclick="openEditTransaction(${t.id})">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-full flex items-center justify-center text-white" style="background-color: ${catColor}">
-                                    <i class="ph ${icon} text-xl"></i>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-gray-100 text-[16px] mb-0.5">${t.desc}</p>
-                                    <p class="text-[12px] text-gray-500 tracking-wide">${t.category} • ${repName}</p>
-                                </div>
-                            </div>
-                            <div class="flex flex-col items-end">
-                                <p class="font-medium ${colorClass} text-[15px]">${isIncome ? '' : ''}${formatCurrency(t.amount)}</p>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += `</div></div>`;
-                list.innerHTML += html;
-            });
-        }
-
-        // LÓGICA DE SALVAR
-        function saveTransaction(e) {
-            e.preventDefault();
-            const desc = document.getElementById('desc').value;
-            const rawAmount = document.getElementById('amount').value;
-            const totalAmount = Math.abs(parseCurrency(rawAmount));
-            const category = document.getElementById('category').value;
-            const dateInput = document.getElementById('date').value;
-
-            if(!desc || isNaN(totalAmount) || totalAmount === 0 || !dateInput || !category) {
-                alert("Preencha todos os campos."); return;
-            }
-
-            if (editingTxId) {
-                const index = transactions.findIndex(t => t.id === editingTxId);
-                if (index > -1) {
-                    const t = transactions[index];
-                    const isGrouped = t.groupId ? transactions.some(x => x.groupId === t.groupId && x.id !== t.id) : false;
-
-                    if (isGrouped) {
-                        pendingAction = 'edit';
-                        pendingData = { desc, totalAmount, category, dateInput };
-                        openRepeatConfirm('Editar Transação', 'edit');
-                        return; 
-                    } else {
-                        transactions[index].desc = desc;
-                        transactions[index].amount = totalAmount;
-                        transactions[index].type = currentType;
-                        transactions[index].category = category;
-                        transactions[index].date = dateInput;
-                    }
-                }
-            } else {
-                let baseDate = new Date(dateInput + 'T12:00:00');
-                let groupId = Date.now().toString();
-                let baseObj = { type: currentType, category, repetition: currentRepetition };
-
-                if (currentRepetition === 'unica') {
-                    transactions.push({ id: Date.now(), desc, amount: totalAmount, date: dateInput, ...baseObj });
-                } else if (currentRepetition === 'parcelada') {
-                    let parcels = parseInt(document.getElementById('installments-count').value) || 2;
-                    let instType = document.querySelector('input[name="inst_type"]:checked').value;
-                    let amountPerParcel = totalAmount;
-                    if (instType === 'total') amountPerParcel = totalAmount / parcels;
-
-                    for(let i=0; i<parcels; i++) {
-                        let d = new Date(baseDate); d.setMonth(d.getMonth() + i);
-                        transactions.push({ id: Date.now() + i, groupId, desc: `${desc} (${i+1}/${parcels})`, amount: amountPerParcel, date: d.toISOString().split('T')[0], ...baseObj });
-                    }
-                } else if (currentRepetition === 'fixa') {
-                    for(let i=0; i<120; i++) {
-                        let d = new Date(baseDate); d.setMonth(d.getMonth() + i);
-                        transactions.push({ id: Date.now() + i, groupId, desc: desc, amount: totalAmount, date: d.toISOString().split('T')[0], ...baseObj });
-                    }
-                }
-            }
-            
-            updateUI();
-            
-            if (editingTxId || !document.getElementById('continue-adding').checked) {
-                closeModal();
-            } else {
-                document.getElementById('amount').value = '';
-                document.getElementById('desc').value = '';
-                setTimeout(() => document.getElementById('amount').focus(), 50);
-            }
-        }
-
-        function deleteTransactionAction() {
-            if (!editingTxId) return;
-            const t = transactions.find(x => x.id === editingTxId);
-            if (!t) return;
-
-            const isGrouped = t.groupId ? transactions.some(x => x.groupId === t.groupId && x.id !== t.id) : false;
-
-            if (isGrouped) {
-                pendingAction = 'delete';
-                openRepeatConfirm('Excluir Transação', 'delete');
-            } else {
-                pendingAction = 'delete';
-                openSimpleConfirm('Excluir Transação', 'Deseja realmente excluir esta transação?');
-            }
-        }
-
-        function executeRepeatAction(scope) {
-            const t = transactions.find(x => x.id === editingTxId);
-            if (!t) return;
-            const index = transactions.findIndex(x => x.id === editingTxId);
-
-            if (pendingAction === 'delete') {
-                if (scope === 'all') {
-                    transactions = transactions.filter(x => !(x.groupId === t.groupId && x.date >= t.date));
-                } else {
-                    transactions = transactions.filter(x => x.id !== editingTxId);
-                }
-            } else if (pendingAction === 'edit') {
-                const { desc, totalAmount, category, dateInput } = pendingData;
-                if (scope === 'all') {
-                    transactions.forEach(x => {
-                        if (x.groupId === t.groupId && x.date >= t.date) {
-                            let match = x.desc.match(/ \(\d+\/\d+\)$/);
-                            x.desc = match ? desc + match[0] : desc;
-                            x.amount = totalAmount;
-                            x.type = currentType;
-                            x.category = category;
-                            if(x.id === t.id) x.date = dateInput; 
-                        }
-                    });
-                } else {
-                    transactions[index].desc = pendingData.desc;
-                    transactions[index].amount = pendingData.totalAmount;
-                    transactions[index].type = currentType;
-                    transactions[index].category = pendingData.category;
-                    transactions[index].date = pendingData.dateInput;
-                    transactions[index].groupId = null; 
-                    transactions[index].repetition = 'unica';
-                }
-            }
-
-            updateUI();
-            closeRepeatConfirm();
-            closeModal();
-        }
-
-        function executeSimpleConfirm() {
-            if (pendingAction === 'delete') {
-                transactions = transactions.filter(x => x.id !== editingTxId);
-            } else if (pendingAction === 'delete_category') {
-                categories = categories.filter(c => c.id !== pendingData.catId);
-            }
-            updateUI();
-            closeSimpleConfirm();
-            if(pendingAction === 'delete') closeModal();
-        }
-
-        function openSimpleConfirm(title, desc) {
-            document.getElementById('simple-confirm-title').innerText = title; document.getElementById('simple-confirm-desc').innerText = desc;
-            const m = document.getElementById('modal-simple-confirm'); const c = document.getElementById('modal-simple-confirm-content');
-            m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
-        }
-        function closeSimpleConfirm() {
-            const m = document.getElementById('modal-simple-confirm'); const c = document.getElementById('modal-simple-confirm-content');
-            m.classList.add('opacity-0'); c.classList.add('translate-y-full'); setTimeout(() => m.classList.add('hidden'), 250);
-        }
-        function openRepeatConfirm(title, actionType) {
-            document.getElementById('repeat-confirm-title').innerText = title;
-            document.getElementById('btn-repeat-all').className = actionType === 'delete' ? "w-full py-4 rounded-xl bg-red-500 text-white font-bold tap-effect" : "w-full py-4 rounded-xl bg-roxo text-white font-bold tap-effect";
-            const m = document.getElementById('modal-repeat-confirm'); const c = document.getElementById('modal-repeat-confirm-content');
-            m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
-        }
-        function closeRepeatConfirm() {
-            const m = document.getElementById('modal-repeat-confirm'); const c = document.getElementById('modal-repeat-confirm-content');
-            m.classList.add('opacity-0'); c.classList.add('translate-y-full'); setTimeout(() => m.classList.add('hidden'), 250);
-        }
-
-        function updateCategoriesList() {
-            const list = document.getElementById('categories-list');
-            list.innerHTML = '';
-            categories.forEach(c => {
-                list.innerHTML += `
-                    <div class="card-bg p-4 rounded-xl flex items-center justify-between tap-effect">
-                        <div class="flex items-center gap-4">
-                            <div class="w-5 h-5 rounded-full shadow-sm" style="background-color: ${c.color}"></div>
-                            <span class="font-medium text-gray-100">${c.name}</span>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="openEditCategory(${c.id})" class="p-2 text-gray-500 hover:text-blue-400 tap-effect"><i class="ph ph-pencil-simple text-xl"></i></button>
-                            <button onclick="deleteCategory(${c.id})" class="p-2 text-gray-500 hover:text-red-500 tap-effect"><i class="ph ph-trash text-xl"></i></button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-        function openCategorySelectModal() {
-            const list = document.getElementById('category-select-list');
-            list.innerHTML = '';
-            categories.forEach(c => {
-                list.innerHTML += `
-                    <div class="flex items-center gap-4 p-4 border-b border-gray-800 cursor-pointer tap-effect" onclick="selectCategory('${c.name}')">
-                        <div class="w-5 h-5 rounded-full" style="background-color: ${c.color}"></div>
-                        <span class="text-white text-[17px] font-medium">${c.name}</span>
-                    </div>
-                `;
-            });
-            const m = document.getElementById('modal-category-select'); const c = document.getElementById('modal-category-select-content');
-            m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
-        }
-        function closeCategorySelectModal() {
-            const m = document.getElementById('modal-category-select'); const c = document.getElementById('modal-category-select-content');
-            m.classList.add('opacity-0'); c.classList.add('translate-y-full'); setTimeout(() => m.classList.add('hidden'), 250);
-        }
-        function selectCategory(name) {
-            document.getElementById('category').value = name; document.getElementById('selected-category-display').innerText = name;
-            document.getElementById('selected-category-display').classList.replace('text-gray-400', 'text-white');
-            closeCategorySelectModal();
-        }
-        function addCategory(e) {
-            e.preventDefault();
-            const name = document.getElementById('cat-name').value; const color = document.getElementById('cat-color').value;
-            if(!name) return; categories.push({ id: Date.now(), name, color }); document.getElementById('cat-name').value = ''; updateUI();
-        }
-        function saveCategoryEdit(e) {
-            e.preventDefault();
-            const newName = document.getElementById('edit-cat-name').value; const newColor = document.getElementById('edit-cat-color').value;
-            const index = categories.findIndex(c => c.id === editingCatId);
-            if (index > -1) {
-                const oldName = categories[index].name; categories[index].name = newName; categories[index].color = newColor;
-                transactions.forEach(t => { if(t.category === oldName) t.category = newName; });
-            }
-            closeCategoryModal(); updateUI();
-        }
-        function deleteCategory(id) { pendingAction = 'delete_category'; pendingData = { catId: id }; openSimpleConfirm('Excluir Categoria', 'Transações atreladas a esta categoria ficarão sem marcação. Continuar?'); }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            setTimeout(() => document.getElementById(`tab-${tabId}`).classList.add('active'), 10);
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                const icon = btn.querySelector('i');
-                if(btn.dataset.target === tabId) { btn.classList.replace('text-gray-500', 'text-roxo'); icon.classList.replace('ph', 'ph-fill'); } 
-                else { btn.classList.replace('text-roxo', 'text-gray-500'); icon.classList.replace('ph-fill', 'ph'); }
-            });
-        }
-        function openModal() {
-            editingTxId = null;
-            document.getElementById('modal-tx-title').innerText = 'Nova Transação';
-            document.getElementById('btn-delete-tx').classList.add('hidden'); document.getElementById('rep-section').style.display = 'block';
-            document.getElementById('continue-adding-wrapper').classList.remove('hidden'); document.getElementById('continue-adding').checked = false;
-            document.getElementById('form').reset(); document.getElementById('date').valueAsDate = new Date();
-            document.getElementById('category').value = ''; document.getElementById('selected-category-display').innerText = 'Selecione a Categoria';
-            document.getElementById('selected-category-display').classList.replace('text-white', 'text-gray-400');
-            setType('expense'); setRepetition('unica');
-            const m = document.getElementById('modal'); const c = document.getElementById('modal-content');
-            m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
-        }
-        function openEditTransaction(id) {
-            const t = transactions.find(x => x.id === id); if(!t) return; editingTxId = id;
-            document.getElementById('modal-tx-title').innerText = 'Editar Transação';
-            document.getElementById('btn-delete-tx').classList.remove('hidden'); document.getElementById('rep-section').style.display = 'none'; 
-            document.getElementById('continue-adding-wrapper').classList.add('hidden');
-            let numStr = t.amount.toFixed(2).replace(".", ",").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
-            document.getElementById('amount').value = numStr;
-            document.getElementById('desc').value = t.desc.replace(/ \(\d+\/\d+\)$/, ''); document.getElementById('date').value = t.date;
-            document.getElementById('category').value = t.category; document.getElementById('selected-category-display').innerText = t.category;
-            document.getElementById('selected-category-display').classList.replace('text-gray-400', 'text-white');
-            setType(t.type);
-            const m = document.getElementById('modal'); const c = document.getElementById('modal-content');
-            m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
-        }
-        function closeModal() {
-            const m = document.getElementById('modal'); const c = document.getElementById('modal-content');
-            m.classList.add('opacity-0'); c.classList.add('translate-y-full'); setTimeout(() => m.classList.add('hidden'), 250);
-        }
-        function openEditCategory(id) {
-            const cat = categories.find(c => c.id === id); if(!cat) return; editingCatId = id;
-            document.getElementById('edit-cat-name').value = cat.name; document.getElementById('edit-cat-color').value = cat.color;
-            const m = document.getElementById('modal-category'); const c = document.getElementById('modal-category-content');
-            m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('translate-y-full');
-        }
-        function closeCategoryModal() {
-            const m = document.getElementById('modal-category'); const c = document.getElementById('modal-category-content');
-            m.classList.add('opacity-0'); c.classList.add('translate-y-full'); setTimeout(() => m.classList.add('hidden'), 250);
-        }
-        function setType(type) {
-            currentType = type; const btnExp = document.getElementById('btn-expense'); const btnInc = document.getElementById('btn-income');
-            if(type === 'expense') {
-                btnExp.className = 'flex-1 py-3 text-sm font-medium rounded-lg bg-red-500/20 text-red-500 border border-red-500/50 transition-all tap-effect';
-                btnInc.className = 'flex-1 py-3 text-sm font-medium rounded-lg text-gray-400 border border-transparent transition-all tap-effect';
-            } else {
-                btnInc.className = 'flex-1 py-3 text-sm font-medium rounded-lg bg-green-500/20 text-green-500 border border-green-500/50 transition-all tap-effect';
-                btnExp.className = 'flex-1 py-3 text-sm font-medium rounded-lg text-gray-400 border border-transparent transition-all tap-effect';
-            }
-        }
-        function setRepetition(type) {
-            currentRepetition = type; const btnUnica = document.getElementById('btn-rep-unica'); const btnFixa = document.getElementById('btn-rep-fixa'); const btnParcelada = document.getElementById('btn-rep-parcelada'); const divInst = document.getElementById('installments-div');
-            [btnUnica, btnFixa, btnParcelada].forEach(b => b.className = 'flex-1 py-2 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 transition-colors tap-effect');
-            if(type === 'unica') btnUnica.className = 'flex-1 py-2 text-sm rounded-lg bg-roxo text-white tap-effect';
-            if(type === 'fixa') btnFixa.className = 'flex-1 py-2 text-sm rounded-lg bg-roxo text-white tap-effect';
-            if(type === 'parcelada') { btnParcelada.className = 'flex-1 py-2 text-sm rounded-lg bg-roxo text-white tap-effect'; divInst.classList.remove('hidden'); } 
-            else { divInst.classList.add('hidden'); }
-        }
-
-        function exportData() {
-            const dataStr = JSON.stringify({ transactions, categories }); const blob = new Blob([dataStr], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement('a');
-            a.href = url; a.download = `MeuControle_Backup.json`; a.click(); URL.revokeObjectURL(url);
-        }
-        function importData(event) {
-            const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
-            reader.onload = function(e) {
-                try { const data = JSON.parse(e.target.result); if(data.transactions) transactions = data.transactions; if(data.categories) categories = data.categories; updateUI(); alert('Dados restaurados com sucesso!'); } 
-                catch (error) { alert('Erro ao ler o arquivo.'); }
-            }; reader.readAsText(file);
-        }
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {})); }
-    </script>
+setType('expense');setRepetition('unica');
+document.getElementById('date').value=todayStr();
+updateUI();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+</script>
 </body>
 </html>
