@@ -78,6 +78,13 @@ body {
 @keyframes sOR{to{transform:translateX(25px);opacity:0}}
 @keyframes sIL{from{transform:translateX(-25px);opacity:0}to{transform:translateX(0);opacity:1}}
 
+/* O SEGREDO DA SPLASH SCREEN NO IOS: Aceleração de Hardware para unificar a camada */
+#splash-screen {
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  will-change: opacity;
+}
+
 /* Animação de carregamento da Splash Screen */
 @keyframes splashLoader {
   0% { transform: translateX(-100%); }
@@ -87,7 +94,7 @@ body {
   animation: splashLoader 1.5s ease-in-out infinite;
 }
 .splash-transition {
-  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.5s ease-out;
 }
 
 .text-roxo{color:#7C3AED}.bg-roxo{background:#7C3AED}.fab-button{background:#7C3AED}
@@ -105,7 +112,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 <body class="antialiased select-none">
 
 <!-- SPLASH SCREEN DE CARREGAMENTO -->
-<div id="splash-screen" class="fixed top-0 left-0 right-0 bottom-0 z-[9999] flex flex-col items-center justify-center bg-[#121212]">
+<div id="splash-screen" class="fixed top-0 left-0 right-0 bottom-0 z-[9999] flex flex-col items-center justify-center bg-[#121212] splash-transition">
   <!-- Ícone pulsante -->
   <div class="relative flex items-center justify-center w-24 h-24 mb-6">
     <div class="absolute inset-0 bg-roxo rounded-3xl animate-ping opacity-30"></div>
@@ -195,7 +202,6 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     </main>
   </div>
 
-  <!-- BARRA DE NAVEGAÇÃO -->
   <!-- BARRA DE NAVEGAÇÃO -->
   <nav class="shrink-0 card-bg border-t border-gray-800 px-6 nav-safe flex justify-between items-center z-30 relative w-full">
     <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-roxo w-14 tap-effect" data-target="home"><i class="ph-fill ph-house text-2xl mb-1"></i><span class="text-[10px] font-medium">Principal</span></button>
@@ -341,9 +347,9 @@ window.addEventListener('load', () => {
   setTimeout(() => {
     const splash = document.getElementById('splash-screen');
     if(splash) {
-      splash.style.opacity = '0';
-      // Espera a animação de fade (600ms configurado na classe) antes de destruir o elemento
-      setTimeout(() => splash.remove(), 600); 
+      splash.classList.add('splash-fade-out');
+      // Espera a animação de fade (500ms configurado na classe) antes de destruir o elemento
+      setTimeout(() => splash.remove(), 500); 
     }
   }, 1500); 
 });
