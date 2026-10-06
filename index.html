@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#121212">
-<title>Controle Mobills</title>
+<title>Controle Financeiro</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -15,11 +15,8 @@
 <style>
 ::-webkit-scrollbar{display:none}
 
-:root {
-  --app-height: 100vh;
-}
-
-/* Fundo total esticado cobrindo qualquer falha de safe area inferior */
+/* TRAVA ABSOLUTA DE HARDWARE NO IOS:
+   Usar fixed com inset 0 blinda o app contra a falha de altura do Safari na animação de abertura. */
 html, body {
   position: fixed;
   inset: 0;
@@ -27,7 +24,7 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  background: #1C1C1E; /* Cor exata do menu inferior para camuflar */
+  background: #121212;
   overflow: hidden;
   overscroll-behavior: none;
   touch-action: none;
@@ -41,13 +38,10 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* O contêiner usa altura absoluta calculada com folga de preenchimento inferior */
+/* O contêiner principal preenche perfeitamente o viewport travado */
 .app {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--app-height);
+  inset: 0;
   max-width: 448px;
   margin: 0 auto;
   display: flex;
@@ -91,7 +85,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 .seg-off{color:#9CA3AF;border:1px solid transparent}
 .chip-on{background:#7C3AED;color:#fff}.chip-off{background:#2C2C2E;color:#d1d5db}
 
-/* Animação suave para sumir com a Splash Screen */
+/* Animação da Splash Screen */
 .splash-fade-out {
   opacity: 0;
   pointer-events: none;
@@ -101,12 +95,12 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </head>
 <body class="antialiased select-none">
 
-<!-- SPLASH SCREEN DE CARREGAMENTO INTELIGENTE -->
+<!-- SPLASH SCREEN DE CARREGAMENTO (Cobre qualquer falha de animação inicial do iOS) -->
 <div id="splash-screen" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#121212]">
   <div class="w-20 h-20 bg-roxo rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(124,58,237,0.4)] mb-5 animate-pulse">
     <i class="ph-fill ph-wallet text-4xl text-white"></i>
   </div>
-  <h1 class="text-white font-bold text-2xl tracking-tight">Mobills</h1>
+  <h1 class="text-white font-bold text-2xl tracking-tight">Controle Financeiro</h1>
 </div>
 
 <div class="app">
@@ -313,41 +307,19 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </div>
 
 <script>
-// --- MOTOR DE RECÁLCULO INTELIGENTE DO IOS (ANTI-BARRA PRETA) ---
-const setAppHeight = () => {
-  // Usa o innerHeight real do navegador ou força o tamanho máximo da janela se o iOS falhar
-  const h = window.innerHeight > 0 ? window.innerHeight : screen.height;
-  document.documentElement.style.setProperty('--app-height', `${h}px`);
-};
-
-setAppHeight();
-window.addEventListener('resize', setAppHeight);
-window.addEventListener('orientationchange', setAppHeight);
-
-// O SEGREDO: Fila de recálculos usando requestAnimationFrame do navegador.
-// Isso garante que a Splash Screen só vai sumir EXATAMENTE no quadro (frame) 
-// em que o iOS renderizou a tela por completo, eliminando qualquer lag visual.
+// Removemos o cálculo dinâmico de innerHeight via JS e deixamos o CSS puro travar o viewport.
+// Isso impede qualquer atraso ou falha de leitura de altura durante a animação de zoom do iOS.
 window.addEventListener('load', () => {
-  const checkAndReveal = () => {
-    setAppHeight();
-    requestAnimationFrame(() => {
-      setAppHeight();
-      setTimeout(() => {
-        const splash = document.getElementById('splash-screen');
-        if (splash) {
-          splash.classList.add('splash-fade-out');
-          setTimeout(() => splash.remove(), 400);
-        }
-      }, 150); // Delay curto e seguro após o motor estabilizar
-    });
-  };
-  
-  // Força checagens em cascata para cobrir qualquer lentidão do WebKit
-  setTimeout(checkAndReveal, 200);
-  setTimeout(checkAndReveal, 500);
+  setTimeout(() => {
+    const splash = document.getElementById('splash-screen');
+    if(splash) {
+      splash.classList.add('splash-fade-out');
+      setTimeout(() => splash.remove(), 400);
+    }
+  }, 700);
 });
-// ===============================================================
 
+// --- LÓGICA DO APLICATIVO ---
 const STORAGE_KEY='mobills_dark_final_v17';
 const CATS_KEY='mobills_cats_final_v17';
 const ICONS=['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus'];
@@ -393,7 +365,6 @@ document.body.addEventListener('touchend',e=>{
 
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){
-    setAppHeight();
     const m=new Date().getMonth();
     if(m!==lastKnownRealMonth){displayDate=new Date();lastKnownRealMonth=m;updateUI();}
   }
@@ -593,7 +564,7 @@ function selectIcon(i){
     document.getElementById('btn-new-icon').innerHTML = `<i class="ph ph-${i} text-xl"></i>`;
   } else {
     editCatIcon = i;
-    document.getElementById('btn-edit-icon').innerHTML = `<i class="ph ph-${editCatIcon} text-2xl"></i>`;
+    document.getElementById('btn-edit-icon').innerHTML = `<i class="ph ph-${i} text-2xl"></i>`;
   }
   closeIconSelect();
 }
