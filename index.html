@@ -14,15 +14,15 @@
 <style>
 ::-webkit-scrollbar{display:none}
 
-/* Trava absoluta nas bordas físicas da tela - Fundo perfeito preservado */
+/* Trava absoluta nas bordas físicas da tela (Garante que não falte espaço no notch/home bar) */
 html, body {
   position: fixed;
-  inset: 0;
+  inset: 0; /* top: 0, right: 0, bottom: 0, left: 0 */
   width: 100%;
   height: 100%;
   margin: 0;
   padding: 0;
-  background: #1C1C1E;
+  background: #1C1C1E; /* Fundo idêntico ao do menu inferior */
   overflow: hidden;
   overscroll-behavior: none;
   -webkit-text-size-adjust: 100%;
@@ -35,6 +35,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
+/* O container principal acompanha exatamente as bordas, centrado no desktop */
 .app {
   position: absolute;
   inset: 0; 
@@ -49,12 +50,8 @@ body {
 
 .card-bg{background:#1C1C1E}
 
-/* Topo: Margem generosa para afastar completamente do Notch/Ilha Dinâmica */
-.hdr { 
-  padding-top: calc(env(safe-area-inset-top, 24px) + 1.25rem); 
-}
-
-/* Baixo: O exato código que você elogiou e que encaixou perfeito na barra do iPhone */
+/* Cálculos de Safe Area 100% seguros para iOS */
+.hdr { padding-top: calc(env(safe-area-inset-top, 0px) + 0.75rem); }
 .nav-safe { 
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem); 
   padding-top: 0.75rem; 
@@ -73,7 +70,7 @@ body {
 .text-roxo{color:#7C3AED}.bg-roxo{background:#7C3AED}.fab-button{background:#7C3AED}
 input[type=color]{-webkit-appearance:none;border:none;padding:0}
 input[type=color]::-webkit-color-swatch-wrapper{padding:0}
-input[type=color]::-webkit-color-swatch{border:none;border-radius:10px}
+input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 .tap-effect{transition:transform .1s,opacity .1s}.tap-effect:active{transform:scale(.97);opacity:.8}
 .modal-content-transition{transition:transform .35s cubic-bezier(.16,1,.3,1)}
 .modal-backdrop-transition{transition:opacity .25s ease-out}
@@ -132,15 +129,14 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:10px}
     <main id="tab-categories" class="tab-content">
       <h2 class="text-xl font-medium text-white mb-5">Categorias</h2>
       <div class="card-bg rounded-2xl p-4 mb-6 shadow-md">
-        <!-- RESOLVIDO: Botões um pouco menores (w-10 h-10) para não esmagar em telas menores -->
         <form onsubmit="addCategory(event)">
           <div class="flex gap-2 items-center">
-            <input type="color" id="cat-color" value="#7C3AED" class="w-10 h-10 rounded-xl cursor-pointer bg-transparent tap-effect shrink-0">
-            <button type="button" id="btn-new-icon" onclick="openIconSelect('new')" class="w-10 h-10 rounded-xl bg-[#2C2C2E] flex items-center justify-center shrink-0 tap-effect text-white">
-              <i class="ph ph-tag text-lg"></i>
+            <input type="color" id="cat-color" value="#7C3AED" class="w-12 h-12 rounded-xl cursor-pointer bg-transparent tap-effect shrink-0">
+            <button type="button" id="btn-new-icon" onclick="openIconSelect('new')" class="w-12 h-12 rounded-xl bg-[#2C2C2E] flex items-center justify-center shrink-0 tap-effect text-white">
+              <i class="ph ph-tag text-xl"></i>
             </button>
-            <input type="text" id="cat-name" placeholder="Nome..." required class="flex-1 min-w-0 bg-[#2C2C2E] text-white rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-1 focus:ring-purple-500">
-            <button type="submit" class="bg-roxo text-white px-3 py-2.5 rounded-xl font-bold tap-effect shrink-0">+</button>
+            <input type="text" id="cat-name" placeholder="Nome..." required class="flex-1 min-w-0 bg-[#2C2C2E] text-white rounded-xl p-3 outline-none focus:ring-1 focus:ring-purple-500">
+            <button type="submit" class="bg-roxo text-white px-4 py-3 rounded-xl font-bold tap-effect shrink-0">+</button>
           </div>
         </form>
       </div>
@@ -158,7 +154,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:10px}
     </main>
   </div>
 
-  <!-- BARRA DE NAVEGAÇÃO -->
+  <!-- BARRA DE NAVEGAÇÃO (Com padding resolvido) -->
   <nav class="shrink-0 card-bg border-t border-gray-800 px-6 nav-safe flex justify-between items-center z-30 relative w-full">
     <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-roxo w-14 tap-effect" data-target="home"><i class="ph-fill ph-house text-2xl mb-1"></i><span class="text-[10px] font-medium">Principal</span></button>
     <button onclick="switchTab('transactions')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="transactions"><i class="ph ph-list-dashes text-2xl mb-1"></i><span class="text-[10px] font-medium">Transações</span></button>
@@ -167,8 +163,8 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:10px}
     <button onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="more"><i class="ph ph-dots-three text-2xl mb-1"></i><span class="text-[10px] font-medium">Mais</span></button>
   </nav>
 
-  <!-- MODAIS RESTAURADOS PARA "fixed inset-0" (Evita bug de clique no Safari) -->
-  <div id="modal-cat-detail" class="fixed inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+  <!-- MODAIS (Usando 'absolute inset-0' para ficar perfeitamente no container) -->
+  <div id="modal-cat-detail" class="absolute inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
     <div id="modal-cat-detail-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[80vh]">
       <div class="flex justify-between items-center p-5 border-b border-gray-800">
         <div class="flex items-center gap-3 min-w-0"><div id="cd-icon" class="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0"></div><div class="min-w-0"><h3 id="cd-title" class="text-lg font-medium text-white truncate"></h3><p id="cd-total" class="text-sm text-red-400"></p></div></div>
@@ -178,7 +174,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:10px}
     </div>
   </div>
 
-  <div id="modal" class="fixed inset-0 bg-black/90 z-[55] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+  <div id="modal" class="absolute inset-0 bg-black/90 z-[55] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
     <div id="modal-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[95vh] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
       <div class="flex justify-between items-center p-5 border-b border-gray-800">
         <button type="button" onclick="closeModal()" class="text-gray-400 p-2 -ml-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
@@ -226,14 +222,14 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:10px}
     </div>
   </div>
 
-  <div id="modal-category-select" class="fixed inset-0 bg-black/90 z-[58] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+  <div id="modal-category-select" class="absolute inset-0 bg-black/90 z-[58] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
     <div id="modal-category-select-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[70vh]">
       <div class="flex justify-between items-center p-5 border-b border-gray-800"><h3 class="text-lg font-medium text-white">Selecione a Categoria</h3><button type="button" onclick="closeCategorySelectModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button></div>
       <div class="overflow-y-auto p-2" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))" id="category-select-list"></div>
     </div>
   </div>
 
-  <div id="modal-simple-confirm" class="fixed inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+  <div id="modal-simple-confirm" class="absolute inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
     <div id="modal-simple-confirm-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))">
       <h3 class="text-xl font-bold text-white mb-2" id="simple-confirm-title">Excluir</h3>
       <p class="text-sm text-gray-400 mb-8" id="simple-confirm-desc"></p>
@@ -241,7 +237,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:10px}
     </div>
   </div>
 
-  <div id="modal-repeat-confirm" class="fixed inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+  <div id="modal-repeat-confirm" class="absolute inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
     <div id="modal-repeat-confirm-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))">
       <h3 class="text-xl font-bold text-white mb-2" id="repeat-confirm-title">Transação Repetida</h3>
       <p class="text-sm text-gray-400 mb-6">Esta é uma transação que se repete. Onde deseja aplicar a alteração?</p>
@@ -253,7 +249,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:10px}
     </div>
   </div>
 
-  <div id="modal-category" class="fixed inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+  <div id="modal-category" class="absolute inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
     <div id="modal-category-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col">
       <div class="flex justify-between items-center p-5 border-b border-gray-800">
         <button type="button" onclick="closeCategoryModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
@@ -263,11 +259,11 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:10px}
       <div class="p-5" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))">
         <form id="form-category" onsubmit="saveCategoryEdit(event)">
           <div class="flex items-center gap-3">
-            <input type="color" id="edit-cat-color" class="w-12 h-12 rounded-xl cursor-pointer bg-transparent tap-effect shrink-0">
-            <button type="button" id="btn-edit-icon" onclick="openIconSelect('edit')" class="w-12 h-12 rounded-xl bg-[#2C2C2E] flex items-center justify-center shrink-0 tap-effect text-white">
-              <i class="ph ph-tag text-xl"></i>
+            <input type="color" id="edit-cat-color" class="w-14 h-14 rounded-xl cursor-pointer bg-transparent tap-effect shrink-0">
+            <button type="button" id="btn-edit-icon" onclick="openIconSelect('edit')" class="w-14 h-14 rounded-xl bg-[#2C2C2E] flex items-center justify-center shrink-0 tap-effect text-white">
+              <i class="ph ph-tag text-2xl"></i>
             </button>
-            <input type="text" id="edit-cat-name" required class="flex-1 min-w-0 bg-[#2C2C2E] text-white rounded-xl px-3 py-3 outline-none focus:ring-1 focus:ring-purple-500 text-base" placeholder="Nome da Categoria">
+            <input type="text" id="edit-cat-name" required class="flex-1 min-w-0 bg-[#2C2C2E] text-white rounded-xl p-4 outline-none focus:ring-1 focus:ring-purple-500 text-lg" placeholder="Nome da Categoria">
           </div>
           <button type="submit" class="hidden">Salvar</button>
         </form>
@@ -275,7 +271,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:10px}
     </div>
   </div>
 
-  <div id="modal-icon-select" class="fixed inset-0 bg-black/90 z-[65] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+  <div id="modal-icon-select" class="absolute inset-0 bg-black/90 z-[65] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
     <div id="modal-icon-select-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[60vh]">
       <div class="flex justify-between items-center p-5 border-b border-gray-800">
         <h3 class="text-lg font-medium text-white">Selecione o Ícone</h3>
@@ -288,8 +284,8 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:10px}
 </div>
 
 <script>
-const STORAGE_KEY='mobills_dark_final_v15';
-const CATS_KEY='mobills_cats_final_v15';
+const STORAGE_KEY='mobills_dark_final_v12';
+const CATS_KEY='mobills_cats_final_v12';
 const ICONS=['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus'];
 let transactions=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
 let categories=JSON.parse(localStorage.getItem(CATS_KEY))||[
@@ -324,7 +320,7 @@ document.body.addEventListener('touchstart',e=>{
 
 document.body.addEventListener('touchend',e=>{
   if(e.target.closest('.overflow-x-auto')) return;
-  if(document.querySelector('.fixed.inset-0:not(.hidden)')) return;
+  if(document.querySelector('.absolute.inset-0:not(.hidden)')) return;
   const dx=tsX-e.changedTouches[0].screenX,dy=tsY-e.changedTouches[0].screenY;
   if(Math.abs(dx)>Math.abs(dy)*1.5 && Math.abs(dx)>50){
     changeMonth(dx>0?1:-1);
