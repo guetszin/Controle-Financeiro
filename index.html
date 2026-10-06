@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<!-- A Meta Tag exata e perfeita para PWAs no iOS -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,12 +13,14 @@
 <link rel="manifest" href="manifest.json">
 <style>
 ::-webkit-scrollbar{display:none}
-/* Trava absolutamento o body e html para impedir vazamento de tela no iOS */
+/* O segredo para não vazar a tela no Safari iOS */
 html, body {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  width: 100%; height: 100%;
-  margin: 0; padding: 0;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh; 
+  min-height: -webkit-fill-available; /* Hack oficial da Apple */
   background: #1C1C1E;
   overflow: hidden;
   overscroll-behavior: none;
@@ -26,19 +29,22 @@ html, body {
 body {
   color: #fff;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  justify-content: center;
 }
-/* O container principal usa posições absolutas respeitando as bordas do dispositivo */
+/* O app não usa mais position fixed/absolute, ele preenche o body exato */
 .app {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%;
+  height: 100%;
+  min-height: -webkit-fill-available;
+  max-width: 448px; /* Mantém bonito no tablet/PC */
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  max-width: 448px;
-  margin: 0 auto;
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  background: #121212;
+  position: relative;
 }
-.app-container{background:#121212}
 .card-bg{background:#1C1C1E}
 .hdr{padding-top:calc(env(safe-area-inset-top,0px) + .25rem)}
 .nav-safe{padding-bottom:max(calc(env(safe-area-inset-bottom,0px) - 14px),10px);padding-top:.5rem}
@@ -64,10 +70,10 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </style>
 </head>
 <body class="antialiased select-none">
-<div class="app app-container relative">
+<div class="app">
 
   <!-- CABEÇALHO -->
-  <header class="shrink-0 hdr app-container pb-4 border-b border-gray-800 z-20">
+  <header class="shrink-0 hdr pb-4 border-b border-gray-800 z-20" style="background:#121212">
     <div class="flex justify-between items-center mb-2 w-4/5 mx-auto">
       <button onclick="changeMonth(-1)" class="p-2 text-gray-400 tap-effect"><i class="ph ph-caret-left text-xl"></i></button>
       <span id="current-month-display" class="font-medium text-gray-200 text-lg capitalize w-40 text-center tracking-wide transition-opacity duration-200"></span>
@@ -110,7 +116,6 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
       <div id="transactions-list"></div>
     </main>
 
-    <!-- ABA CATEGORIAS REFATORADA -->
     <main id="tab-categories" class="tab-content">
       <h2 class="text-xl font-medium text-white mb-5">Categorias</h2>
       <div class="card-bg rounded-2xl p-4 mb-6 shadow-md">
@@ -140,7 +145,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
   </div>
 
   <!-- BARRA DE NAVEGAÇÃO -->
-  <nav class="shrink-0 card-bg border-t border-gray-800 px-6 nav-safe flex justify-between items-center z-30 relative">
+  <nav class="shrink-0 card-bg border-t border-gray-800 px-6 nav-safe flex justify-between items-center z-30 relative w-full">
     <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-roxo w-14 tap-effect" data-target="home"><i class="ph-fill ph-house text-2xl mb-1"></i><span class="text-[10px] font-medium">Principal</span></button>
     <button onclick="switchTab('transactions')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="transactions"><i class="ph ph-list-dashes text-2xl mb-1"></i><span class="text-[10px] font-medium">Transações</span></button>
     <div class="relative -top-6"><button onclick="openModal()" class="fab-button text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-[0_8px_16px_rgba(124,58,237,0.4)] tap-effect">+</button></div>
@@ -148,9 +153,9 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     <button onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="more"><i class="ph ph-dots-three text-2xl mb-1"></i><span class="text-[10px] font-medium">Mais</span></button>
   </nav>
 
-  <!-- MODAIS RESTANTES -->
-  <div id="modal-cat-detail" class="fixed inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-    <div id="modal-cat-detail-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[80vh]">
+  <!-- MODAIS (Invisíveis até serem abertos) -->
+  <div id="modal-cat-detail" class="absolute inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+    <div id="modal-cat-detail-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[80vh]">
       <div class="flex justify-between items-center p-5 border-b border-gray-800">
         <div class="flex items-center gap-3 min-w-0"><div id="cd-icon" class="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0"></div><div class="min-w-0"><h3 id="cd-title" class="text-lg font-medium text-white truncate"></h3><p id="cd-total" class="text-sm text-red-400"></p></div></div>
         <button type="button" onclick="closeCatDetail()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
@@ -159,8 +164,8 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     </div>
   </div>
 
-  <div id="modal" class="fixed inset-0 bg-black/90 z-[55] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-    <div id="modal-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[95vh] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+  <div id="modal" class="absolute inset-0 bg-black/90 z-[55] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+    <div id="modal-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[95vh] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
       <div class="flex justify-between items-center p-5 border-b border-gray-800">
         <button type="button" onclick="closeModal()" class="text-gray-400 p-2 -ml-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
         <h3 id="modal-tx-title" class="text-lg font-medium text-white">Nova Transação</h3>
@@ -207,23 +212,23 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     </div>
   </div>
 
-  <div id="modal-category-select" class="fixed inset-0 bg-black/90 z-[58] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-    <div id="modal-category-select-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[70vh]">
+  <div id="modal-category-select" class="absolute inset-0 bg-black/90 z-[58] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+    <div id="modal-category-select-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[70vh]">
       <div class="flex justify-between items-center p-5 border-b border-gray-800"><h3 class="text-lg font-medium text-white">Selecione a Categoria</h3><button type="button" onclick="closeCategorySelectModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button></div>
       <div class="overflow-y-auto p-2" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))" id="category-select-list"></div>
     </div>
   </div>
 
-  <div id="modal-simple-confirm" class="fixed inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-    <div id="modal-simple-confirm-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))">
+  <div id="modal-simple-confirm" class="absolute inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+    <div id="modal-simple-confirm-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))">
       <h3 class="text-xl font-bold text-white mb-2" id="simple-confirm-title">Excluir</h3>
       <p class="text-sm text-gray-400 mb-8" id="simple-confirm-desc"></p>
       <div class="flex gap-4"><button onclick="closeSimpleConfirm()" class="flex-1 py-4 rounded-xl bg-[#2C2C2E] text-white font-medium tap-effect">Cancelar</button><button onclick="executeSimpleConfirm()" class="flex-1 py-4 rounded-xl bg-red-500 text-white font-bold tap-effect">Confirmar</button></div>
     </div>
   </div>
 
-  <div id="modal-repeat-confirm" class="fixed inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-    <div id="modal-repeat-confirm-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))">
+  <div id="modal-repeat-confirm" class="absolute inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+    <div id="modal-repeat-confirm-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))">
       <h3 class="text-xl font-bold text-white mb-2" id="repeat-confirm-title">Transação Repetida</h3>
       <p class="text-sm text-gray-400 mb-6">Esta é uma transação que se repete. Onde deseja aplicar a alteração?</p>
       <div class="flex flex-col gap-3">
@@ -234,9 +239,8 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     </div>
   </div>
 
-  <!-- MODAL EDITAR CATEGORIA REFATORADO -->
-  <div id="modal-category" class="fixed inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-    <div id="modal-category-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col">
+  <div id="modal-category" class="absolute inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+    <div id="modal-category-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col">
       <div class="flex justify-between items-center p-5 border-b border-gray-800">
         <button type="button" onclick="closeCategoryModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
         <h3 class="text-lg font-medium text-white">Editar Categoria</h3>
@@ -257,9 +261,8 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     </div>
   </div>
 
-  <!-- NOVO MODAL: SELETOR DE ÍCONES EM GRADE -->
-  <div id="modal-icon-select" class="fixed inset-0 bg-black/90 z-[65] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-    <div id="modal-icon-select-content" class="max-w-md mx-auto card-bg w-full rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[60vh]">
+  <div id="modal-icon-select" class="absolute inset-0 bg-black/90 z-[65] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
+    <div id="modal-icon-select-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[60vh]">
       <div class="flex justify-between items-center p-5 border-b border-gray-800">
         <h3 class="text-lg font-medium text-white">Selecione o Ícone</h3>
         <button type="button" onclick="closeIconSelect()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
@@ -271,8 +274,8 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </div>
 
 <script>
-const STORAGE_KEY='mobills_dark_final_v10';
-const CATS_KEY='mobills_cats_final_v10';
+const STORAGE_KEY='mobills_dark_final_v11';
+const CATS_KEY='mobills_cats_final_v11';
 const ICONS=['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus'];
 let transactions=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
 let categories=JSON.parse(localStorage.getItem(CATS_KEY))||[
@@ -284,7 +287,7 @@ let displayDate=new Date(),lastKnownRealMonth=new Date().getMonth();
 let editingTxId=null,editingCatId=null,pendingAction=null,pendingData=null;
 let txTab='avulsas',catFilter='all',sortedCats=[],detailCat=null;
 let newCatIcon='tag',editCatIcon='tag';
-let currentIconTarget='new'; // 'new' ou 'edit'
+let currentIconTarget='new';
 
 const formatCurrency=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);
 const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -299,7 +302,6 @@ function handleAmountInput(e){
 }
 function parseCurrency(v){return v?parseFloat(v.replace(/\./g,'').replace(',','.')):0;}
 
-/* ---------- SWIPE EM QUALQUER LUGAR DA TELA ---------- */
 let tsX=0,tsY=0;
 document.body.addEventListener('touchstart',e=>{
   tsX=e.changedTouches[0].screenX;
@@ -308,7 +310,7 @@ document.body.addEventListener('touchstart',e=>{
 
 document.body.addEventListener('touchend',e=>{
   if(e.target.closest('.overflow-x-auto')) return;
-  if(document.querySelector('.fixed.inset-0:not(.hidden)')) return;
+  if(document.querySelector('.absolute.inset-0:not(.hidden)')) return;
   const dx=tsX-e.changedTouches[0].screenX,dy=tsY-e.changedTouches[0].screenY;
   if(Math.abs(dx)>Math.abs(dy)*1.5 && Math.abs(dx)>50){
     changeMonth(dx>0?1:-1);
@@ -334,7 +336,6 @@ function changeMonth(step){
   },200);
 }
 
-/* ---------- UI ---------- */
 function monthTx(){
   const m=displayDate.getMonth(),y=displayDate.getFullYear();
   return transactions.filter(t=>{const d=new Date(t.date+'T12:00:00');return d.getMonth()===m&&d.getFullYear()===y;});
@@ -356,7 +357,6 @@ function updateUI(){
   localStorage.setItem(CATS_KEY,JSON.stringify(categories));
 }
 
-/* ---------- Gráfico + legenda ---------- */
 function updateChartAndLegend(list){
   const totals={};
   list.forEach(t=>{if(t.type==='expense')totals[t.category]=(totals[t.category]||0)+t.amount;});
@@ -502,7 +502,6 @@ function openRepeatConfirm(title,type){
 }
 function closeRepeatConfirm(){hideSheet('modal-repeat-confirm','modal-repeat-confirm-content');}
 
-/* ---------- LÓGICA DE SELEÇÃO DE ÍCONES (MENU GRID) ---------- */
 function openIconSelect(target){
   currentIconTarget = target;
   const activeIcon = target === 'new' ? newCatIcon : editCatIcon;
