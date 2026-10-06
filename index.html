@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#121212">
+<meta name="theme-color" content="#1C1C1E">
 <title>Controle Mobills</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -19,21 +19,17 @@
   --app-height: 100vh;
 }
 
-/* 
-  O SEGREDO DEFINITIVO PARA IOS:
-  Travar a altura exata calculada pelo JS e usar touch-action: none
-  Isso impede o "bounce" do Safari e corrige os toques falsos.
-*/
 html, body {
   width: 100%;
   height: 100vh;
   height: var(--app-height);
   margin: 0;
   padding: 0;
-  background: #121212;
+  /* CAMUFLAGEM: Fundo igual ao da barra de navegação inferior */
+  background: #1C1C1E; 
   overflow: hidden;
   overscroll-behavior: none;
-  touch-action: none; /* Impede que o iOS arraste a tela inteira */
+  touch-action: none;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
@@ -58,14 +54,12 @@ body {
 
 .card-bg{background:#1C1C1E}
 
-/* Safe Area garantida */
 .hdr { padding-top: calc(env(safe-area-inset-top, 0px) + 0.75rem); }
 .nav-safe { 
   padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px); 
   padding-top: 0.75rem; 
 }
 
-/* Áreas que podem rolar são liberadas especificamente */
 #scroll, .overflow-y-auto {
   touch-action: pan-y;
   overscroll-behavior-y: contain;
@@ -298,16 +292,24 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </div>
 
 <script>
-// Calcula e atualiza a altura exata da tela sempre que ela muda
+// BLOCO DE PROTEÇÃO DO SAFARI IOS:
+// Calcula a altura da tela não só agora, mas "atrasado" para driblar a animação do iOS
 const setAppHeight = () => {
   document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
 };
+setAppHeight(); // Executa ao ler o script
 window.addEventListener('resize', setAppHeight);
 window.addEventListener('orientationchange', setAppHeight);
-setAppHeight(); // Executa imediatamente ao abrir
 
-const STORAGE_KEY='mobills_dark_final_v14';
-const CATS_KEY='mobills_cats_final_v14';
+// O SEGREDO: Força recálculos instantes depois de abrir o Web App 
+// (quando a tela do iOS realmente assenta e para a animação)
+setTimeout(setAppHeight, 100);
+setTimeout(setAppHeight, 300);
+setTimeout(setAppHeight, 600);
+// ===================================
+
+const STORAGE_KEY='mobills_dark_final_v15';
+const CATS_KEY='mobills_cats_final_v15';
 const ICONS=['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus'];
 let transactions=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
 let categories=JSON.parse(localStorage.getItem(CATS_KEY))||[
@@ -351,6 +353,7 @@ document.body.addEventListener('touchend',e=>{
 
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){
+    setAppHeight(); // Recalcula altura ao voltar para o app
     const m=new Date().getMonth();
     if(m!==lastKnownRealMonth){displayDate=new Date();lastKnownRealMonth=m;updateUI();}
   }
