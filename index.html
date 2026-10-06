@@ -53,11 +53,11 @@ body {
 
 /* Ajustes de Safe Area para notch e barra inferior com respiro extra para o Dynamic Island */
 .hdr { 
-  padding-top: calc(env(safe-area-inset-top, 24px) + 12px); 
+  padding-top: calc(env(safe-area-inset-top, 24px) + 18px); 
   padding-bottom: 16px;
 }
 .nav-safe { 
-  padding-bottom: max(calc(env(safe-area-inset-bottom) + 12px), 12px); 
+  padding-bottom: max(calc(env(safe-area-inset-bottom) + 12px), 5px); 
   padding-top: 0.75rem; 
 }
 
@@ -169,7 +169,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
         <button id="sub-avulsas" onclick="setTxTab('avulsas')" class="flex-1 min-w-[70px] py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Avulsas</button>
         <button id="sub-parceladas" onclick="setTxTab('parceladas')" class="flex-1 min-w-[70px] py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Parceladas</button>
         <button id="sub-fixas" onclick="setTxTab('fixas')" class="flex-1 min-w-[70px] py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Fixas</button>
-        <button id="sub-receitas" onclick="setTxTab('receitas')" class="flex-1 min-w-[70px] py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Receitas</button>
+        <button id="sub-entradas" onclick="setTxTab('entradas')" class="flex-1 min-w-[70px] py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Entradas</button>
         <button id="sub-neutros" onclick="setTxTab('neutros')" class="flex-1 min-w-[70px] py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Neutros</button>
       </div>
       
@@ -282,7 +282,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
           <!-- Tipos de Transação -->
           <div class="flex bg-[#121212] rounded-xl p-1 mb-6">
             <button type="button" id="btn-expense" onclick="setType('expense')" class="flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Despesa</button>
-            <button type="button" id="btn-income" onclick="setType('income')" class="flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Receita</button>
+            <button type="button" id="btn-income" onclick="setType('income')" class="flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Entrada</button>
             <button type="button" id="btn-neutral" onclick="setType('neutral')" class="flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Neutro</button>
           </div>
           <div class="mb-6">
@@ -300,7 +300,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
             <input type="date" id="date" required class="w-full bg-transparent outline-none text-white text-lg" style="color-scheme:dark">
           </div>
 
-          <!-- Apenas aparece para Despesa -->
+          <!-- A Opção de repetição agora aparece para TODOS os tipos -->
           <div id="rep-section" class="mb-2">
             <label class="text-xs text-gray-500 mb-2 block">Repetição</label>
             <div class="flex bg-[#121212] rounded-xl p-1">
@@ -398,8 +398,8 @@ window.addEventListener('load', () => {
 // =========================================================================
 // LÓGICA DO APLICATIVO CONTROLE FINANCEIRO
 // =========================================================================
-const STORAGE_KEY='controle_financeiro_final_v28';
-const CATS_KEY='controle_financeiro_cats_final_v28';
+const STORAGE_KEY='controle_financeiro_final_v30';
+const CATS_KEY='controle_financeiro_cats_final_v30';
 
 // Adicionado MUITOS ícones novos (Mais de 60 ícones profissionais)
 const ICONS = [
@@ -590,7 +590,7 @@ function applyFilter(i) {
 }
 
 function updateTransactionsList(monthList){
-  ['avulsas','parceladas','fixas','receitas','neutros'].forEach(k=>{
+  ['avulsas','parceladas','fixas','entradas','neutros'].forEach(k=>{
     const btn = document.getElementById('sub-'+k);
     if(btn) btn.className='flex-1 min-w-[70px] py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect '+(k===txTab?'seg-on':'seg-off');
   });
@@ -605,10 +605,10 @@ function updateTransactionsList(monthList){
   const rep=t=>t.repetition||'unica';
   
   const view = fm.filter(t => {
-    if (txTab === 'receitas') return t.type === 'income';
+    if (txTab === 'entradas') return t.type === 'income';
     if (txTab === 'neutros') return t.type === 'neutral';
     
-    // Ignoramos receitas e neutros para as abas de gastos
+    // Ignoramos entradas e neutros para as abas de gastos (avulsas, fixas, parceladas)
     if (t.type === 'income' || t.type === 'neutral') return false;
     
     if (txTab === 'avulsas') return rep(t) === 'unica';
@@ -625,7 +625,7 @@ function updateTransactionsList(monthList){
   let colorToShow = 'text-red-400';
   let labelToShow = 'Gastos do Mês';
 
-  if (txTab === 'receitas') {
+  if (txTab === 'entradas') {
       valToShow = earned;
       colorToShow = 'text-green-500';
       labelToShow = 'Entradas do Mês';
@@ -661,11 +661,7 @@ function saveTransaction(e){
   const desc=document.getElementById('desc').value;
   const total=Math.abs(parseCurrency(document.getElementById('amount').value));
   const category=document.getElementById('category').value;
-  
-  // Lógica de Data Dinâmica
   let rawDate = document.getElementById('date').value;
-  if(currentType === 'income') rawDate = todayStr();
-  else if(currentType === 'neutral' && rawDate.length === 7) rawDate += '-01'; // Ajusta mês
   
   if(!desc||isNaN(total)||total===0||!rawDate||!category){alert('Preencha todos os campos.');return;}
   
@@ -822,6 +818,7 @@ function openModal(){
   document.getElementById('date').value=todayStr();
   document.getElementById('category').value='';
   resetCatDisplay('');
+  currentRepetition = 'unica';
   setType('expense');
   showSheet('modal','modal-content');
 }
@@ -833,12 +830,16 @@ function openEditTransaction(id){
   document.getElementById('amount').value=t.amount.toFixed(2).replace('.',',').replace(/(\d)(?=(\d{3})+(?!\d))/g,'$1.');
   document.getElementById('desc').value=t.desc.replace(/ \(\d+\/\d+\)$/,'');
   
-  // Adapta caso seja edição de tipo Neutro (apenas mês)
-  document.getElementById('date').type = t.type === 'neutral' ? 'month' : 'date';
-  document.getElementById('date').value = t.type === 'neutral' ? t.date.substring(0,7) : t.date;
+  // Restaura a data corretamente independente do tipo
+  document.getElementById('date').type = 'date';
+  document.getElementById('date').value = t.date;
   
   document.getElementById('category').value=t.category;resetCatDisplay(t.category);
-  setType(t.type);
+  
+  setType(t.type); 
+  currentRepetition = t.repetition || 'unica';
+  setRepetition(currentRepetition);
+  
   showSheet('modal','modal-content');
 }
 function closeModal(){hideSheet('modal','modal-content');}
@@ -854,33 +855,14 @@ function setType(type){
   i.className = base + (type === 'income' ? 'bg-green-500/20 text-green-500 border border-green-500/50' : 'text-gray-400 border border-transparent');
   n.className = base + (type === 'neutral' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50' : 'text-gray-400 border border-transparent');
   
-  const repSec = document.getElementById('rep-section');
-  const dateWrap = document.getElementById('date-wrapper');
+  // Mostrar repeticao e datas igualzinho despesa para todos!
+  document.getElementById('rep-section').style.display = 'block';
   const dateInput = document.getElementById('date');
-
-  // Lógica Receitas e Neutras
-  if(type === 'income') {
-    repSec.style.display = 'none';
-    dateWrap.classList.add('hidden');
-    dateInput.required = false;
-    currentRepetition = 'unica';
-  } else if (type === 'neutral') {
-    repSec.style.display = 'none';
-    dateWrap.classList.remove('hidden');
-    dateInput.type = 'month'; // Transforma em seletor de mês apenas
-    dateInput.required = true;
-    currentRepetition = 'unica';
-    if(dateInput.value.length > 7) {
-        dateInput.value = dateInput.value.substring(0, 7);
-    }
-  } else {
-    repSec.style.display = 'block';
-    dateWrap.classList.remove('hidden');
-    dateInput.type = 'date';
-    dateInput.required = true;
-    if(dateInput.value.length === 7) { dateInput.value = dateInput.value + '-01'; } // Corrige se voltar do Neutro
-    setRepetition(currentRepetition || 'unica');
-  }
+  dateInput.type = 'date';
+  dateInput.required = true;
+  if(dateInput.value.length === 7) { dateInput.value = dateInput.value + '-01'; }
+  
+  setRepetition(currentRepetition || 'unica');
 }
 
 function setRepetition(type){
@@ -891,8 +873,6 @@ function setRepetition(type){
   });
   document.getElementById('installments-div').classList.toggle('hidden', type !== 'parcelada');
   const dw = document.getElementById('date-wrapper');
-  
-  if (currentType !== 'expense') return; // Bloqueia regras caso não seja despesa
   
   if(type === 'unica') dw.classList.remove('hidden'); 
   else {
