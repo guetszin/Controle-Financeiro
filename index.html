@@ -83,8 +83,8 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 </div>
 
 <!-- TELA DE LOGIN CENTRALIZADA -->
-<div id="login-screen" class="fixed inset-0 z-[9000] bg-[#121212] hidden flex-col transition-opacity duration-300 h-screen h-[100dvh]">
-  <div class="m-auto flex flex-col items-center justify-center w-full px-6">
+<div id="login-screen" class="fixed inset-0 z-[9000] bg-[#121212] hidden flex-col items-center justify-center p-6 transition-opacity duration-300">
+  <div class="w-full max-w-sm flex flex-col items-center justify-center">
     <div class="w-24 h-24 bg-roxo rounded-3xl flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(124,58,237,0.5)]">
         <i class="ph-fill ph-cloud-arrow-up text-5xl text-white"></i>
     </div>
@@ -92,12 +92,12 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     <p class="text-gray-400 text-center mb-10 text-sm max-w-xs">Faça login para salvar seus dados na nuvem automaticamente e nunca mais perdê-los.</p>
 
     <!-- Botão Google -->
-    <button onclick="if(window.loginComGoogle) window.loginComGoogle()" class="w-full max-w-sm bg-white text-gray-900 py-4 rounded-2xl font-bold flex justify-center items-center gap-3 tap-effect mb-5 shadow-lg">
+    <button onclick="if(window.loginComGoogle) window.loginComGoogle()" class="w-full bg-white text-gray-900 py-4 rounded-2xl font-bold flex justify-center items-center gap-3 tap-effect mb-5 shadow-lg">
         <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.16v2.84A11.002 11.002 0 0 0 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.16A10.978 10.978 0 0 0 1 12c0 1.76.42 3.42 1.16 4.93l3.68-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.16 7.07l3.68 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
         Entrar com Google
     </button>
 
-    <button onclick="continueOffline()" class="w-full max-w-sm bg-transparent border border-gray-700 text-gray-400 py-4 rounded-2xl font-medium flex justify-center items-center gap-2 tap-effect">
+    <button onclick="continueOffline()" class="w-full bg-transparent border border-gray-700 text-gray-400 py-4 rounded-2xl font-medium flex justify-center items-center gap-2 tap-effect">
         Usar sem conta (Apenas Local)
     </button>
   </div>
@@ -140,9 +140,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
         <button id="sub-avulsas" onclick="setTxTab('avulsas')" class="shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Avulsas</button>
         <button id="sub-parceladas" onclick="setTxTab('parceladas')" class="shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Parceladas</button>
         <button id="sub-fixas" onclick="setTxTab('fixas')" class="shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Fixas</button>
-        <button id="sub-entradas" onclick="setTxTab('entradas')" class="shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Entradas</button>
-        <button id="sub-neutros" onclick="setTxTab('neutros')" class="shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Neutros</button>
-        <div class="w-1 shrink-0"></div> 
+        <button id="sub-entradas_neutros" onclick="setTxTab('entradas_neutros')" class="shrink-0 min-w-[85px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Entradas/Neutro</button>
       </div>
       
       <div class="card-bg rounded-2xl p-4 mb-5 flex justify-between items-center shadow-md border border-gray-800/50">
@@ -195,9 +193,12 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 
       <h2 class="text-xl font-medium text-white mb-5">Backup e Restauração</h2>
       <div class="card-bg rounded-2xl p-4 space-y-4 shadow-md mb-6">
-        <button onclick="exportData()" class="w-full bg-[#2C2C2E] text-white py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect"><i class="ph ph-export text-xl text-roxo"></i> Baixar Backup Manual (.json)</button>
+        <button onclick="exportData()" class="w-full bg-[#2C2C2E] text-white py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect"><i class="ph ph-download-simple text-xl text-roxo"></i> Baixar Backup Manual (.json)</button>
         <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
         <button onclick="document.getElementById('importFile').click()" class="w-full bg-[#2C2C2E] text-white py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect"><i class="ph ph-upload-simple text-xl text-roxo"></i> Substituir com Arquivo (.json)</button>
+        
+        <!-- Botão Novo: Forçar Sincronização Manual com Nuvem -->
+        <button onclick="forceCloudSync()" id="btn-force-sync" class="w-full bg-roxo/20 border border-roxo/50 text-roxo py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect hidden"><i class="ph ph-arrows-clockwise text-xl"></i> Forçar Sincronização (Nuvem)</button>
       </div>
 
       <h2 class="text-xl font-medium text-white mb-5">Zona de Perigo</h2>
@@ -222,7 +223,24 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
   <!-- Modais Restantes -->
   <div id="modal-filter" class="absolute inset-0 bg-black/90 z-[58] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end"><div id="modal-filter-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[70vh]"><div class="flex justify-between items-center p-5 border-b border-gray-800"><h3 class="text-lg font-medium text-white">Filtrar Categoria</h3><button type="button" onclick="closeFilterModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button></div><div class="overflow-y-auto p-2" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))"><div class="flex items-center gap-4 p-4 border-b border-gray-800 cursor-pointer tap-effect" onclick="applyFilter(-1)"><div class="w-9 h-9 rounded-full flex items-center justify-center bg-red-500/10 text-red-500"><i class="ph ph-x text-lg"></i></div><span class="text-red-400 text-[17px] font-medium">Limpar Filtro</span></div><div id="filter-category-list"></div></div></div></div>
   <div id="modal-cat-detail" class="absolute inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end"><div id="modal-cat-detail-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[80vh]"><div class="flex justify-between items-center p-5 border-b border-gray-800"><div class="flex items-center gap-3 min-w-0"><div id="cd-icon" class="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0"></div><div class="min-w-0"><h3 id="cd-title" class="text-lg font-medium text-white truncate"></h3><p id="cd-total" class="text-sm text-red-400"></p></div></div><button type="button" onclick="closeCatDetail()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button></div><div class="overflow-y-auto px-5 py-2" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))" id="cd-list"></div></div></div>
-  <div id="modal" class="absolute inset-0 bg-black/90 z-[55] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end"><div id="modal-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[95vh] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]"><div class="flex justify-between items-center p-5 border-b border-gray-800"><button type="button" onclick="closeModal()" class="text-gray-400 p-2 -ml-2 tap-effect"><i class="ph ph-x text-2xl"></i></button><h3 id="modal-tx-title" class="text-lg font-medium text-white">Nova Transação</h3><div class="flex"><button type="button" id="btn-delete-tx" onclick="deleteTransactionAction()" class="text-red-500 hidden p-2 tap-effect"><i class="ph ph-trash text-2xl"></i></button><button type="button" onclick="document.getElementById('form').requestSubmit()" class="text-roxo font-bold p-2 -mr-2 tap-effect"><i class="ph ph-check text-2xl"></i></button></div></div><div class="overflow-y-auto p-5" style="padding-bottom:calc(2rem + env(safe-area-inset-bottom,0px))"><form id="form" onsubmit="saveTransaction(event)"><div class="flex bg-[#121212] rounded-xl p-1 mb-6"><button type="button" id="btn-expense" onclick="setType('expense')" class="flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Despesa</button><button type="button" id="btn-income" onclick="setType('income')" class="flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Entrada</button><button type="button" id="btn-neutral" onclick="setType('neutral')" class="flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Neutro</button></div><div class="mb-6"><label class="text-xs text-gray-500 mb-1 block">Valor</label><input type="tel" id="amount" inputmode="numeric" oninput="handleAmountInput(event)" required class="w-full text-4xl font-bold text-white bg-transparent border-b border-gray-700 py-2 outline-none focus:border-roxo" placeholder="0,00"></div><div class="mb-5 flex items-center border-b border-gray-700 py-3"><i class="ph ph-pencil-simple text-gray-400 text-xl mr-3"></i><input type="text" id="desc" required class="w-full bg-transparent outline-none text-white text-lg" placeholder="Descrição"></div><div class="mb-5 flex items-center border-b border-gray-700 py-3 cursor-pointer tap-effect" onclick="openCategorySelectModal()"><i class="ph ph-tag text-gray-400 text-xl mr-3"></i><div id="selected-category-display" class="flex-1 text-gray-400 text-lg">Selecione a Categoria</div><i class="ph ph-caret-down text-gray-500"></i></div><input type="hidden" id="category"><div id="date-wrapper" class="mb-6 flex items-center border-b border-gray-700 py-3"><i class="ph ph-calendar text-gray-400 text-xl mr-3"></i><input type="date" id="date" required class="w-full bg-transparent outline-none text-white text-lg" style="color-scheme:dark"></div><div id="rep-section" class="mb-2"><label class="text-xs text-gray-500 mb-2 block">Repetição</label><div class="flex bg-[#121212] rounded-xl p-1"><button type="button" id="btn-rep-unica" onclick="setRepetition('unica')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-receipt text-base"></i>Única</button><button type="button" id="btn-rep-fixa" onclick="setRepetition('fixa')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-repeat text-base"></i>Fixa</button><button type="button" id="btn-rep-parcelada" onclick="setRepetition('parcelada')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-credit-card text-base"></i>Parcelada</button></div><div id="installments-div" class="hidden mt-4 bg-[#121212] rounded-xl p-4 flex flex-col gap-4"><div class="flex items-center"><i class="ph ph-copy text-gray-400 text-xl mr-3"></i><input type="number" id="installments-count" min="2" max="48" inputmode="numeric" placeholder="Quantidade de parcelas" class="w-full bg-transparent outline-none text-white text-lg"></div><div class="flex gap-2"><label class="flex-1 cursor-pointer"><input type="radio" name="inst_type" value="total" checked class="sr-only peer"><span class="block text-center py-2.5 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 border border-transparent peer-checked:bg-[#7C3AED]/20 peer-checked:text-purple-300 peer-checked:border-[#7C3AED]/60">Valor total</span></label><label class="flex-1 cursor-pointer"><input type="radio" name="inst_type" value="parcela" class="sr-only peer"><span class="block text-center py-2.5 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 border border-transparent peer-checked:bg-[#7C3AED]/20 peer-checked:text-purple-300 peer-checked:border-[#7C3AED]/60">Valor da parcela</span></label></div></div></div><button type="submit" class="hidden">Salvar</button></form></div></div></div>
+  <div id="modal" class="absolute inset-0 bg-black/90 z-[55] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end"><div id="modal-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[95vh] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]"><div class="flex justify-between items-center p-5 border-b border-gray-800"><button type="button" onclick="closeModal()" class="text-gray-400 p-2 -ml-2 tap-effect"><i class="ph ph-x text-2xl"></i></button><h3 id="modal-tx-title" class="text-lg font-medium text-white">Nova Transação</h3><div class="flex"><button type="button" id="btn-delete-tx" onclick="deleteTransactionAction()" class="text-red-500 hidden p-2 tap-effect"><i class="ph ph-trash text-2xl"></i></button><button type="button" onclick="document.getElementById('form').requestSubmit()" class="text-roxo font-bold p-2 -mr-2 tap-effect"><i class="ph ph-check text-2xl"></i></button></div></div><div class="overflow-y-auto p-5" style="padding-bottom:calc(2rem + env(safe-area-inset-bottom,0px))"><form id="form" onsubmit="saveTransaction(event)"><div class="flex bg-[#121212] rounded-xl p-1 mb-6"><button type="button" id="btn-expense" onclick="setType('expense')" class="flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Despesa</button><button type="button" id="btn-income" onclick="setType('income')" class="flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Entrada</button><button type="button" id="btn-neutral" onclick="setType('neutral')" class="flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Neutro</button></div><div class="mb-6"><label class="text-xs text-gray-500 mb-1 block">Valor</label><input type="tel" id="amount" inputmode="numeric" oninput="handleAmountInput(event)" required class="w-full text-4xl font-bold text-white bg-transparent border-b border-gray-700 py-2 outline-none focus:border-roxo" placeholder="0,00"></div><div class="mb-5 flex items-center border-b border-gray-700 py-3"><i class="ph ph-pencil-simple text-gray-400 text-xl mr-3"></i><input type="text" id="desc" required class="w-full bg-transparent outline-none text-white text-lg" placeholder="Descrição"></div><div class="mb-5 flex items-center border-b border-gray-700 py-3 cursor-pointer tap-effect" onclick="openCategorySelectModal()"><i class="ph ph-tag text-gray-400 text-xl mr-3"></i><div id="selected-category-display" class="flex-1 text-gray-400 text-lg">Selecione a Categoria</div><i class="ph ph-caret-down text-gray-500"></i></div><input type="hidden" id="category"><div id="date-wrapper" class="mb-6 flex items-center border-b border-gray-700 py-3"><i class="ph ph-calendar text-gray-400 text-xl mr-3"></i><input type="date" id="date" required class="w-full bg-transparent outline-none text-white text-lg" style="color-scheme:dark"></div>
+  
+  <div id="rep-section" class="mb-2">
+    <label class="text-xs text-gray-500 mb-2 block">Repetição</label>
+    
+    <!-- Inputs do parcelamento MOVIDOS PARA CIMA dos botões -->
+    <div id="installments-div" class="hidden mb-4 bg-[#121212] rounded-xl p-4 flex flex-col gap-4">
+      <div class="flex items-center"><i class="ph ph-copy text-gray-400 text-xl mr-3"></i><input type="number" id="installments-count" min="2" max="48" inputmode="numeric" placeholder="Quantidade de parcelas" class="w-full bg-transparent outline-none text-white text-lg"></div>
+      <div class="flex gap-2"><label class="flex-1 cursor-pointer"><input type="radio" name="inst_type" value="total" checked class="sr-only peer"><span class="block text-center py-2.5 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 border border-transparent peer-checked:bg-[#7C3AED]/20 peer-checked:text-purple-300 peer-checked:border-[#7C3AED]/60">Valor total</span></label><label class="flex-1 cursor-pointer"><input type="radio" name="inst_type" value="parcela" class="sr-only peer"><span class="block text-center py-2.5 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 border border-transparent peer-checked:bg-[#7C3AED]/20 peer-checked:text-purple-300 peer-checked:border-[#7C3AED]/60">Valor da parcela</span></label></div>
+    </div>
+    
+    <div class="flex bg-[#121212] rounded-xl p-1">
+      <button type="button" id="btn-rep-unica" onclick="setRepetition('unica')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-receipt text-base"></i>Única</button>
+      <button type="button" id="btn-rep-fixa" onclick="setRepetition('fixa')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-repeat text-base"></i>Fixa</button>
+      <button type="button" id="btn-rep-parcelada" onclick="setRepetition('parcelada')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-credit-card text-base"></i>Parcelada</button>
+    </div>
+  </div>
+  <button type="submit" class="hidden">Salvar</button></form></div></div></div>
   <div id="modal-category-select" class="absolute inset-0 bg-black/90 z-[58] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end"><div id="modal-category-select-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[70vh]"><div class="flex justify-between items-center p-5 border-b border-gray-800"><h3 class="text-lg font-medium text-white">Selecione a Categoria</h3><button type="button" onclick="closeCategorySelectModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button></div><div class="overflow-y-auto p-2" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))" id="category-select-list"></div></div></div>
   <div id="modal-simple-confirm" class="absolute inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end"><div id="modal-simple-confirm-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))"><h3 class="text-xl font-bold text-white mb-2" id="simple-confirm-title">Excluir</h3><p class="text-sm text-gray-400 mb-8" id="simple-confirm-desc"></p><div class="flex gap-4"><button onclick="closeSimpleConfirm()" class="flex-1 py-4 rounded-xl bg-[#2C2C2E] text-white font-medium tap-effect">Cancelar</button><button onclick="executeSimpleConfirm()" class="flex-1 py-4 rounded-xl bg-red-500 text-white font-bold tap-effect">Confirmar</button></div></div></div>
   <div id="modal-repeat-confirm" class="absolute inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end"><div id="modal-repeat-confirm-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))"><h3 class="text-xl font-bold text-white mb-2" id="repeat-confirm-title">Transação Repetida</h3><p class="text-sm text-gray-400 mb-6">Esta é uma transação que se repete. Onde deseja aplicar a alteração?</p><div class="flex flex-col gap-3"><button id="btn-repeat-all" onclick="executeRepeatAction('all')" class="w-full py-4 rounded-xl bg-roxo text-white font-bold tap-effect">Esta e as seguintes</button><button onclick="executeRepeatAction('single')" class="w-full py-4 rounded-xl bg-[#2C2C2E] text-white font-medium tap-effect">Somente esta</button><button onclick="closeRepeatConfirm()" class="w-full py-4 rounded-xl bg-transparent text-gray-500 font-medium tap-effect">Cancelar</button></div></div></div>
@@ -238,7 +256,6 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
   import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-  // ⚠️ ATENÇÃO: SUBSTITUA O BLOCO ABAIXO PELO CÓDIGO DO SEU FIREBASE
   const firebaseConfig = {
     apiKey: "AIzaSyDd4ha2rWMUEvldDzEa5QWzhR1kJ2q6P1o",
     authDomain: "controle-financeiro-amigos.firebaseapp.com",
@@ -270,7 +287,6 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     location.reload(); 
   };
 
-  // Envia dados para a Nuvem de forma silênciosa
   window.syncDataToCloud = async (txs, cats) => {
     if (!window.currentUser) return;
     try {
@@ -284,16 +300,25 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     } catch (error) { console.error("Erro Nuvem:", error); }
   };
 
-  // Monitor do Estado de Login
+  window.forceCloudSync = async () => {
+    if (!window.currentUser) {
+      alert("Você precisa fazer login primeiro.");
+      return;
+    }
+    try {
+      alert("Sincronizando com a nuvem...");
+      await window.syncDataToCloud(window.getTxs(), window.getCats());
+      alert("Sincronização concluída com sucesso!");
+    } catch (err) { alert("Falha na sincronização."); }
+  };
+
   onAuthStateChanged(auth, async (user) => {
     window.authResolved = true;
     if (user) {
-      // Limpa a escolha offline, pois agora ele logou
       localStorage.removeItem('user_chose_offline');
       window.currentUser = user;
       document.getElementById('login-screen').classList.add('hidden');
       
-      // Interface do Usuário Logado
       document.getElementById('user-info').classList.remove('hidden');
       document.getElementById('user-name').innerText = user.displayName;
       document.getElementById('user-email').innerText = user.email;
@@ -305,8 +330,8 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
       btnLog.classList.replace('bg-[#2C2C2E]', 'bg-red-500/10');
       
       document.getElementById('last-sync-time').classList.remove('hidden');
+      document.getElementById('btn-force-sync').classList.remove('hidden');
 
-      // Puxar do Banco
       const docSnap = await getDoc(doc(db, "users", user.uid));
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -316,7 +341,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
       }
     } else {
       window.currentUser = null;
-      // Só mostra a tela de login se ele NUNCA tiver clicado em "Usar offline"
+      document.getElementById('btn-force-sync').classList.add('hidden');
       if(!localStorage.getItem('user_chose_offline')) {
          document.getElementById('login-screen').classList.remove('hidden');
       }
@@ -331,8 +356,8 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 <script>
 let minTimePassed = false;
 
-// Garante que o splash fique visível por pelo menos 1.2 segundos para carregar e ficar bonito
-setTimeout(() => { minTimePassed = true; window.checkAppReady(); }, 1200);
+// Agora destrava a tela de carregamento muito mais rápido (400ms em vez de 1200ms)
+setTimeout(() => { minTimePassed = true; window.checkAppReady(); }, 400);
 
 window.checkAppReady = () => {
   if (minTimePassed && window.authResolved) {
@@ -363,7 +388,6 @@ let editingTxId=null,editingCatId=null,pendingAction=null,pendingData=null;
 let txTab='avulsas',catFilter='all',sortedCats=[],detailCat=null;
 let newCatIcon='tag',editCatIcon='tag',currentIconTarget='new';
 
-// Integração com a Nuvem
 window.getTxs = () => transactions;
 window.getCats = () => categories;
 window.replaceData = (txs, cats, syncDate) => {
@@ -462,15 +486,14 @@ function closeFilterModal() { hideSheet('modal-filter', 'modal-filter-content');
 function applyFilter(i) { catFilter = i < 0 ? 'all' : categories[i].name; closeFilterModal(); updateUI(); }
 
 function updateTransactionsList(monthList){
-  ['avulsas','parceladas','fixas','entradas','neutros'].forEach(k=>{const btn=document.getElementById('sub-'+k);if(btn)btn.className='shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect '+(k===txTab?'seg-on':'seg-off');});
+  ['avulsas','parceladas','fixas','entradas_neutros'].forEach(k=>{const btn=document.getElementById('sub-'+k);if(btn)btn.className='shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect '+(k===txTab?'seg-on':'seg-off');});
   const subCat=catFilter==='all'?'Todas as categorias':esc(catFilter);
   document.getElementById('active-filter-text').innerText=catFilter==='all'?'Filtrar':esc(catFilter);
   document.getElementById('tx-summary-sub').innerText=`• ${subCat}`;
   const pass=t=>catFilter==='all'||t.category===catFilter, fm=monthList.filter(pass), list=document.getElementById('transactions-list'), rep=t=>t.repetition||'unica';
   
   const view = fm.filter(t => {
-    if (txTab === 'entradas') return t.type === 'income';
-    if (txTab === 'neutros') return t.type === 'neutral';
+    if (txTab === 'entradas_neutros') return t.type === 'income' || t.type === 'neutral';
     if (t.type === 'income' || t.type === 'neutral') return false;
     if (txTab === 'avulsas') return rep(t) === 'unica';
     if (txTab === 'fixas') return rep(t) === 'fixa';
@@ -479,8 +502,7 @@ function updateTransactionsList(monthList){
   });
 
   let valToShow = view.reduce((a,t)=>a+(t.type==='expense'?t.amount:0),0), colorToShow = 'text-red-400', labelToShow = 'Gastos do Mês';
-  if (txTab === 'entradas') { valToShow = view.reduce((a,t)=>a+(t.type==='income'?t.amount:0),0); colorToShow = 'text-green-500'; labelToShow = 'Entradas do Mês'; }
-  else if (txTab === 'neutros') { valToShow = view.reduce((a,t)=>a+(t.type==='neutral'?t.amount:0),0); colorToShow = 'text-blue-400'; labelToShow = 'Registros Neutros'; }
+  if (txTab === 'entradas_neutros') { valToShow = view.reduce((a,t)=>a+(t.type==='income'?t.amount:0),0); colorToShow = 'text-green-500'; labelToShow = 'Entradas do Mês'; }
 
   document.getElementById('tx-summary-label').innerText = labelToShow;
   document.getElementById('tx-summary-val').innerText = formatCurrency(valToShow);
@@ -488,6 +510,18 @@ function updateTransactionsList(monthList){
 
   if(!view.length){list.innerHTML=`<div class="text-center py-12 text-gray-500"><i class="ph ph-receipt text-5xl mb-3 opacity-30"></i><p>Nenhuma transação aqui.</p></div>`;return;}
   const gm=groupMin();
+  
+  // Renderização separada para Entradas e Neutros
+  if(txTab === 'entradas_neutros'){ 
+      let incHTML = view.filter(t=>t.type==='income').sort((a,b)=>a.date<b.date?1:-1).map(t=>txRow(t,subText(t,gm))).join('');
+      let neuHTML = view.filter(t=>t.type==='neutral').sort((a,b)=>a.date<b.date?1:-1).map(t=>txRow(t,subText(t,gm))).join('');
+      let finalHTML = '';
+      if(incHTML) finalHTML += `<div class="mb-5"><h3 class="text-[13px] font-semibold text-gray-400 mb-1 border-b border-gray-800 pb-2">Entradas</h3>${incHTML}</div>`;
+      if(neuHTML) finalHTML += `<div class="mb-5"><h3 class="text-[13px] font-semibold text-gray-400 mb-1 border-b border-gray-800 pb-2">Neutros</h3>${neuHTML}</div>`;
+      list.innerHTML = finalHTML;
+      return; 
+  }
+
   if(txTab!=='avulsas'){ list.innerHTML=view.sort((a,b)=>a.date<b.date?1:-1).map(t=>txRow(t,subText(t,gm))).join('');return; }
   const grouped={};view.forEach(t=>(grouped[t.date]=grouped[t.date]||[]).push(t));
   list.innerHTML=Object.keys(grouped).sort().reverse().map(date=>{const d=new Date(date+'T12:00:00');return `<div class="mb-5"><h3 class="text-[13px] font-semibold text-gray-400 mb-1 capitalize border-b border-gray-800 pb-2">${d.toLocaleDateString('pt-BR',{weekday:'long'})}, ${d.toLocaleDateString('pt-BR',{day:'2-digit'})}</h3>${grouped[date].map(t=>txRow(t,subText(t,gm))).join('')}</div>`;}).join('');
@@ -566,7 +600,6 @@ function closeModal(){hideSheet('modal','modal-content');}
 function setType(type){currentType=type;const e=document.getElementById('btn-expense'),i=document.getElementById('btn-income'),n=document.getElementById('btn-neutral'),base='flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg transition-all tap-effect ';e.className=base+(type==='expense'?'bg-red-500/20 text-red-500 border border-red-500/50':'text-gray-400 border border-transparent');i.className=base+(type==='income'?'bg-green-500/20 text-green-500 border border-green-500/50':'text-gray-400 border border-transparent');n.className=base+(type==='neutral'?'bg-blue-500/20 text-blue-400 border border-blue-500/50':'text-gray-400 border border-transparent');document.getElementById('rep-section').style.display='block';const dateInput=document.getElementById('date');dateInput.type='date';dateInput.required=true;if(dateInput.value.length===7){dateInput.value=dateInput.value+'-01';}setRepetition(currentRepetition||'unica');}
 function setRepetition(type){currentRepetition=type;const base='flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect ';[['unica','btn-rep-unica'],['fixa','btn-rep-fixa'],['parcelada','btn-rep-parcelada']].forEach(([k,id])=>{document.getElementById(id).className=base+(k===type?'seg-on':'seg-off');});document.getElementById('installments-div').classList.toggle('hidden',type!=='parcelada');const dw=document.getElementById('date-wrapper');if(type==='unica')dw.classList.remove('hidden');else{dw.classList.add('hidden');document.getElementById('date').value=todayStr();}}
 
-// Ações da aba Mais
 function toggleLogin() { if(window.currentUser){ if(window.logoutGoogle) window.logoutGoogle(); } else { if(window.loginComGoogle) window.loginComGoogle(); } }
 function clearLocalData() {
   if(confirm('Isso apagará o app deste navegador. Os dados na nuvem estão seguros. Continuar?')) {
@@ -576,15 +609,20 @@ function clearLocalData() {
 function clearAllData() { pendingAction='clear_all'; openSimpleConfirm('Excluir Tudo', 'Todos os seus dados (inclusive na nuvem) serão apagados para sempre. Continuar?'); }
 
 function exportData(){const blob=new Blob([JSON.stringify({transactions,categories})],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='MeuControle_Backup.json';a.click();URL.revokeObjectURL(url);}
+
 function importData(event){
   const file=event.target.files[0];if(!file)return; const r=new FileReader();
-  r.onload=e=>{
+  r.onload=async e=>{
     try{
       const d=JSON.parse(e.target.result);
       if(d.transactions) transactions=d.transactions;
       if(d.categories) categories=d.categories;
       updateUI(); 
-      alert('Dados restaurados e sincronizados!');
+      // Se tiver logado, sobe o backup instantaneamente pro firebase!
+      if(window.currentUser && window.syncDataToCloud) {
+         await window.syncDataToCloud(transactions, categories);
+      }
+      alert('Dados restaurados e sincronizados com a nuvem com sucesso!');
     }catch(err){alert('Erro ao ler o arquivo.');}
   };
   r.readAsText(file);
