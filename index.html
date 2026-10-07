@@ -82,9 +82,9 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
   </div>
 </div>
 
-<!-- TELA DE LOGIN CENTRALIZADA -->
-<div id="login-screen" class="fixed inset-0 z-[9000] bg-[#121212] hidden flex-col items-center justify-center p-6 transition-opacity duration-300">
-  <div class="w-full max-w-sm flex flex-col items-center justify-center">
+<!-- TELA DE LOGIN CENTRALIZADA (Layout Exato ao Splash Screen) -->
+<div id="login-screen" class="fixed inset-0 z-[9000] flex flex-col items-center justify-center bg-[#121212] hidden transition-opacity duration-300">
+  <div class="w-full max-w-sm px-6 flex flex-col items-center justify-center">
     <div class="w-24 h-24 bg-roxo rounded-3xl flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(124,58,237,0.5)]">
         <i class="ph-fill ph-cloud-arrow-up text-5xl text-white"></i>
     </div>
@@ -103,8 +103,20 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
   </div>
 </div>
 
+<!-- TELA DE LOADING DE AUTENTICAÇÃO (Spinner) -->
+<div id="auth-loading" class="fixed inset-0 z-[9500] flex flex-col items-center justify-center bg-[#121212] hidden">
+  <div class="relative flex items-center justify-center w-20 h-20 mb-4">
+    <div class="absolute inset-0 bg-roxo rounded-3xl animate-ping opacity-40"></div>
+    <div class="relative z-10 w-20 h-20 bg-roxo rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(124,58,237,0.5)]">
+      <i class="ph-fill ph-spinner-gap animate-spin text-4xl text-white"></i>
+    </div>
+  </div>
+  <h2 class="text-white font-bold text-xl tracking-tight mt-2">Conectando...</h2>
+</div>
+
 <div class="app">
-  <header class="shrink-0 hdr border-b border-gray-800 z-20" style="background:#121212">
+  <!-- CABEÇALHO COM ID PARA PODER SER OCULTADO -->
+  <header id="main-header" class="shrink-0 hdr border-b border-gray-800 z-20" style="background:#121212">
     <div class="flex justify-between items-center mb-2 w-4/5 mx-auto">
       <button onclick="changeMonth(-1)" class="p-2 text-gray-400 tap-effect"><i class="ph ph-caret-left text-xl"></i></button>
       <span id="current-month-display" class="font-medium text-gray-200 text-lg capitalize w-40 text-center tracking-wide transition-opacity duration-200"></span>
@@ -125,6 +137,9 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
       </div>
     </div>
   </header>
+  
+  <!-- ESPAÇADOR QUE ASSUME O LUGAR DO CABEÇALHO PARA MANTER O CORTE DA CAMERA (NOTCH) -->
+  <div id="top-spacer" class="shrink-0 hdr hidden bg-[#121212]"></div>
 
   <div id="scroll" class="flex-1 overflow-y-auto overscroll-contain px-4 pt-5 pb-10">
     <main id="tab-home" class="tab-content active animate-month">
@@ -137,10 +152,10 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 
     <main id="tab-transactions" class="tab-content animate-month">
       <div class="flex bg-[#1C1C1E] rounded-xl p-1 mb-4 overflow-x-auto gap-1" style="-webkit-overflow-scrolling: touch;">
-        <button id="sub-avulsas" onclick="setTxTab('avulsas')" class="shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Avulsas</button>
-        <button id="sub-parceladas" onclick="setTxTab('parceladas')" class="shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Parceladas</button>
-        <button id="sub-fixas" onclick="setTxTab('fixas')" class="shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Fixas</button>
-        <button id="sub-entradas_neutros" onclick="setTxTab('entradas_neutros')" class="shrink-0 min-w-[85px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Entradas/Neutro</button>
+        <button id="sub-avulsas" onclick="setTxTab('avulsas')" class="shrink-0 px-3 whitespace-nowrap flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Avulsas</button>
+        <button id="sub-parceladas" onclick="setTxTab('parceladas')" class="shrink-0 px-3 whitespace-nowrap flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Parceladas</button>
+        <button id="sub-fixas" onclick="setTxTab('fixas')" class="shrink-0 px-3 whitespace-nowrap flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Fixas</button>
+        <button id="sub-entradas_neutros" onclick="setTxTab('entradas_neutros')" class="shrink-0 px-3 whitespace-nowrap flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Entradas/Neutro</button>
       </div>
       
       <div class="card-bg rounded-2xl p-4 mb-5 flex justify-between items-center shadow-md border border-gray-800/50">
@@ -197,7 +212,6 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
         <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
         <button onclick="document.getElementById('importFile').click()" class="w-full bg-[#2C2C2E] text-white py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect"><i class="ph ph-upload-simple text-xl text-roxo"></i> Substituir com Arquivo (.json)</button>
         
-        <!-- Botão Novo: Forçar Sincronização Manual com Nuvem -->
         <button onclick="forceCloudSync()" id="btn-force-sync" class="w-full bg-roxo/20 border border-roxo/50 text-roxo py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect hidden"><i class="ph ph-arrows-clockwise text-xl"></i> Forçar Sincronização (Nuvem)</button>
       </div>
 
@@ -227,13 +241,10 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
   
   <div id="rep-section" class="mb-2">
     <label class="text-xs text-gray-500 mb-2 block">Repetição</label>
-    
-    <!-- Inputs do parcelamento MOVIDOS PARA CIMA dos botões -->
     <div id="installments-div" class="hidden mb-4 bg-[#121212] rounded-xl p-4 flex flex-col gap-4">
       <div class="flex items-center"><i class="ph ph-copy text-gray-400 text-xl mr-3"></i><input type="number" id="installments-count" min="2" max="48" inputmode="numeric" placeholder="Quantidade de parcelas" class="w-full bg-transparent outline-none text-white text-lg"></div>
       <div class="flex gap-2"><label class="flex-1 cursor-pointer"><input type="radio" name="inst_type" value="total" checked class="sr-only peer"><span class="block text-center py-2.5 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 border border-transparent peer-checked:bg-[#7C3AED]/20 peer-checked:text-purple-300 peer-checked:border-[#7C3AED]/60">Valor total</span></label><label class="flex-1 cursor-pointer"><input type="radio" name="inst_type" value="parcela" class="sr-only peer"><span class="block text-center py-2.5 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 border border-transparent peer-checked:bg-[#7C3AED]/20 peer-checked:text-purple-300 peer-checked:border-[#7C3AED]/60">Valor da parcela</span></label></div>
     </div>
-    
     <div class="flex bg-[#121212] rounded-xl p-1">
       <button type="button" id="btn-rep-unica" onclick="setRepetition('unica')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-receipt text-base"></i>Única</button>
       <button type="button" id="btn-rep-fixa" onclick="setRepetition('fixa')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-repeat text-base"></i>Fixa</button>
@@ -274,10 +285,13 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
   window.authResolved = false;
 
   window.loginComGoogle = async () => {
+    // Exibe overlay de Loading para não piscar a tela
+    document.getElementById('auth-loading').classList.remove('hidden');
     try { 
       await signInWithPopup(auth, provider); 
     } catch (error) { 
-      console.error("Erro no login", error); 
+      console.error("Erro no login", error);
+      document.getElementById('auth-loading').classList.add('hidden');
       alert("Falha no login: " + error.message + "\n\nDICA: Certifique-se de que o provedor Google está Ativado no Firebase (Aba Authentication) e seu domínio está na lista de Domínios Autorizados.");
     }
   };
@@ -301,10 +315,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
   };
 
   window.forceCloudSync = async () => {
-    if (!window.currentUser) {
-      alert("Você precisa fazer login primeiro.");
-      return;
-    }
+    if (!window.currentUser) { alert("Você precisa fazer login primeiro."); return; }
     try {
       alert("Sincronizando com a nuvem...");
       await window.syncDataToCloud(window.getTxs(), window.getCats());
@@ -346,6 +357,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
          document.getElementById('login-screen').classList.remove('hidden');
       }
     }
+    document.getElementById('auth-loading').classList.add('hidden'); // Remove loading assim que resolver
     window.checkAppReady();
   });
 </script>
@@ -356,7 +368,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 <script>
 let minTimePassed = false;
 
-// Agora destrava a tela de carregamento muito mais rápido (400ms em vez de 1200ms)
+// Destrava a tela de carregamento rápido (400ms)
 setTimeout(() => { minTimePassed = true; window.checkAppReady(); }, 400);
 
 window.checkAppReady = () => {
@@ -413,13 +425,31 @@ function handleAmountInput(e){
 }
 function parseCurrency(v){return v?parseFloat(v.replace(/\./g,'').replace(',','.')):0;}
 
-let tsX=0,tsY=0;
-document.body.addEventListener('touchstart',e=>{tsX=e.changedTouches[0].screenX;tsY=e.changedTouches[0].screenY;},{passive:true});
-document.body.addEventListener('touchend',e=>{
-  if(e.target.closest('.overflow-x-auto')||document.querySelector('.absolute.inset-0:not(.hidden)')) return;
-  const dx=tsX-e.changedTouches[0].screenX,dy=tsY-e.changedTouches[0].screenY;
-  if(Math.abs(dx)>Math.abs(dy)*1.5 && Math.abs(dx)>50) changeMonth(dx>0?1:-1);
-},{passive:true});
+// LÓGICA DE SWIPE REESCRITA (Aplicado na área principal de rolagem)
+let startX=0, startY=0;
+const scrollArea = document.getElementById('scroll');
+scrollArea.addEventListener('touchstart', e => {
+  startX = e.touches[0].clientX;
+  startY = e.touches[0].clientY;
+}, {passive:true});
+
+scrollArea.addEventListener('touchend', e => {
+  // Ignora se estiver deslizando menus horizontais ou se algum modal estiver aberto
+  if(e.target.closest('.overflow-x-auto') || document.querySelector('.absolute.inset-0:not(.hidden)')) return;
+  
+  let endX = e.changedTouches[0].clientX;
+  let endY = e.changedTouches[0].clientY;
+  let diffX = startX - endX;
+  let diffY = startY - endY;
+
+  // Garante que o movimento foi fortemente horizontal
+  if (Math.abs(diffX) > Math.abs(diffY) * 1.5 && Math.abs(diffX) > 40) {
+    // Muda de mês APENAS se estiver nas abas de Principal ou Transações
+    if(document.getElementById('tab-home').classList.contains('active') || document.getElementById('tab-transactions').classList.contains('active')) {
+      changeMonth(diffX > 0 ? 1 : -1);
+    }
+  }
+}, {passive:true});
 
 function changeMonth(step){
   const els=document.querySelectorAll('.animate-month'),disp=document.getElementById('current-month-display');
@@ -486,7 +516,7 @@ function closeFilterModal() { hideSheet('modal-filter', 'modal-filter-content');
 function applyFilter(i) { catFilter = i < 0 ? 'all' : categories[i].name; closeFilterModal(); updateUI(); }
 
 function updateTransactionsList(monthList){
-  ['avulsas','parceladas','fixas','entradas_neutros'].forEach(k=>{const btn=document.getElementById('sub-'+k);if(btn)btn.className='shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect '+(k===txTab?'seg-on':'seg-off');});
+  ['avulsas','parceladas','fixas','entradas_neutros'].forEach(k=>{const btn=document.getElementById('sub-'+k);if(btn)btn.className='shrink-0 px-3 whitespace-nowrap flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect '+(k===txTab?'seg-on':'seg-off');});
   const subCat=catFilter==='all'?'Todas as categorias':esc(catFilter);
   document.getElementById('active-filter-text').innerText=catFilter==='all'?'Filtrar':esc(catFilter);
   document.getElementById('tx-summary-sub').innerText=`• ${subCat}`;
@@ -511,13 +541,20 @@ function updateTransactionsList(monthList){
   if(!view.length){list.innerHTML=`<div class="text-center py-12 text-gray-500"><i class="ph ph-receipt text-5xl mb-3 opacity-30"></i><p>Nenhuma transação aqui.</p></div>`;return;}
   const gm=groupMin();
   
-  // Renderização separada para Entradas e Neutros
+  // Renderização separada para Entradas e Neutros com Soma no título
   if(txTab === 'entradas_neutros'){ 
-      let incHTML = view.filter(t=>t.type==='income').sort((a,b)=>a.date<b.date?1:-1).map(t=>txRow(t,subText(t,gm))).join('');
-      let neuHTML = view.filter(t=>t.type==='neutral').sort((a,b)=>a.date<b.date?1:-1).map(t=>txRow(t,subText(t,gm))).join('');
+      let incArr = view.filter(t=>t.type==='income');
+      let neuArr = view.filter(t=>t.type==='neutral');
+
+      let incSum = incArr.reduce((s,t)=>s+t.amount,0);
+      let neuSum = neuArr.reduce((s,t)=>s+t.amount,0);
+
+      let incHTML = incArr.sort((a,b)=>a.date<b.date?1:-1).map(t=>txRow(t,subText(t,gm))).join('');
+      let neuHTML = neuArr.sort((a,b)=>a.date<b.date?1:-1).map(t=>txRow(t,subText(t,gm))).join('');
       let finalHTML = '';
-      if(incHTML) finalHTML += `<div class="mb-5"><h3 class="text-[13px] font-semibold text-gray-400 mb-1 border-b border-gray-800 pb-2">Entradas</h3>${incHTML}</div>`;
-      if(neuHTML) finalHTML += `<div class="mb-5"><h3 class="text-[13px] font-semibold text-gray-400 mb-1 border-b border-gray-800 pb-2">Neutros</h3>${neuHTML}</div>`;
+
+      if(incHTML) finalHTML += `<div class="mb-5"><div class="flex justify-between items-end border-b border-gray-800 pb-2 mb-2"><h3 class="text-[13px] font-semibold text-gray-400 uppercase">Entradas <span class="ml-2 text-green-500 font-medium">(${formatCurrency(incSum)})</span></h3></div>${incHTML}</div>`;
+      if(neuHTML) finalHTML += `<div class="mb-5"><div class="flex justify-between items-end border-b border-gray-800 pb-2 mb-2"><h3 class="text-[13px] font-semibold text-gray-400 uppercase">Neutros <span class="ml-2 text-blue-400 font-medium">(${formatCurrency(neuSum)})</span></h3></div>${neuHTML}</div>`;
       list.innerHTML = finalHTML;
       return; 
   }
@@ -592,7 +629,31 @@ function deleteCategory(id){pendingAction='delete_category';pendingData={catId:i
 function openCategorySelectModal(){document.getElementById('category-select-list').innerHTML=categories.map(c=>`<div class="flex items-center gap-4 p-4 border-b border-gray-800 cursor-pointer tap-effect" onclick="selectCategory(${c.id})"><div class="w-9 h-9 rounded-full flex items-center justify-center text-white" style="background:${c.color}"><i class="ph ph-${c.icon} text-lg"></i></div><span class="text-white text-[17px] font-medium">${esc(c.name)}</span></div>`).join('');showSheet('modal-category-select','modal-category-select-content');}
 function closeCategorySelectModal(){hideSheet('modal-category-select','modal-category-select-content');}
 function selectCategory(id){const c=categories.find(x=>x.id===id);if(!c)return;document.getElementById('category').value=c.name;const d=document.getElementById('selected-category-display');d.innerText=c.name;d.classList.replace('text-gray-400','text-white');closeCategorySelectModal();}
-function switchTab(id){document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));setTimeout(()=>document.getElementById('tab-'+id).classList.add('active'),10);document.getElementById('scroll').scrollTop=0;document.querySelectorAll('.nav-btn').forEach(btn=>{const icon=btn.querySelector('i');if(btn.dataset.target===id){btn.classList.replace('text-gray-500','text-roxo');icon.classList.replace('ph','ph-fill');}else{btn.classList.replace('text-roxo','text-gray-500');icon.classList.replace('ph-fill','ph');}});}
+
+// LÓGICA DE OCULTAR O CABEÇALHO COM BASE NA ABA ATIVA
+function switchTab(id){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  setTimeout(()=>document.getElementById('tab-'+id).classList.add('active'),10);
+  document.getElementById('scroll').scrollTop=0;
+  
+  document.querySelectorAll('.nav-btn').forEach(btn=>{
+    const icon=btn.querySelector('i');
+    if(btn.dataset.target===id){btn.classList.replace('text-gray-500','text-roxo');icon.classList.replace('ph','ph-fill');}
+    else{btn.classList.replace('text-roxo','text-gray-500');icon.classList.replace('ph-fill','ph');}
+  });
+
+  // Mostra ou esconde o cabeçalho
+  const header = document.getElementById('main-header');
+  const spacer = document.getElementById('top-spacer');
+  if(id === 'categories' || id === 'more') {
+      header.classList.add('hidden');
+      spacer.classList.remove('hidden');
+  } else {
+      header.classList.remove('hidden');
+      spacer.classList.add('hidden');
+  }
+}
+
 function resetCatDisplay(name){const d=document.getElementById('selected-category-display');d.innerText=name||'Selecione a Categoria';if(name)d.classList.replace('text-gray-400','text-white');else d.classList.replace('text-white','text-gray-400');}
 function openModal(){editingTxId=null;document.getElementById('modal-tx-title').innerText='Nova Transação';document.getElementById('btn-delete-tx').classList.add('hidden');document.getElementById('form').reset();document.getElementById('date').type='date';document.getElementById('date').value=todayStr();document.getElementById('category').value='';resetCatDisplay('');currentRepetition='unica';setType('expense');showSheet('modal','modal-content');}
 function openEditTransaction(id){const t=transactions.find(x=>x.id===id);if(!t)return;editingTxId=id;document.getElementById('modal-tx-title').innerText='Editar Transação';document.getElementById('btn-delete-tx').classList.remove('hidden');document.getElementById('amount').value=t.amount.toFixed(2).replace('.',',').replace(/(\d)(?=(\d{3})+(?!\d))/g,'$1.');document.getElementById('desc').value=t.desc.replace(/ \(\d+\/\d+\)$/,'');document.getElementById('date').type='date';document.getElementById('date').value=t.date;document.getElementById('category').value=t.category;resetCatDisplay(t.category);setType(t.type);currentRepetition=t.repetition||'unica';setRepetition(currentRepetition);showSheet('modal','modal-content');}
@@ -610,19 +671,31 @@ function clearAllData() { pendingAction='clear_all'; openSimpleConfirm('Excluir 
 
 function exportData(){const blob=new Blob([JSON.stringify({transactions,categories})],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='MeuControle_Backup.json';a.click();URL.revokeObjectURL(url);}
 
+// LÓGICA DE AVISO NO UPLOAD DE ARQUIVO
 function importData(event){
-  const file=event.target.files[0];if(!file)return; const r=new FileReader();
+  const file=event.target.files[0];if(!file)return; 
+  
+  const isCloud = window.currentUser && window.syncDataToCloud;
+  const msg = isCloud 
+      ? "Atenção: Ao restaurar este backup, seus dados atuais serão SUBSTITUÍDOS e a nova versão será enviada para a NUVEM imediatamente. Deseja continuar?" 
+      : "Atenção: Seus dados locais serão substituídos por este arquivo. Deseja continuar?";
+
+  if(!confirm(msg)) {
+      event.target.value = ''; // reseta o input caso cancele
+      return;
+  }
+
+  const r=new FileReader();
   r.onload=async e=>{
     try{
       const d=JSON.parse(e.target.result);
       if(d.transactions) transactions=d.transactions;
       if(d.categories) categories=d.categories;
       updateUI(); 
-      // Se tiver logado, sobe o backup instantaneamente pro firebase!
       if(window.currentUser && window.syncDataToCloud) {
          await window.syncDataToCloud(transactions, categories);
       }
-      alert('Dados restaurados e sincronizados com a nuvem com sucesso!');
+      alert('Dados restaurados e sincronizados com sucesso!');
     }catch(err){alert('Erro ao ler o arquivo.');}
   };
   r.readAsText(file);
