@@ -267,6 +267,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
   import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+  // SUAS CREDENCIAIS DO FIREBASE
   const firebaseConfig = {
     apiKey: "AIzaSyDd4ha2rWMUEvldDzEa5QWzhR1kJ2q6P1o",
     authDomain: "controle-financeiro-amigos.firebaseapp.com",
@@ -292,7 +293,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     } catch (error) { 
       console.error("Erro no login", error);
       document.getElementById('auth-loading').classList.add('hidden');
-      alert("Falha no login: " + error.message + "\n\nDICA: Certifique-se de que o provedor Google está Ativado no Firebase (Aba Authentication) e seu domínio está na lista de Domínios Autorizados.");
+      alert("Falha no login: " + error.message + "\n\nDICA: Certifique-se de que o provedor Google está Ativado no Firebase e seu domínio está Autorizado.");
     }
   };
 
@@ -425,29 +426,34 @@ function handleAmountInput(e){
 }
 function parseCurrency(v){return v?parseFloat(v.replace(/\./g,'').replace(',','.')):0;}
 
-// LÓGICA DE SWIPE REESCRITA (Aplicado na área principal de rolagem)
-let startX=0, startY=0;
-const scrollArea = document.getElementById('scroll');
-scrollArea.addEventListener('touchstart', e => {
-  startX = e.touches[0].clientX;
-  startY = e.touches[0].clientY;
+// LÓGICA DE SWIPE TOTALMENTE CORRIGIDA
+let tsX = 0, tsY = 0;
+document.addEventListener('touchstart', e => {
+  tsX = e.touches[0].clientX;
+  tsY = e.touches[0].clientY;
 }, {passive:true});
 
-scrollArea.addEventListener('touchend', e => {
-  // Ignora se estiver deslizando menus horizontais ou se algum modal estiver aberto
-  if(e.target.closest('.overflow-x-auto') || document.querySelector('.absolute.inset-0:not(.hidden)')) return;
+document.addEventListener('touchend', e => {
+  // Ignora se for menu horizontal
+  if(e.target.closest('.overflow-x-auto')) return;
   
-  let endX = e.changedTouches[0].clientX;
-  let endY = e.changedTouches[0].clientY;
-  let diffX = startX - endX;
-  let diffY = startY - endY;
+  // Ignora se QUALQUER tela de sobreposição com fundo preto estiver aberta
+  const isOverlaysOpen = document.querySelector('.bg-black\\/90:not(.hidden), #login-screen:not(.hidden), #auth-loading:not(.hidden)');
+  if(isOverlaysOpen) return;
 
-  // Garante que o movimento foi fortemente horizontal
-  if (Math.abs(diffX) > Math.abs(diffY) * 1.5 && Math.abs(diffX) > 40) {
-    // Muda de mês APENAS se estiver nas abas de Principal ou Transações
-    if(document.getElementById('tab-home').classList.contains('active') || document.getElementById('tab-transactions').classList.contains('active')) {
+  // Só desliza na aba Principal ou Transações
+  const isHome = document.getElementById('tab-home').classList.contains('active');
+  const isTx = document.getElementById('tab-transactions').classList.contains('active');
+  if(!isHome && !isTx) return;
+
+  let teX = e.changedTouches[0].clientX;
+  let teY = e.changedTouches[0].clientY;
+  let diffX = tsX - teX;
+  let diffY = tsY - teY;
+
+  // Verifica se o deslize foi forte na horizontal (Evita ativar deslizando para cima/baixo)
+  if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) * 1.2) {
       changeMonth(diffX > 0 ? 1 : -1);
-    }
   }
 }, {passive:true});
 
@@ -541,7 +547,6 @@ function updateTransactionsList(monthList){
   if(!view.length){list.innerHTML=`<div class="text-center py-12 text-gray-500"><i class="ph ph-receipt text-5xl mb-3 opacity-30"></i><p>Nenhuma transação aqui.</p></div>`;return;}
   const gm=groupMin();
   
-  // Renderização separada para Entradas e Neutros com Soma no título
   if(txTab === 'entradas_neutros'){ 
       let incArr = view.filter(t=>t.type==='income');
       let neuArr = view.filter(t=>t.type==='neutral');
@@ -630,7 +635,6 @@ function openCategorySelectModal(){document.getElementById('category-select-list
 function closeCategorySelectModal(){hideSheet('modal-category-select','modal-category-select-content');}
 function selectCategory(id){const c=categories.find(x=>x.id===id);if(!c)return;document.getElementById('category').value=c.name;const d=document.getElementById('selected-category-display');d.innerText=c.name;d.classList.replace('text-gray-400','text-white');closeCategorySelectModal();}
 
-// LÓGICA DE OCULTAR O CABEÇALHO COM BASE NA ABA ATIVA
 function switchTab(id){
   document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
   setTimeout(()=>document.getElementById('tab-'+id).classList.add('active'),10);
@@ -642,7 +646,6 @@ function switchTab(id){
     else{btn.classList.replace('text-roxo','text-gray-500');icon.classList.replace('ph-fill','ph');}
   });
 
-  // Mostra ou esconde o cabeçalho
   const header = document.getElementById('main-header');
   const spacer = document.getElementById('top-spacer');
   if(id === 'categories' || id === 'more') {
@@ -671,7 +674,6 @@ function clearAllData() { pendingAction='clear_all'; openSimpleConfirm('Excluir 
 
 function exportData(){const blob=new Blob([JSON.stringify({transactions,categories})],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='MeuControle_Backup.json';a.click();URL.revokeObjectURL(url);}
 
-// LÓGICA DE AVISO NO UPLOAD DE ARQUIVO
 function importData(event){
   const file=event.target.files[0];if(!file)return; 
   
@@ -680,10 +682,7 @@ function importData(event){
       ? "Atenção: Ao restaurar este backup, seus dados atuais serão SUBSTITUÍDOS e a nova versão será enviada para a NUVEM imediatamente. Deseja continuar?" 
       : "Atenção: Seus dados locais serão substituídos por este arquivo. Deseja continuar?";
 
-  if(!confirm(msg)) {
-      event.target.value = ''; // reseta o input caso cancele
-      return;
-  }
+  if(!confirm(msg)) { event.target.value = ''; return; }
 
   const r=new FileReader();
   r.onload=async e=>{
@@ -695,7 +694,7 @@ function importData(event){
       if(window.currentUser && window.syncDataToCloud) {
          await window.syncDataToCloud(transactions, categories);
       }
-      alert('Dados restaurados e sincronizados com sucesso!');
+      alert('Dados restaurados e sincronizados com a nuvem com sucesso!');
     }catch(err){alert('Erro ao ler o arquivo.');}
   };
   r.readAsText(file);
