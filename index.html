@@ -2,7 +2,6 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<!-- viewport-fit=cover é essencial para passar por baixo da câmera e da barra inferior -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,58 +14,31 @@
 <style>
 ::-webkit-scrollbar{display:none}
 
-/* 100vw e 100lvh forçam o app a ignorar as barras fantasmas do iOS */
 html, body {
-  margin: 0;
-  padding: 0;
-  width: 100vw;
-  height: 100vh;
-  height: 100lvh; /* Passa por trás da URL no Safari e preenche o PWA */
+  margin: 0; padding: 0;
+  width: 100vw; height: 100vh; height: 100lvh;
   background-color: #1C1C1E; 
-  overflow: hidden;
-  overscroll-behavior: none;
-  touch-action: none; /* Trava totalmente a tela física */
+  overflow: hidden; overscroll-behavior: none;
+  touch-action: none; 
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
 }
+body { color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
 
-body {
-  color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-/* O container principal simplesmente preenche esse espaço cravado */
 .app {
-  width: 100%;
-  height: 100%;
-  max-width: 448px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  background-color: #121212;
-  position: relative;
+  width: 100%; height: 100%; max-width: 448px; margin: 0 auto;
+  display: flex; flex-direction: column;
+  background-color: #121212; position: relative;
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
 .card-bg{background:#1C1C1E}
 
-/* Ajustes de Safe Area para notch e barra inferior com respiro extra para o Dynamic Island */
-.hdr { 
-  padding-top: calc(env(safe-area-inset-top, 24px) + 18px); 
-  padding-bottom: 16px;
-}
-.nav-safe { 
-  padding-bottom: max(calc(env(safe-area-inset-bottom) + 12px), 5px); 
-  padding-top: 0.75rem; 
-}
+.hdr { padding-top: calc(env(safe-area-inset-top, 24px) + 18px); padding-bottom: 16px; }
+.nav-safe { padding-bottom: max(calc(env(safe-area-inset-bottom) + 12px), 5px); padding-top: 0.75rem; }
 
-/* Únicas áreas onde seu dedo pode arrastar (Lista de transações, etc) */
-#scroll, .overflow-y-auto {
-  touch-action: pan-y;
-  overscroll-behavior-y: contain;
-  -webkit-overflow-scrolling: touch;
-}
+#scroll, .overflow-y-auto { touch-action: pan-y; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; }
 
 .tab-content{display:none}
 .tab-content.active{display:block;animation:smoothEnter .3s ease-out forwards}
@@ -78,24 +50,10 @@ body {
 @keyframes sOR{to{transform:translateX(25px);opacity:0}}
 @keyframes sIL{from{transform:translateX(-25px);opacity:0}to{transform:translateX(0);opacity:1}}
 
-/* O SEGREDO DA SPLASH SCREEN NO IOS: Aceleração de Hardware para unificar a camada */
-#splash-screen {
-  -webkit-transform: translate3d(0, 0, 0);
-  transform: translate3d(0, 0, 0);
-  will-change: opacity;
-}
-
-/* Animação de carregamento da Splash Screen */
-@keyframes splashLoader {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-.animate-splash-bar {
-  animation: splashLoader 1.5s ease-in-out infinite;
-}
-.splash-transition {
-  transition: opacity 0.5s ease-out;
-}
+#splash-screen { transform: translate3d(0, 0, 0); will-change: opacity; z-index: 9999; }
+@keyframes splashLoader { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.animate-splash-bar { animation: splashLoader 1.5s ease-in-out infinite; }
+.splash-transition { transition: opacity 0.5s ease-out; }
 
 .text-roxo{color:#7C3AED}.bg-roxo{background:#7C3AED}.fab-button{background:#7C3AED}
 input[type=color]{-webkit-appearance:none;border:none;padding:0}
@@ -106,31 +64,44 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
 .modal-backdrop-transition{transition:opacity .25s ease-out}
 .seg-on{background:rgba(124,58,237,.2);color:#A78BFA;border:1px solid rgba(124,58,237,.55)}
 .seg-off{color:#9CA3AF;border:1px solid transparent}
-.chip-on{background:#7C3AED;color:#fff}.chip-off{background:#2C2C2E;color:#d1d5db}
 </style>
 </head>
 <body class="antialiased select-none">
 
-<!-- SPLASH SCREEN DE CARREGAMENTO -->
-<div id="splash-screen" class="fixed top-0 left-0 right-0 bottom-0 z-[9999] flex flex-col items-center justify-center bg-[#121212] splash-transition">
-  <!-- Ícone pulsante -->
+<!-- SPLASH SCREEN -->
+<div id="splash-screen" class="fixed inset-0 flex flex-col items-center justify-center bg-[#121212] splash-transition">
   <div class="relative flex items-center justify-center w-24 h-24 mb-6">
     <div class="absolute inset-0 bg-roxo rounded-3xl animate-ping opacity-30"></div>
     <div class="relative z-10 w-24 h-24 bg-roxo rounded-3xl flex items-center justify-center shadow-[0_0_40px_rgba(124,58,237,0.5)]">
       <i class="ph-fill ph-wallet text-5xl text-white"></i>
     </div>
   </div>
-  <!-- Título -->
   <h1 class="text-white font-extrabold text-3xl tracking-tight mb-4">Controle Financeiro</h1>
-  <!-- Barra de progresso -->
   <div class="w-16 h-1 bg-[#2C2C2E] rounded-full overflow-hidden relative">
     <div class="absolute top-0 left-0 h-full w-full bg-roxo rounded-full animate-splash-bar"></div>
   </div>
 </div>
 
-<div class="app">
+<!-- TELA DE LOGIN -->
+<div id="login-screen" class="fixed inset-0 z-[9000] bg-[#121212] hidden flex-col items-center justify-center p-6 transition-opacity duration-300">
+  <div class="w-24 h-24 bg-roxo rounded-3xl flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(124,58,237,0.5)]">
+      <i class="ph-fill ph-cloud-arrow-up text-5xl text-white"></i>
+  </div>
+  <h1 class="text-white font-extrabold text-3xl tracking-tight mb-2 text-center">Sincronização Ativa</h1>
+  <p class="text-gray-400 text-center mb-10 px-4 text-sm">Faça login para salvar seus dados na nuvem automaticamente e nunca mais perdê-los.</p>
 
-  <!-- CABEÇALHO -->
+  <!-- O ícone do Google nativo via CDN -->
+  <button onclick="if(window.loginComGoogle) window.loginComGoogle()" class="w-full max-w-sm bg-white text-gray-900 py-4 rounded-2xl font-bold flex justify-center items-center gap-3 tap-effect mb-5 shadow-lg">
+      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.16v2.84A11.002 11.002 0 0 0 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.16A10.978 10.978 0 0 0 1 12c0 1.76.42 3.42 1.16 4.93l3.68-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.16 7.07l3.68 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Entrar com Google
+  </button>
+
+  <button onclick="continueOffline()" class="w-full max-w-sm bg-transparent border border-gray-700 text-gray-400 py-4 rounded-2xl font-medium flex justify-center items-center gap-2 tap-effect">
+      Usar sem conta (Apenas Local)
+  </button>
+</div>
+
+<div class="app">
   <header class="shrink-0 hdr border-b border-gray-800 z-20" style="background:#121212">
     <div class="flex justify-between items-center mb-2 w-4/5 mx-auto">
       <button onclick="changeMonth(-1)" class="p-2 text-gray-400 tap-effect"><i class="ph ph-caret-left text-xl"></i></button>
@@ -153,7 +124,6 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     </div>
   </header>
 
-  <!-- ÁREA ROLÁVEL PRINCIPAL -->
   <div id="scroll" class="flex-1 overflow-y-auto overscroll-contain px-4 pt-5 pb-10">
     <main id="tab-home" class="tab-content active animate-month">
       <div class="card-bg rounded-3xl p-5 shadow-lg">
@@ -164,16 +134,16 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     </main>
 
     <main id="tab-transactions" class="tab-content animate-month">
-      <!-- Abas Reorganizadas -->
+      <!-- Filtro Corrigido (Não corta o último botão mais) -->
       <div class="flex bg-[#1C1C1E] rounded-xl p-1 mb-4 overflow-x-auto gap-1" style="-webkit-overflow-scrolling: touch;">
-        <button id="sub-avulsas" onclick="setTxTab('avulsas')" class="flex-1 min-w-[70px] py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Avulsas</button>
-        <button id="sub-parceladas" onclick="setTxTab('parceladas')" class="flex-1 min-w-[70px] py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Parceladas</button>
-        <button id="sub-fixas" onclick="setTxTab('fixas')" class="flex-1 min-w-[70px] py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Fixas</button>
-        <button id="sub-entradas" onclick="setTxTab('entradas')" class="flex-1 min-w-[70px] py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Entradas</button>
-        <button id="sub-neutros" onclick="setTxTab('neutros')" class="flex-1 min-w-[70px] py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Neutros</button>
+        <button id="sub-avulsas" onclick="setTxTab('avulsas')" class="shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Avulsas</button>
+        <button id="sub-parceladas" onclick="setTxTab('parceladas')" class="shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Parceladas</button>
+        <button id="sub-fixas" onclick="setTxTab('fixas')" class="shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Fixas</button>
+        <button id="sub-entradas" onclick="setTxTab('entradas')" class="shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Entradas</button>
+        <button id="sub-neutros" onclick="setTxTab('neutros')" class="shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Neutros</button>
+        <div class="w-1 shrink-0"></div> <!-- Spacer invisível para dar respiro ao scroll -->
       </div>
       
-      <!-- Card Alinhado: Informação de um lado, Filtro do outro -->
       <div class="card-bg rounded-2xl p-4 mb-5 flex justify-between items-center shadow-md border border-gray-800/50">
         <div class="flex-1 min-w-0 pr-2">
           <p class="text-[10px] text-gray-400 uppercase tracking-wider mb-0.5" id="tx-summary-label">Gastos do Mês</p>
@@ -197,9 +167,7 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
         <form onsubmit="addCategory(event)">
           <div class="flex gap-2 items-center">
             <input type="color" id="cat-color" value="#7C3AED" class="w-12 h-12 rounded-xl cursor-pointer bg-transparent tap-effect shrink-0">
-            <button type="button" id="btn-new-icon" onclick="openIconSelect('new')" class="w-12 h-12 rounded-xl bg-[#2C2C2E] flex items-center justify-center shrink-0 tap-effect text-white">
-              <i class="ph ph-tag text-xl"></i>
-            </button>
+            <button type="button" id="btn-new-icon" onclick="openIconSelect('new')" class="w-12 h-12 rounded-xl bg-[#2C2C2E] flex items-center justify-center shrink-0 tap-effect text-white"><i class="ph ph-tag text-xl"></i></button>
             <input type="text" id="cat-name" placeholder="Nome..." required class="flex-1 min-w-0 bg-[#2C2C2E] text-white rounded-xl p-3 outline-none focus:ring-1 focus:ring-purple-500">
             <button type="submit" class="bg-roxo text-white px-4 py-3 rounded-xl font-bold tap-effect shrink-0">+</button>
           </div>
@@ -209,223 +177,198 @@ input[type=color]::-webkit-color-swatch{border:none;border-radius:12px}
     </main>
 
     <main id="tab-more" class="tab-content">
-      <h2 class="text-xl font-medium text-white mb-5">Mais Opções</h2>
-      <div class="card-bg rounded-2xl p-4 space-y-4 shadow-md">
-        <button onclick="exportData()" class="w-full bg-[#2C2C2E] text-white py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect"><i class="ph ph-export text-xl text-roxo"></i> Fazer Backup (Exportar)</button>
+      <h2 class="text-xl font-medium text-white mb-5">Conta e Dados</h2>
+      <div class="card-bg rounded-2xl p-4 space-y-4 shadow-md mb-6">
+        <div id="user-info" class="flex items-center gap-3 mb-2 hidden">
+            <img id="user-avatar" class="w-12 h-12 rounded-full border-2 border-gray-700 bg-gray-800">
+            <div>
+                <p id="user-name" class="text-white font-medium text-base leading-tight">Nome</p>
+                <p id="user-email" class="text-xs text-gray-400">email@...</p>
+                <p id="last-sync-time" class="text-[10px] text-roxo font-medium mt-1">Última nuvem: ...</p>
+            </div>
+        </div>
+        <button onclick="toggleLogin()" id="btn-toggle-login" class="w-full bg-[#2C2C2E] text-white py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect">
+          <i class="ph ph-google-logo text-xl text-roxo"></i> Entrar com Google
+        </button>
+      </div>
+
+      <h2 class="text-xl font-medium text-white mb-5">Backup e Restauração</h2>
+      <div class="card-bg rounded-2xl p-4 space-y-4 shadow-md mb-6">
+        <button onclick="exportData()" class="w-full bg-[#2C2C2E] text-white py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect"><i class="ph ph-export text-xl text-roxo"></i> Baixar Backup Manual (.json)</button>
         <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
-        <button onclick="document.getElementById('importFile').click()" class="w-full bg-[#2C2C2E] text-white py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect"><i class="ph ph-import text-xl text-roxo"></i> Restaurar Backup</button>
-        <button onclick="clearData()" class="w-full bg-red-500/10 text-red-500 border border-red-500/30 py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect"><i class="ph ph-trash text-xl"></i> Limpar dados atuais</button>
+        <button onclick="document.getElementById('importFile').click()" class="w-full bg-[#2C2C2E] text-white py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect"><i class="ph ph-upload-simple text-xl text-roxo"></i> Substituir com Arquivo (.json)</button>
+      </div>
+
+      <h2 class="text-xl font-medium text-white mb-5">Zona de Perigo</h2>
+      <div class="card-bg rounded-2xl p-4 space-y-4 shadow-md">
+        <button onclick="clearLocalData()" class="w-full bg-[#2C2C2E] text-red-400 py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect"><i class="ph ph-eraser text-xl"></i> Apagar Apenas Cache Local</button>
+        <button onclick="clearAllData()" class="w-full bg-red-500/10 text-red-500 border border-red-500/30 py-4 rounded-xl font-medium flex justify-center items-center gap-2 tap-effect"><i class="ph ph-trash text-xl"></i> Excluir Tudo (Nuvem e Local)</button>
       </div>
     </main>
   </div>
 
-  <!-- BARRA DE NAVEGAÇÃO -->
   <nav class="shrink-0 card-bg border-t border-gray-800 px-6 nav-safe flex justify-between items-center z-30 relative w-full">
     <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-roxo w-14 tap-effect" data-target="home"><i class="ph-fill ph-house text-2xl mb-1"></i><span class="text-[10px] font-medium">Principal</span></button>
     <button onclick="switchTab('transactions')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="transactions"><i class="ph ph-list-dashes text-2xl mb-1"></i><span class="text-[10px] font-medium">Transações</span></button>
-    
-    <!-- Espaçador vazio para manter o design flexível da barra -->
     <div class="w-14"></div>
-    
-    <!-- Botão (+) CRAVADO no exato centro e com o ícone perfeito -->
     <div class="absolute left-1/2 -translate-x-1/2 -top-6">
-      <button onclick="openModal()" class="fab-button text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-[0_8px_16px_rgba(124,58,237,0.4)] tap-effect leading-none">
-        <i class="ph ph-plus"></i>
-      </button>
+      <button onclick="openModal()" class="fab-button text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-[0_8px_16px_rgba(124,58,237,0.4)] tap-effect leading-none"><i class="ph ph-plus"></i></button>
     </div>
-    
     <button onclick="switchTab('categories')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="categories"><i class="ph ph-squares-four text-2xl mb-1"></i><span class="text-[10px] font-medium">Categorias</span></button>
     <button onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-gray-500 w-14 tap-effect" data-target="more"><i class="ph ph-dots-three text-2xl mb-1"></i><span class="text-[10px] font-medium">Mais</span></button>
   </nav>
 
-  <!-- MODAL FILTRO DE CATEGORIAS -->
-  <div id="modal-filter" class="absolute inset-0 bg-black/90 z-[58] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-    <div id="modal-filter-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[70vh]">
-      <div class="flex justify-between items-center p-5 border-b border-gray-800">
-        <h3 class="text-lg font-medium text-white">Filtrar Categoria</h3>
-        <button type="button" onclick="closeFilterModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
-      </div>
-      <div class="overflow-y-auto p-2" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))">
-        <!-- Botão Limpar Filtro -->
-        <div class="flex items-center gap-4 p-4 border-b border-gray-800 cursor-pointer tap-effect" onclick="applyFilter(-1)">
-          <div class="w-9 h-9 rounded-full flex items-center justify-center bg-red-500/10 text-red-500"><i class="ph ph-x text-lg"></i></div>
-          <span class="text-red-400 text-[17px] font-medium">Limpar Filtro</span>
-        </div>
-        <div id="filter-category-list"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAIS RESTANTES -->
-  <div id="modal-cat-detail" class="absolute inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-    <div id="modal-cat-detail-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[80vh]">
-      <div class="flex justify-between items-center p-5 border-b border-gray-800">
-        <div class="flex items-center gap-3 min-w-0"><div id="cd-icon" class="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0"></div><div class="min-w-0"><h3 id="cd-title" class="text-lg font-medium text-white truncate"></h3><p id="cd-total" class="text-sm text-red-400"></p></div></div>
-        <button type="button" onclick="closeCatDetail()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
-      </div>
-      <div class="overflow-y-auto px-5 py-2" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))" id="cd-list"></div>
-    </div>
-  </div>
-
-  <div id="modal" class="absolute inset-0 bg-black/90 z-[55] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-    <div id="modal-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[95vh] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-      <div class="flex justify-between items-center p-5 border-b border-gray-800">
-        <button type="button" onclick="closeModal()" class="text-gray-400 p-2 -ml-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
-        <h3 id="modal-tx-title" class="text-lg font-medium text-white">Nova Transação</h3>
-        <div class="flex">
-          <button type="button" id="btn-delete-tx" onclick="deleteTransactionAction()" class="text-red-500 hidden p-2 tap-effect"><i class="ph ph-trash text-2xl"></i></button>
-          <button type="button" onclick="document.getElementById('form').requestSubmit()" class="text-roxo font-bold p-2 -mr-2 tap-effect"><i class="ph ph-check text-2xl"></i></button>
-        </div>
-      </div>
-      <div class="overflow-y-auto p-5" style="padding-bottom:calc(2rem + env(safe-area-inset-bottom,0px))">
-        <form id="form" onsubmit="saveTransaction(event)">
-          <!-- Tipos de Transação -->
-          <div class="flex bg-[#121212] rounded-xl p-1 mb-6">
-            <button type="button" id="btn-expense" onclick="setType('expense')" class="flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Despesa</button>
-            <button type="button" id="btn-income" onclick="setType('income')" class="flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Entrada</button>
-            <button type="button" id="btn-neutral" onclick="setType('neutral')" class="flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Neutro</button>
-          </div>
-          <div class="mb-6">
-            <label class="text-xs text-gray-500 mb-1 block">Valor</label>
-            <input type="tel" id="amount" inputmode="numeric" oninput="handleAmountInput(event)" required class="w-full text-4xl font-bold text-white bg-transparent border-b border-gray-700 py-2 outline-none focus:border-roxo" placeholder="0,00">
-          </div>
-          <div class="mb-5 flex items-center border-b border-gray-700 py-3"><i class="ph ph-pencil-simple text-gray-400 text-xl mr-3"></i><input type="text" id="desc" required class="w-full bg-transparent outline-none text-white text-lg" placeholder="Descrição"></div>
-          <div class="mb-5 flex items-center border-b border-gray-700 py-3 cursor-pointer tap-effect" onclick="openCategorySelectModal()">
-            <i class="ph ph-tag text-gray-400 text-xl mr-3"></i><div id="selected-category-display" class="flex-1 text-gray-400 text-lg">Selecione a Categoria</div><i class="ph ph-caret-down text-gray-500"></i>
-          </div>
-          <input type="hidden" id="category">
-          
-          <div id="date-wrapper" class="mb-6 flex items-center border-b border-gray-700 py-3">
-            <i class="ph ph-calendar text-gray-400 text-xl mr-3"></i>
-            <input type="date" id="date" required class="w-full bg-transparent outline-none text-white text-lg" style="color-scheme:dark">
-          </div>
-
-          <!-- A Opção de repetição agora aparece para TODOS os tipos -->
-          <div id="rep-section" class="mb-2">
-            <label class="text-xs text-gray-500 mb-2 block">Repetição</label>
-            <div class="flex bg-[#121212] rounded-xl p-1">
-              <button type="button" id="btn-rep-unica" onclick="setRepetition('unica')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-receipt text-base"></i>Única</button>
-              <button type="button" id="btn-rep-fixa" onclick="setRepetition('fixa')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-repeat text-base"></i>Fixa</button>
-              <button type="button" id="btn-rep-parcelada" onclick="setRepetition('parcelada')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-credit-card text-base"></i>Parcelada</button>
-            </div>
-            <div id="installments-div" class="hidden mt-4 bg-[#121212] rounded-xl p-4 flex flex-col gap-4">
-              <div class="flex items-center"><i class="ph ph-copy text-gray-400 text-xl mr-3"></i><input type="number" id="installments-count" min="2" max="48" inputmode="numeric" placeholder="Quantidade de parcelas" class="w-full bg-transparent outline-none text-white text-lg"></div>
-              <div class="flex gap-2">
-                <label class="flex-1 cursor-pointer"><input type="radio" name="inst_type" value="total" checked class="sr-only peer"><span class="block text-center py-2.5 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 border border-transparent peer-checked:bg-[#7C3AED]/20 peer-checked:text-purple-300 peer-checked:border-[#7C3AED]/60">Valor total</span></label>
-                <label class="flex-1 cursor-pointer"><input type="radio" name="inst_type" value="parcela" class="sr-only peer"><span class="block text-center py-2.5 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 border border-transparent peer-checked:bg-[#7C3AED]/20 peer-checked:text-purple-300 peer-checked:border-[#7C3AED]/60">Valor da parcela</span></label>
-              </div>
-            </div>
-          </div>
-          <button type="submit" class="hidden">Salvar</button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-category-select" class="absolute inset-0 bg-black/90 z-[58] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-    <div id="modal-category-select-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[70vh]">
-      <div class="flex justify-between items-center p-5 border-b border-gray-800"><h3 class="text-lg font-medium text-white">Selecione a Categoria</h3><button type="button" onclick="closeCategorySelectModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button></div>
-      <div class="overflow-y-auto p-2" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))" id="category-select-list"></div>
-    </div>
-  </div>
-
-  <div id="modal-simple-confirm" class="absolute inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-    <div id="modal-simple-confirm-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))">
-      <h3 class="text-xl font-bold text-white mb-2" id="simple-confirm-title">Excluir</h3>
-      <p class="text-sm text-gray-400 mb-8" id="simple-confirm-desc"></p>
-      <div class="flex gap-4"><button onclick="closeSimpleConfirm()" class="flex-1 py-4 rounded-xl bg-[#2C2C2E] text-white font-medium tap-effect">Cancelar</button><button onclick="executeSimpleConfirm()" class="flex-1 py-4 rounded-xl bg-red-500 text-white font-bold tap-effect">Confirmar</button></div>
-    </div>
-  </div>
-
-  <div id="modal-repeat-confirm" class="absolute inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-    <div id="modal-repeat-confirm-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))">
-      <h3 class="text-xl font-bold text-white mb-2" id="repeat-confirm-title">Transação Repetida</h3>
-      <p class="text-sm text-gray-400 mb-6">Esta é uma transação que se repete. Onde deseja aplicar a alteração?</p>
-      <div class="flex flex-col gap-3">
-        <button id="btn-repeat-all" onclick="executeRepeatAction('all')" class="w-full py-4 rounded-xl bg-roxo text-white font-bold tap-effect">Esta e as seguintes</button>
-        <button onclick="executeRepeatAction('single')" class="w-full py-4 rounded-xl bg-[#2C2C2E] text-white font-medium tap-effect">Somente esta</button>
-        <button onclick="closeRepeatConfirm()" class="w-full py-4 rounded-xl bg-transparent text-gray-500 font-medium tap-effect">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-category" class="absolute inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-    <div id="modal-category-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col">
-      <div class="flex justify-between items-center p-5 border-b border-gray-800">
-        <button type="button" onclick="closeCategoryModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
-        <h3 class="text-lg font-medium text-white">Editar Categoria</h3>
-        <button type="button" onclick="document.getElementById('form-category').requestSubmit()" class="text-roxo font-bold p-2 tap-effect"><i class="ph ph-check text-2xl"></i></button>
-      </div>
-      <div class="p-5" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))">
-        <form id="form-category" onsubmit="saveCategoryEdit(event)">
-          <div class="flex items-center gap-3">
-            <input type="color" id="edit-cat-color" class="w-14 h-14 rounded-xl cursor-pointer bg-transparent tap-effect shrink-0">
-            <button type="button" id="btn-edit-icon" onclick="openIconSelect('edit')" class="w-14 h-14 rounded-xl bg-[#2C2C2E] flex items-center justify-center shrink-0 tap-effect text-white">
-              <i class="ph ph-tag text-2xl"></i>
-            </button>
-            <input type="text" id="edit-cat-name" required class="flex-1 min-w-0 bg-[#2C2C2E] text-white rounded-xl p-4 outline-none focus:ring-1 focus:ring-purple-500 text-lg" placeholder="Nome da Categoria">
-          </div>
-          <button type="submit" class="hidden">Salvar</button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-icon-select" class="absolute inset-0 bg-black/90 z-[65] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end">
-    <div id="modal-icon-select-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[60vh]">
-      <div class="flex justify-between items-center p-5 border-b border-gray-800">
-        <h3 class="text-lg font-medium text-white">Selecione o Ícone</h3>
-        <button type="button" onclick="closeIconSelect()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button>
-      </div>
-      <div class="overflow-y-auto p-5 grid grid-cols-5 gap-4" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))" id="icon-select-list">
-      </div>
-    </div>
-  </div>
+  <!-- Modais Restantes -->
+  <div id="modal-filter" class="absolute inset-0 bg-black/90 z-[58] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end"><div id="modal-filter-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[70vh]"><div class="flex justify-between items-center p-5 border-b border-gray-800"><h3 class="text-lg font-medium text-white">Filtrar Categoria</h3><button type="button" onclick="closeFilterModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button></div><div class="overflow-y-auto p-2" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))"><div class="flex items-center gap-4 p-4 border-b border-gray-800 cursor-pointer tap-effect" onclick="applyFilter(-1)"><div class="w-9 h-9 rounded-full flex items-center justify-center bg-red-500/10 text-red-500"><i class="ph ph-x text-lg"></i></div><span class="text-red-400 text-[17px] font-medium">Limpar Filtro</span></div><div id="filter-category-list"></div></div></div></div>
+  <div id="modal-cat-detail" class="absolute inset-0 bg-black/90 z-50 hidden opacity-0 modal-backdrop-transition flex flex-col justify-end"><div id="modal-cat-detail-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[80vh]"><div class="flex justify-between items-center p-5 border-b border-gray-800"><div class="flex items-center gap-3 min-w-0"><div id="cd-icon" class="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0"></div><div class="min-w-0"><h3 id="cd-title" class="text-lg font-medium text-white truncate"></h3><p id="cd-total" class="text-sm text-red-400"></p></div></div><button type="button" onclick="closeCatDetail()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button></div><div class="overflow-y-auto px-5 py-2" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))" id="cd-list"></div></div></div>
+  <div id="modal" class="absolute inset-0 bg-black/90 z-[55] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end"><div id="modal-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[95vh] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]"><div class="flex justify-between items-center p-5 border-b border-gray-800"><button type="button" onclick="closeModal()" class="text-gray-400 p-2 -ml-2 tap-effect"><i class="ph ph-x text-2xl"></i></button><h3 id="modal-tx-title" class="text-lg font-medium text-white">Nova Transação</h3><div class="flex"><button type="button" id="btn-delete-tx" onclick="deleteTransactionAction()" class="text-red-500 hidden p-2 tap-effect"><i class="ph ph-trash text-2xl"></i></button><button type="button" onclick="document.getElementById('form').requestSubmit()" class="text-roxo font-bold p-2 -mr-2 tap-effect"><i class="ph ph-check text-2xl"></i></button></div></div><div class="overflow-y-auto p-5" style="padding-bottom:calc(2rem + env(safe-area-inset-bottom,0px))"><form id="form" onsubmit="saveTransaction(event)"><div class="flex bg-[#121212] rounded-xl p-1 mb-6"><button type="button" id="btn-expense" onclick="setType('expense')" class="flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Despesa</button><button type="button" id="btn-income" onclick="setType('income')" class="flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Entrada</button><button type="button" id="btn-neutral" onclick="setType('neutral')" class="flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg tap-effect">Neutro</button></div><div class="mb-6"><label class="text-xs text-gray-500 mb-1 block">Valor</label><input type="tel" id="amount" inputmode="numeric" oninput="handleAmountInput(event)" required class="w-full text-4xl font-bold text-white bg-transparent border-b border-gray-700 py-2 outline-none focus:border-roxo" placeholder="0,00"></div><div class="mb-5 flex items-center border-b border-gray-700 py-3"><i class="ph ph-pencil-simple text-gray-400 text-xl mr-3"></i><input type="text" id="desc" required class="w-full bg-transparent outline-none text-white text-lg" placeholder="Descrição"></div><div class="mb-5 flex items-center border-b border-gray-700 py-3 cursor-pointer tap-effect" onclick="openCategorySelectModal()"><i class="ph ph-tag text-gray-400 text-xl mr-3"></i><div id="selected-category-display" class="flex-1 text-gray-400 text-lg">Selecione a Categoria</div><i class="ph ph-caret-down text-gray-500"></i></div><input type="hidden" id="category"><div id="date-wrapper" class="mb-6 flex items-center border-b border-gray-700 py-3"><i class="ph ph-calendar text-gray-400 text-xl mr-3"></i><input type="date" id="date" required class="w-full bg-transparent outline-none text-white text-lg" style="color-scheme:dark"></div><div id="rep-section" class="mb-2"><label class="text-xs text-gray-500 mb-2 block">Repetição</label><div class="flex bg-[#121212] rounded-xl p-1"><button type="button" id="btn-rep-unica" onclick="setRepetition('unica')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-receipt text-base"></i>Única</button><button type="button" id="btn-rep-fixa" onclick="setRepetition('fixa')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-repeat text-base"></i>Fixa</button><button type="button" id="btn-rep-parcelada" onclick="setRepetition('parcelada')" class="flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect"><i class="ph ph-credit-card text-base"></i>Parcelada</button></div><div id="installments-div" class="hidden mt-4 bg-[#121212] rounded-xl p-4 flex flex-col gap-4"><div class="flex items-center"><i class="ph ph-copy text-gray-400 text-xl mr-3"></i><input type="number" id="installments-count" min="2" max="48" inputmode="numeric" placeholder="Quantidade de parcelas" class="w-full bg-transparent outline-none text-white text-lg"></div><div class="flex gap-2"><label class="flex-1 cursor-pointer"><input type="radio" name="inst_type" value="total" checked class="sr-only peer"><span class="block text-center py-2.5 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 border border-transparent peer-checked:bg-[#7C3AED]/20 peer-checked:text-purple-300 peer-checked:border-[#7C3AED]/60">Valor total</span></label><label class="flex-1 cursor-pointer"><input type="radio" name="inst_type" value="parcela" class="sr-only peer"><span class="block text-center py-2.5 text-sm rounded-lg bg-[#2C2C2E] text-gray-300 border border-transparent peer-checked:bg-[#7C3AED]/20 peer-checked:text-purple-300 peer-checked:border-[#7C3AED]/60">Valor da parcela</span></label></div></div></div><button type="submit" class="hidden">Salvar</button></form></div></div></div>
+  <div id="modal-category-select" class="absolute inset-0 bg-black/90 z-[58] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end"><div id="modal-category-select-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[70vh]"><div class="flex justify-between items-center p-5 border-b border-gray-800"><h3 class="text-lg font-medium text-white">Selecione a Categoria</h3><button type="button" onclick="closeCategorySelectModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button></div><div class="overflow-y-auto p-2" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))" id="category-select-list"></div></div></div>
+  <div id="modal-simple-confirm" class="absolute inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end"><div id="modal-simple-confirm-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))"><h3 class="text-xl font-bold text-white mb-2" id="simple-confirm-title">Excluir</h3><p class="text-sm text-gray-400 mb-8" id="simple-confirm-desc"></p><div class="flex gap-4"><button onclick="closeSimpleConfirm()" class="flex-1 py-4 rounded-xl bg-[#2C2C2E] text-white font-medium tap-effect">Cancelar</button><button onclick="executeSimpleConfirm()" class="flex-1 py-4 rounded-xl bg-red-500 text-white font-bold tap-effect">Confirmar</button></div></div></div>
+  <div id="modal-repeat-confirm" class="absolute inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end"><div id="modal-repeat-confirm-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col p-6" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))"><h3 class="text-xl font-bold text-white mb-2" id="repeat-confirm-title">Transação Repetida</h3><p class="text-sm text-gray-400 mb-6">Esta é uma transação que se repete. Onde deseja aplicar a alteração?</p><div class="flex flex-col gap-3"><button id="btn-repeat-all" onclick="executeRepeatAction('all')" class="w-full py-4 rounded-xl bg-roxo text-white font-bold tap-effect">Esta e as seguintes</button><button onclick="executeRepeatAction('single')" class="w-full py-4 rounded-xl bg-[#2C2C2E] text-white font-medium tap-effect">Somente esta</button><button onclick="closeRepeatConfirm()" class="w-full py-4 rounded-xl bg-transparent text-gray-500 font-medium tap-effect">Cancelar</button></div></div></div>
+  <div id="modal-category" class="absolute inset-0 bg-black/90 z-[60] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end"><div id="modal-category-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col"><div class="flex justify-between items-center p-5 border-b border-gray-800"><button type="button" onclick="closeCategoryModal()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button><h3 class="text-lg font-medium text-white">Editar Categoria</h3><button type="button" onclick="document.getElementById('form-category').requestSubmit()" class="text-roxo font-bold p-2 tap-effect"><i class="ph ph-check text-2xl"></i></button></div><div class="p-5" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))"><form id="form-category" onsubmit="saveCategoryEdit(event)"><div class="flex items-center gap-3"><input type="color" id="edit-cat-color" class="w-14 h-14 rounded-xl cursor-pointer bg-transparent tap-effect shrink-0"><button type="button" id="btn-edit-icon" onclick="openIconSelect('edit')" class="w-14 h-14 rounded-xl bg-[#2C2C2E] flex items-center justify-center shrink-0 tap-effect text-white"><i class="ph ph-tag text-2xl"></i></button><input type="text" id="edit-cat-name" required class="flex-1 min-w-0 bg-[#2C2C2E] text-white rounded-xl p-4 outline-none focus:ring-1 focus:ring-purple-500 text-lg" placeholder="Nome da Categoria"></div><button type="submit" class="hidden">Salvar</button></form></div></div></div>
+  <div id="modal-icon-select" class="absolute inset-0 bg-black/90 z-[65] hidden opacity-0 modal-backdrop-transition flex flex-col justify-end"><div id="modal-icon-select-content" class="w-full card-bg rounded-t-3xl transform translate-y-full modal-content-transition flex flex-col max-h-[60vh]"><div class="flex justify-between items-center p-5 border-b border-gray-800"><h3 class="text-lg font-medium text-white">Selecione o Ícone</h3><button type="button" onclick="closeIconSelect()" class="text-gray-400 p-2 tap-effect"><i class="ph ph-x text-2xl"></i></button></div><div class="overflow-y-auto p-5 grid grid-cols-5 gap-4" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))" id="icon-select-list"></div></div></div>
 </div>
 
+<!-- ========================================== -->
+<!-- 1. MÓDULO FIREBASE (Autenticação e Nuvem)  -->
+<!-- ========================================== -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+  // ⚠️ ATENÇÃO: SUBSTITUA O BLOCO ABAIXO PELO CÓDIGO DO SEU FIREBASE
+  const firebaseConfig = {
+    apiKey: "AIzaSyDd4ha2rWMUEvldDzEa5QWzhR1kJ2q6P1o",
+    authDomain: "controle-financeiro-amigos.firebaseapp.com",
+    projectId: "controle-financeiro-amigos",
+    storageBucket: "controle-financeiro-amigos.firebasestorage.app",
+    messagingSenderId: "1038632180158",
+    appId: "1:1038632180158:web:de57011f699a1f8e9ec1ef"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  window.currentUser = null;
+  window.authResolved = false;
+
+  window.loginComGoogle = async () => {
+    try { await signInWithPopup(auth, provider); } 
+    catch (error) { console.error("Erro no login", error); }
+  };
+
+  window.logoutGoogle = async () => {
+    await signOut(auth);
+    location.reload(); 
+  };
+
+  // Envia dados para a Nuvem de forma silênciosa
+  window.syncDataToCloud = async (txs, cats) => {
+    if (!window.currentUser) return;
+    try {
+      const timestamp = new Date().toISOString();
+      await setDoc(doc(db, "users", window.currentUser.uid), {
+        transactions: txs,
+        categories: cats,
+        lastSync: timestamp
+      });
+      window.updateLastSyncText(timestamp);
+    } catch (error) { console.error("Erro Nuvem:", error); }
+  };
+
+  // Monitor do Estado de Login
+  onAuthStateChanged(auth, async (user) => {
+    window.authResolved = true;
+    if (user) {
+      window.currentUser = user;
+      document.getElementById('login-screen').classList.add('hidden');
+      
+      // Interface do Usuário Logado
+      document.getElementById('user-info').classList.remove('hidden');
+      document.getElementById('user-name').innerText = user.displayName;
+      document.getElementById('user-email').innerText = user.email;
+      document.getElementById('user-avatar').src = user.photoURL || '';
+      
+      const btnLog = document.getElementById('btn-toggle-login');
+      btnLog.innerHTML = `<i class="ph ph-sign-out text-xl"></i> Sair da Conta`;
+      btnLog.classList.replace('text-white', 'text-red-400');
+      btnLog.classList.replace('bg-[#2C2C2E]', 'bg-red-500/10');
+      
+      document.getElementById('last-sync-time').classList.remove('hidden');
+
+      // Puxar do Banco
+      const docSnap = await getDoc(doc(db, "users", user.uid));
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if(data.transactions) window.replaceData(data.transactions, data.categories, data.lastSync);
+      } else {
+        window.syncDataToCloud(window.getTxs(), window.getCats());
+      }
+    } else {
+      window.currentUser = null;
+      if(!window.offlineModeActived) {
+         document.getElementById('login-screen').classList.remove('hidden');
+      }
+    }
+    window.checkAppReady();
+  });
+</script>
+
+<!-- ========================================== -->
+<!-- 2. LÓGICA PADRÃO DO CONTROLE FINANCEIRO    -->
+<!-- ========================================== -->
 <script>
-// A Splash Screen dura 1.5 segundos para garantir que o visual do celular tenha assentado
-window.addEventListener('load', () => {
-  setTimeout(() => {
+let minTimePassed = false;
+window.offlineModeActived = false;
+
+// Garante que o splash fique visível por pelo menos 1.2 segundos para carregar e ficar bonito
+setTimeout(() => { minTimePassed = true; window.checkAppReady(); }, 1200);
+
+window.checkAppReady = () => {
+  if (minTimePassed && window.authResolved) {
     const splash = document.getElementById('splash-screen');
     if(splash) {
-      splash.classList.add('splash-fade-out');
-      setTimeout(() => splash.remove(), 500); 
+      splash.style.opacity = '0';
+      setTimeout(() => splash.classList.add('hidden'), 500);
     }
-  }, 1500); 
-});
+  }
+};
 
-// =========================================================================
-// LÓGICA DO APLICATIVO CONTROLE FINANCEIRO
-// =========================================================================
+function continueOffline() {
+  window.offlineModeActived = true;
+  document.getElementById('login-screen').classList.add('hidden');
+}
+
 const STORAGE_KEY='controle_financeiro_final_v30';
 const CATS_KEY='controle_financeiro_cats_final_v30';
 
-// Adicionado MUITOS ícones novos (Mais de 60 ícones profissionais)
-const ICONS = [
-  'tag', 'car', 'fork-knife', 'shopping-bag', 'house', 'heartbeat', 
-  'graduation-cap', 'airplane-tilt', 'gas-pump', 'gift', 'pawprint', 
-  'device-mobile', 'lightbulb', 'barbell', 't-shirt', 'coffee', 
-  'game-controller', 'briefcase', 'money', 'bus', 'pizza', 'hamburger',
-  'baby', 'cat', 'dog', 'bank', 'credit-card', 'chart-line', 'chart-bar',
-  'coins', 'currency-dollar', 'receipt', 'wallet', 'storefront', 'basket',
-  'armchair', 'monitor', 'laptop', 'book', 'first-aid', 'pill', 'syringe',
-  'heart', 'airplane', 'train', 'bicycle', 'lightning', 'drop', 'fire',
-  'umbrella', 'wrench', 'hammer', 'scissors', 'sneaker', 'sunglasses',
-  'music-notes', 'video-camera', 'popcorn', 'ticket', 'smiley', 'star', 'calendar'
-];
+const ICONS = ['tag','car','fork-knife','shopping-bag','house','heartbeat','graduation-cap','airplane-tilt','gas-pump','gift','pawprint','device-mobile','lightbulb','barbell','t-shirt','coffee','game-controller','briefcase','money','bus','pizza','hamburger','baby','cat','dog','bank','credit-card','chart-line','chart-bar','coins','currency-dollar','receipt','wallet','storefront','basket','armchair','monitor','laptop','book','first-aid','pill','syringe','heart','airplane','train','bicycle','lightning','drop','fire','umbrella','wrench','hammer','scissors','sneaker','sunglasses','music-notes','video-camera','popcorn','ticket','smiley','star','calendar'];
 
 let transactions=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
-let categories=JSON.parse(localStorage.getItem(CATS_KEY))||[
-  {id:1,name:'Carro',color:'#DC2626',icon:'car'},{id:2,name:'Alimentação',color:'#F59E0B',icon:'fork-knife'},
-  {id:3,name:'Compras',color:'#A855F7',icon:'shopping-bag'},{id:4,name:'Outros',color:'#6B7280',icon:'tag'}];
+let categories=JSON.parse(localStorage.getItem(CATS_KEY))||[{id:1,name:'Carro',color:'#DC2626',icon:'car'},{id:2,name:'Alimentação',color:'#F59E0B',icon:'fork-knife'},{id:3,name:'Compras',color:'#A855F7',icon:'shopping-bag'},{id:4,name:'Outros',color:'#6B7280',icon:'tag'}];
 
 let currentType='expense',currentRepetition='unica',myChart=null;
 let displayDate=new Date(),lastKnownRealMonth=new Date().getMonth();
 let editingTxId=null,editingCatId=null,pendingAction=null,pendingData=null;
 let txTab='avulsas',catFilter='all',sortedCats=[],detailCat=null;
-let newCatIcon='tag',editCatIcon='tag';
-let currentIconTarget='new';
+let newCatIcon='tag',editCatIcon='tag',currentIconTarget='new';
+
+// Integração com a Nuvem
+window.getTxs = () => transactions;
+window.getCats = () => categories;
+window.replaceData = (txs, cats, syncDate) => {
+    transactions = txs;
+    if(cats && cats.length > 0) categories = cats;
+    updateUI();
+    if(syncDate) window.updateLastSyncText(syncDate);
+};
+window.updateLastSyncText = (dateStr) => {
+    const d = new Date(dateStr);
+    document.getElementById('last-sync-time').innerText = `Última Nuvem: ${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR').slice(0,5)}`;
+};
 
 const formatCurrency=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);
 const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -434,235 +377,119 @@ const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.get
 const getCat=name=>categories.find(c=>c.name===name);
 
 function handleAmountInput(e){
-  let v=e.target.value.replace(/\D/g,'');
-  if(v===''){e.target.value='';return;}
+  let v=e.target.value.replace(/\D/g,'');if(v===''){e.target.value='';return;}
   e.target.value=(parseInt(v)/100).toFixed(2).replace('.',',').replace(/(\d)(?=(\d{3})+(?!\d))/g,'$1.');
 }
 function parseCurrency(v){return v?parseFloat(v.replace(/\./g,'').replace(',','.')):0;}
 
 let tsX=0,tsY=0;
-document.body.addEventListener('touchstart',e=>{
-  tsX=e.changedTouches[0].screenX;
-  tsY=e.changedTouches[0].screenY;
-},{passive:true});
-
+document.body.addEventListener('touchstart',e=>{tsX=e.changedTouches[0].screenX;tsY=e.changedTouches[0].screenY;},{passive:true});
 document.body.addEventListener('touchend',e=>{
-  if(e.target.closest('.overflow-x-auto')) return;
-  if(document.querySelector('.absolute.inset-0:not(.hidden)')) return;
+  if(e.target.closest('.overflow-x-auto')||document.querySelector('.absolute.inset-0:not(.hidden)')) return;
   const dx=tsX-e.changedTouches[0].screenX,dy=tsY-e.changedTouches[0].screenY;
-  if(Math.abs(dx)>Math.abs(dy)*1.5 && Math.abs(dx)>50){
-    changeMonth(dx>0?1:-1);
-  }
+  if(Math.abs(dx)>Math.abs(dy)*1.5 && Math.abs(dx)>50) changeMonth(dx>0?1:-1);
 },{passive:true});
-
-document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='visible'){
-    const m=new Date().getMonth();
-    if(m!==lastKnownRealMonth){displayDate=new Date();lastKnownRealMonth=m;updateUI();}
-  }
-});
 
 function changeMonth(step){
   const els=document.querySelectorAll('.animate-month'),disp=document.getElementById('current-month-display');
   const out=step>0?'slide-out-left':'slide-out-right',inn=step>0?'slide-in-right':'slide-in-left';
-  disp.style.opacity=0;
-  els.forEach(el=>{el.classList.remove('slide-in-right','slide-in-left','slide-out-left','slide-out-right');el.classList.add(out);});
-  setTimeout(()=>{
-    displayDate.setDate(1);displayDate.setMonth(displayDate.getMonth()+step);updateUI();
-    disp.style.opacity=1;
-    els.forEach(el=>{el.classList.remove(out);el.classList.add(inn);});
-  },200);
+  disp.style.opacity=0;els.forEach(el=>{el.classList.remove('slide-in-right','slide-in-left','slide-out-left','slide-out-right');el.classList.add(out);});
+  setTimeout(()=>{displayDate.setDate(1);displayDate.setMonth(displayDate.getMonth()+step);updateUI();disp.style.opacity=1;els.forEach(el=>{el.classList.remove(out);el.classList.add(inn);});},200);
 }
+function monthTx(){const m=displayDate.getMonth(),y=displayDate.getFullYear();return transactions.filter(t=>{const d=new Date(t.date+'T12:00:00');return d.getMonth()===m&&d.getFullYear()===y;});}
 
-function monthTx(){
-  const m=displayDate.getMonth(),y=displayDate.getFullYear();
-  return transactions.filter(t=>{const d=new Date(t.date+'T12:00:00');return d.getMonth()===m&&d.getFullYear()===y;});
-}
-
+let cloudSyncTimeout;
 function updateUI(){
   const names=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   document.getElementById('current-month-display').innerText=`${names[displayDate.getMonth()]} ${displayDate.getFullYear()}`;
   const list=monthTx();
   let inc=0,exp=0;
-  
-  // O tipo neutro NÃO afeta o saldo nem despesas
-  list.forEach(t=>{
-    if(t.type==='income') inc+=t.amount;
-    else if(t.type==='expense') exp+=t.amount;
-  });
-  
+  list.forEach(t=>{if(t.type==='income') inc+=t.amount; else if(t.type==='expense') exp+=t.amount;});
   document.getElementById('header-balance').innerText=formatCurrency(inc-exp);
   document.getElementById('dash-income').innerText=formatCurrency(inc);
   document.getElementById('dash-expense').innerText=formatCurrency(exp);
   
-  updateChartAndLegend(list);
-  updateTransactionsList(list);
-  updateCategoriesList();
-  if(detailCat!==null)renderCatDetail();
+  updateChartAndLegend(list); updateTransactionsList(list); updateCategoriesList();
+  if(detailCat!==null) renderCatDetail();
   
   localStorage.setItem(STORAGE_KEY,JSON.stringify(transactions));
   localStorage.setItem(CATS_KEY,JSON.stringify(categories));
+
+  // Dispara o salvamento na nuvem (Debounce de 1 segundo para não travar o app)
+  if(window.syncDataToCloud && window.currentUser) {
+    clearTimeout(cloudSyncTimeout);
+    cloudSyncTimeout = setTimeout(() => { window.syncDataToCloud(transactions, categories); }, 1000);
+  }
 }
 
 function updateChartAndLegend(list){
-  const totals={};
-  // Filtra apenas despesas reais no gráfico
-  list.forEach(t=>{if(t.type==='expense')totals[t.category]=(totals[t.category]||0)+t.amount;});
+  const totals={}; list.forEach(t=>{if(t.type==='expense')totals[t.category]=(totals[t.category]||0)+t.amount;});
   sortedCats=Object.entries(totals).sort((a,b)=>b[1]-a[1]).map(([name,total])=>{const c=getCat(name);return{name,total,color:c?c.color:'#6B7280',icon:c?c.icon:'tag'};});
-  const sum=sortedCats.reduce((s,c)=>s+c.total,0);
-  const legend=document.getElementById('custom-legend');
-  legend.innerHTML=sortedCats.length?sortedCats.map((c,i)=>`
-    <div onclick="openCatDetail(${i})" class="flex justify-between items-center py-2.5 cursor-pointer tap-effect">
-      <div class="flex items-center gap-3 min-w-0">
-        <div class="w-9 h-9 rounded-full flex items-center justify-center text-white shrink-0" style="background:${c.color}"><i class="ph ph-${c.icon} text-lg"></i></div>
-        <div class="min-w-0"><p class="text-gray-200 font-medium text-sm truncate">${esc(c.name)}</p><p class="text-[11px] text-gray-500">${Math.round(c.total/sum*100)}%</p></div>
-      </div>
-      <div class="flex items-center gap-2 shrink-0"><span class="text-red-400 font-medium text-sm">${formatCurrency(c.total)}</span><i class="ph ph-caret-right text-gray-600"></i></div>
-    </div>`).join(''):'<p class="text-sm text-center text-gray-500 mt-2">Nenhum gasto registrado neste mês.</p>';
-  
+  const sum=sortedCats.reduce((s,c)=>s+c.total,0), legend=document.getElementById('custom-legend');
+  legend.innerHTML=sortedCats.length?sortedCats.map((c,i)=>`<div onclick="openCatDetail(${i})" class="flex justify-between items-center py-2.5 cursor-pointer tap-effect"><div class="flex items-center gap-3 min-w-0"><div class="w-9 h-9 rounded-full flex items-center justify-center text-white shrink-0" style="background:${c.color}"><i class="ph ph-${c.icon} text-lg"></i></div><div class="min-w-0"><p class="text-gray-200 font-medium text-sm truncate">${esc(c.name)}</p><p class="text-[11px] text-gray-500">${Math.round(c.total/sum*100)}%</p></div></div><div class="flex items-center gap-2 shrink-0"><span class="text-red-400 font-medium text-sm">${formatCurrency(c.total)}</span><i class="ph ph-caret-right text-gray-600"></i></div></div>`).join(''):'<p class="text-sm text-center text-gray-500 mt-2">Nenhum gasto registrado neste mês.</p>';
   if(myChart)myChart.destroy();
-  const ctx=document.getElementById('expensesChart').getContext('2d');
-  const base={responsive:true,maintainAspectRatio:false,cutout:'78%',plugins:{legend:{display:false},tooltip:{enabled:false}}};
-  myChart=sortedCats.length
-    ?new Chart(ctx,{type:'doughnut',data:{labels:sortedCats.map(c=>c.name),datasets:[{data:sortedCats.map(c=>c.total),backgroundColor:sortedCats.map(c=>c.color),borderWidth:0}]},options:{...base,animation:{duration:800,easing:'easeOutQuart'}}})
-    :new Chart(ctx,{type:'doughnut',data:{datasets:[{data:[1],backgroundColor:['#2C2C2E'],borderWidth:0}]},options:base});
+  const ctx=document.getElementById('expensesChart').getContext('2d'), base={responsive:true,maintainAspectRatio:false,cutout:'78%',plugins:{legend:{display:false},tooltip:{enabled:false}}};
+  myChart=sortedCats.length?new Chart(ctx,{type:'doughnut',data:{labels:sortedCats.map(c=>c.name),datasets:[{data:sortedCats.map(c=>c.total),backgroundColor:sortedCats.map(c=>c.color),borderWidth:0}]},options:{...base,animation:{duration:800,easing:'easeOutQuart'}}}):new Chart(ctx,{type:'doughnut',data:{datasets:[{data:[1],backgroundColor:['#2C2C2E'],borderWidth:0}]},options:base});
 }
 
-function openCatDetail(i){
-  detailCat=sortedCats[i].name;renderCatDetail();
-  showSheet('modal-cat-detail','modal-cat-detail-content');
-}
-function closeCatDetail(){
-  detailCat=null; hideSheet('modal-cat-detail','modal-cat-detail-content');
-}
+function openCatDetail(i){detailCat=sortedCats[i].name;renderCatDetail();showSheet('modal-cat-detail','modal-cat-detail-content');}
+function closeCatDetail(){detailCat=null; hideSheet('modal-cat-detail','modal-cat-detail-content');}
 function renderCatDetail(){
-  const cat=getCat(detailCat),col=cat?cat.color:'#6B7280';
-  const items=monthTx().filter(t=>t.type==='expense'&&t.category===detailCat).sort((a,b)=>b.amount-a.amount);
-  document.getElementById('cd-icon').style.background=col;
-  document.getElementById('cd-icon').innerHTML=`<i class="ph ph-${cat?cat.icon:'tag'} text-xl"></i>`;
-  document.getElementById('cd-title').innerText=detailCat;
-  document.getElementById('cd-total').innerText=formatCurrency(items.reduce((s,t)=>s+t.amount,0));
-  const gm=groupMin();
-  document.getElementById('cd-list').innerHTML=items.length?items.map(t=>txRow(t,subText(t,gm))).join(''):'<p class="text-center text-gray-500 py-8">Nenhuma despesa.</p>';
+  const cat=getCat(detailCat),col=cat?cat.color:'#6B7280', items=monthTx().filter(t=>t.type==='expense'&&t.category===detailCat).sort((a,b)=>b.amount-a.amount);
+  document.getElementById('cd-icon').style.background=col; document.getElementById('cd-icon').innerHTML=`<i class="ph ph-${cat?cat.icon:'tag'} text-xl"></i>`;
+  document.getElementById('cd-title').innerText=detailCat; document.getElementById('cd-total').innerText=formatCurrency(items.reduce((s,t)=>s+t.amount,0));
+  const gm=groupMin(); document.getElementById('cd-list').innerHTML=items.length?items.map(t=>txRow(t,subText(t,gm))).join(''):'<p class="text-center text-gray-500 py-8">Nenhuma despesa.</p>';
 }
 
-function groupMin(){
-  const g={}; transactions.forEach(t=>{if(t.groupId&&(!g[t.groupId]||t.date<g[t.groupId]))g[t.groupId]=t.date;}); return g;
-}
-
-// Ocultadas as palavras "Única" e datas em fixas e avulsas
-function subText(t,gm){
-  if(t.repetition==='parcelada') return `${esc(t.category)} • Registro: ${fmtBR(gm[t.groupId]||t.date)}`;
-  return esc(t.category);
-}
+function groupMin(){const g={}; transactions.forEach(t=>{if(t.groupId&&(!g[t.groupId]||t.date<g[t.groupId]))g[t.groupId]=t.date;}); return g;}
+function subText(t,gm){return t.repetition==='parcelada'?`${esc(t.category)} • Reg: ${fmtBR(gm[t.groupId]||t.date)}`:esc(t.category);}
 
 function txRow(t,sub){
   const c=getCat(t.category), col=c?c.color:'#6B7280', ic=c?c.icon:'tag';
-  
-  // Cores dinâmicas para o texto do valor
-  let amtCol = 'text-red-500';
-  if (t.type === 'income') amtCol = 'text-green-500';
-  else if (t.type === 'neutral') amtCol = 'text-blue-400';
-  
-  return `<div class="flex items-center justify-between cursor-pointer tap-effect py-3" onclick="openEditTransaction(${t.id})">
-    <div class="flex items-center gap-4 min-w-0"><div class="w-12 h-12 rounded-full flex items-center justify-center text-white shrink-0" style="background:${col}"><i class="ph ph-${ic} text-xl"></i></div>
-    <div class="min-w-0"><p class="font-medium text-gray-100 text-[16px] mb-0.5 truncate">${esc(t.desc)}</p><p class="text-[12px] text-gray-500 truncate">${sub}</p></div></div>
-    <p class="font-medium ${amtCol} text-[15px] shrink-0 ml-3">${formatCurrency(t.amount)}</p></div>`;
+  let amtCol = t.type === 'income' ? 'text-green-500' : (t.type === 'neutral' ? 'text-blue-400' : 'text-red-500');
+  return `<div class="flex items-center justify-between cursor-pointer tap-effect py-3" onclick="openEditTransaction(${t.id})"><div class="flex items-center gap-4 min-w-0"><div class="w-12 h-12 rounded-full flex items-center justify-center text-white shrink-0" style="background:${col}"><i class="ph ph-${ic} text-xl"></i></div><div class="min-w-0"><p class="font-medium text-gray-100 text-[16px] mb-0.5 truncate">${esc(t.desc)}</p><p class="text-[12px] text-gray-500 truncate">${sub}</p></div></div><p class="font-medium ${amtCol} text-[15px] shrink-0 ml-3">${formatCurrency(t.amount)}</p></div>`;
 }
 
 function setTxTab(t){txTab=t;updateUI();}
-
-/* --- SISTEMA DO FILTRO MODERNO --- */
-function openFilterModal() {
-  document.getElementById('filter-category-list').innerHTML = categories.map((c, i) => `
-    <div class="flex items-center gap-4 p-4 border-b border-gray-800 cursor-pointer tap-effect" onclick="applyFilter(${i})">
-      <div class="w-9 h-9 rounded-full flex items-center justify-center text-white" style="background:${c.color}"><i class="ph ph-${c.icon} text-lg"></i></div>
-      <span class="text-white text-[17px] font-medium">${esc(c.name)}</span>
-    </div>
-  `).join('');
-  showSheet('modal-filter', 'modal-filter-content');
-}
+function openFilterModal() { document.getElementById('filter-category-list').innerHTML = categories.map((c, i) => `<div class="flex items-center gap-4 p-4 border-b border-gray-800 cursor-pointer tap-effect" onclick="applyFilter(${i})"><div class="w-9 h-9 rounded-full flex items-center justify-center text-white" style="background:${c.color}"><i class="ph ph-${c.icon} text-lg"></i></div><span class="text-white text-[17px] font-medium">${esc(c.name)}</span></div>`).join(''); showSheet('modal-filter', 'modal-filter-content'); }
 function closeFilterModal() { hideSheet('modal-filter', 'modal-filter-content'); }
-function applyFilter(i) {
-  catFilter = i < 0 ? 'all' : categories[i].name;
-  closeFilterModal();
-  updateUI();
-}
+function applyFilter(i) { catFilter = i < 0 ? 'all' : categories[i].name; closeFilterModal(); updateUI(); }
 
 function updateTransactionsList(monthList){
-  ['avulsas','parceladas','fixas','entradas','neutros'].forEach(k=>{
-    const btn = document.getElementById('sub-'+k);
-    if(btn) btn.className='flex-1 min-w-[70px] py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect '+(k===txTab?'seg-on':'seg-off');
-  });
-
-  const subCat = catFilter === 'all' ? 'Todas as categorias' : esc(catFilter);
-  document.getElementById('active-filter-text').innerText = catFilter === 'all' ? 'Filtrar' : esc(catFilter);
-  document.getElementById('tx-summary-sub').innerText = `• ${subCat}`;
-
-  const pass=t=>catFilter==='all'||t.category===catFilter;
-  const fm=monthList.filter(pass);
-  const list=document.getElementById('transactions-list');
-  const rep=t=>t.repetition||'unica';
+  ['avulsas','parceladas','fixas','entradas','neutros'].forEach(k=>{const btn=document.getElementById('sub-'+k);if(btn)btn.className='shrink-0 min-w-[75px] flex-1 py-2.5 text-[11px] sm:text-xs font-medium rounded-lg tap-effect '+(k===txTab?'seg-on':'seg-off');});
+  const subCat=catFilter==='all'?'Todas as categorias':esc(catFilter);
+  document.getElementById('active-filter-text').innerText=catFilter==='all'?'Filtrar':esc(catFilter);
+  document.getElementById('tx-summary-sub').innerText=`• ${subCat}`;
+  const pass=t=>catFilter==='all'||t.category===catFilter, fm=monthList.filter(pass), list=document.getElementById('transactions-list'), rep=t=>t.repetition||'unica';
   
   const view = fm.filter(t => {
     if (txTab === 'entradas') return t.type === 'income';
     if (txTab === 'neutros') return t.type === 'neutral';
-    
-    // Ignoramos entradas e neutros para as abas de gastos (avulsas, fixas, parceladas)
     if (t.type === 'income' || t.type === 'neutral') return false;
-    
     if (txTab === 'avulsas') return rep(t) === 'unica';
     if (txTab === 'fixas') return rep(t) === 'fixa';
     if (txTab === 'parceladas') return rep(t) === 'parcelada';
     return false;
   });
 
-  const spent = view.reduce((a,t)=>a+(t.type==='expense'?t.amount:0),0);
-  const earned = view.reduce((a,t)=>a+(t.type==='income'?t.amount:0),0);
-  const neutSum = view.reduce((a,t)=>a+(t.type==='neutral'?t.amount:0),0);
-  
-  let valToShow = spent;
-  let colorToShow = 'text-red-400';
-  let labelToShow = 'Gastos do Mês';
-
-  if (txTab === 'entradas') {
-      valToShow = earned;
-      colorToShow = 'text-green-500';
-      labelToShow = 'Entradas do Mês';
-  } else if (txTab === 'neutros') {
-      valToShow = neutSum;
-      colorToShow = 'text-blue-400';
-      labelToShow = 'Registros Neutros';
-  }
+  let valToShow = view.reduce((a,t)=>a+(t.type==='expense'?t.amount:0),0), colorToShow = 'text-red-400', labelToShow = 'Gastos do Mês';
+  if (txTab === 'entradas') { valToShow = view.reduce((a,t)=>a+(t.type==='income'?t.amount:0),0); colorToShow = 'text-green-500'; labelToShow = 'Entradas do Mês'; }
+  else if (txTab === 'neutros') { valToShow = view.reduce((a,t)=>a+(t.type==='neutral'?t.amount:0),0); colorToShow = 'text-blue-400'; labelToShow = 'Registros Neutros'; }
 
   document.getElementById('tx-summary-label').innerText = labelToShow;
   document.getElementById('tx-summary-val').innerText = formatCurrency(valToShow);
   document.getElementById('tx-summary-val').className = `font-bold text-xl leading-none ${colorToShow}`;
 
-  if(!view.length){
-    list.innerHTML=`<div class="text-center py-12 text-gray-500"><i class="ph ph-receipt text-5xl mb-3 opacity-30"></i><p>Nenhuma transação aqui.</p></div>`;return;
-  }
-  
+  if(!view.length){list.innerHTML=`<div class="text-center py-12 text-gray-500"><i class="ph ph-receipt text-5xl mb-3 opacity-30"></i><p>Nenhuma transação aqui.</p></div>`;return;}
   const gm=groupMin();
-  // Se não for avulsa, apenas lista em ordem de data decrescente (sem cabeçalho de data)
   if(txTab!=='avulsas'){ list.innerHTML=view.sort((a,b)=>a.date<b.date?1:-1).map(t=>txRow(t,subText(t,gm))).join('');return; }
-  
-  // Se for avulsas, agrupa com cabeçalho de data
   const grouped={};view.forEach(t=>(grouped[t.date]=grouped[t.date]||[]).push(t));
-  list.innerHTML=Object.keys(grouped).sort().reverse().map(date=>{
-    const d=new Date(date+'T12:00:00');
-    const h=`${d.toLocaleDateString('pt-BR',{weekday:'long'})}, ${d.toLocaleDateString('pt-BR',{day:'2-digit'})}`;
-    return `<div class="mb-5"><h3 class="text-[13px] font-semibold text-gray-400 mb-1 capitalize border-b border-gray-800 pb-2">${h}</h3>${grouped[date].map(t=>txRow(t,subText(t,gm))).join('')}</div>`;
-  }).join('');
+  list.innerHTML=Object.keys(grouped).sort().reverse().map(date=>{const d=new Date(date+'T12:00:00');return `<div class="mb-5"><h3 class="text-[13px] font-semibold text-gray-400 mb-1 capitalize border-b border-gray-800 pb-2">${d.toLocaleDateString('pt-BR',{weekday:'long'})}, ${d.toLocaleDateString('pt-BR',{day:'2-digit'})}</h3>${grouped[date].map(t=>txRow(t,subText(t,gm))).join('')}</div>`;}).join('');
 }
 
 function saveTransaction(e){
   e.preventDefault();
-  const desc=document.getElementById('desc').value;
-  const total=Math.abs(parseCurrency(document.getElementById('amount').value));
-  const category=document.getElementById('category').value;
-  let rawDate = document.getElementById('date').value;
-  
+  const desc=document.getElementById('desc').value, total=Math.abs(parseCurrency(document.getElementById('amount').value)), category=document.getElementById('category').value, rawDate = document.getElementById('date').value;
   if(!desc||isNaN(total)||total===0||!rawDate||!category){alert('Preencha todos os campos.');return;}
   
   if(editingTxId){
@@ -686,15 +513,12 @@ function saveTransaction(e){
 }
 
 function deleteTransactionAction(){
-  if(!editingTxId)return;
-  const t=transactions.find(x=>x.id===editingTxId);if(!t)return;
-  pendingAction='delete';
-  if(t.groupId&&transactions.some(x=>x.groupId===t.groupId&&x.id!==t.id))openRepeatConfirm('Excluir Transação','delete');
-  else openSimpleConfirm('Excluir Transação','Deseja realmente excluir esta transação?');
+  if(!editingTxId)return; const t=transactions.find(x=>x.id===editingTxId);if(!t)return; pendingAction='delete';
+  if(t.groupId&&transactions.some(x=>x.groupId===t.groupId&&x.id!==t.id))openRepeatConfirm('Excluir Transação','delete'); else openSimpleConfirm('Excluir Transação','Deseja realmente excluir esta transação?');
 }
 function executeRepeatAction(scope){
   const t=transactions.find(x=>x.id===editingTxId);if(!t)return;
-  if(pendingAction==='delete'){ transactions=scope==='all'?transactions.filter(x=>!(x.groupId===t.groupId&&x.date>=t.date)):transactions.filter(x=>x.id!==editingTxId); }
+  if(pendingAction==='delete') transactions=scope==='all'?transactions.filter(x=>!(x.groupId===t.groupId&&x.date>=t.date)):transactions.filter(x=>x.id!==editingTxId);
   else if(pendingAction==='edit'){
     const{desc,totalAmount,category,dateInput}=pendingData;
     if(scope==='all'){ transactions.forEach(x=>{if(x.groupId===t.groupId&&x.date>=t.date){const m=x.desc.match(/ \(\d+\/\d+\)$/);x.desc=m?desc+m[0]:desc;x.amount=totalAmount;x.type=currentType;x.category=category;if(x.id===t.id)x.date=dateInput;}}); }
@@ -714,194 +538,53 @@ function showSheet(mid,cid){const m=document.getElementById(mid),c=document.getE
 function hideSheet(mid,cid){const m=document.getElementById(mid),c=document.getElementById(cid);m.classList.add('opacity-0');c.classList.add('translate-y-full');setTimeout(()=>m.classList.add('hidden'),250);}
 function openSimpleConfirm(t,d){document.getElementById('simple-confirm-title').innerText=t;document.getElementById('simple-confirm-desc').innerText=d;showSheet('modal-simple-confirm','modal-simple-confirm-content');}
 function closeSimpleConfirm(){hideSheet('modal-simple-confirm','modal-simple-confirm-content');}
-function openRepeatConfirm(title,type){
-  document.getElementById('repeat-confirm-title').innerText=title;
-  document.getElementById('btn-repeat-all').className='w-full py-4 rounded-xl text-white font-bold tap-effect '+(type==='delete'?'bg-red-500':'bg-roxo');
-  showSheet('modal-repeat-confirm','modal-repeat-confirm-content');
-}
+function openRepeatConfirm(title,type){document.getElementById('repeat-confirm-title').innerText=title;document.getElementById('btn-repeat-all').className='w-full py-4 rounded-xl text-white font-bold tap-effect '+(type==='delete'?'bg-red-500':'bg-roxo');showSheet('modal-repeat-confirm','modal-repeat-confirm-content');}
 function closeRepeatConfirm(){hideSheet('modal-repeat-confirm','modal-repeat-confirm-content');}
-
-function openIconSelect(target){
-  currentIconTarget = target;
-  const activeIcon = target === 'new' ? newCatIcon : editCatIcon;
-  document.getElementById('icon-select-list').innerHTML = ICONS.map(i => {
-    const bg = i === activeIcon ? 'bg-roxo text-white' : 'bg-[#2C2C2E] text-gray-300';
-    return `<button type="button" onclick="selectIcon('${i}')" class="w-12 h-12 mx-auto rounded-xl flex items-center justify-center tap-effect ${bg}"><i class="ph ph-${i} text-2xl"></i></button>`;
-  }).join('');
-  showSheet('modal-icon-select', 'modal-icon-select-content');
-}
-function closeIconSelect(){ hideSheet('modal-icon-select', 'modal-icon-select-content'); }
-function selectIcon(i){
-  if(currentIconTarget === 'new'){
-    newCatIcon = i;
-    document.getElementById('btn-new-icon').innerHTML = `<i class="ph ph-${i} text-xl"></i>`;
-  } else {
-    editCatIcon = i;
-    document.getElementById('btn-edit-icon').innerHTML = `<i class="ph ph-${i} text-2xl"></i>`;
-  }
-  closeIconSelect();
-}
-
-function updateCategoriesList(){
-  document.getElementById('categories-list').innerHTML=categories.map(c=>`
-    <div class="card-bg p-4 rounded-xl flex items-center justify-between">
-      <div class="flex items-center gap-4 min-w-0"><div class="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0" style="background:${c.color}"><i class="ph ph-${c.icon} text-xl"></i></div><span class="font-medium text-gray-100 truncate">${esc(c.name)}</span></div>
-      <div class="flex gap-2 shrink-0"><button onclick="openEditCategory(${c.id})" class="p-2 text-gray-500 tap-effect"><i class="ph ph-pencil-simple text-xl"></i></button><button onclick="deleteCategory(${c.id})" class="p-2 text-gray-500 tap-effect"><i class="ph ph-trash text-xl"></i></button></div>
-    </div>`).join('');
-}
-function addCategory(e){
-  e.preventDefault();
-  const name=document.getElementById('cat-name').value.trim(),color=document.getElementById('cat-color').value;
-  if(!name)return;
-  categories.push({id:Date.now(),name,color,icon:newCatIcon});
-  document.getElementById('cat-name').value=''; 
-  newCatIcon='tag'; 
-  document.getElementById('btn-new-icon').innerHTML = `<i class="ph ph-tag text-xl"></i>`;
-  updateUI();
-}
-function openEditCategory(id){
-  const c=categories.find(x=>x.id===id);if(!c)return;editingCatId=id;editCatIcon=c.icon||'tag';
-  document.getElementById('edit-cat-name').value=c.name;document.getElementById('edit-cat-color').value=c.color;
-  document.getElementById('btn-edit-icon').innerHTML = `<i class="ph ph-${editCatIcon} text-2xl"></i>`;
-  showSheet('modal-category','modal-category-content');
-}
+function openIconSelect(target){currentIconTarget=target;const activeIcon=target==='new'?newCatIcon:editCatIcon;document.getElementById('icon-select-list').innerHTML=ICONS.map(i=>{const bg=i===activeIcon?'bg-roxo text-white':'bg-[#2C2C2E] text-gray-300';return `<button type="button" onclick="selectIcon('${i}')" class="w-12 h-12 mx-auto rounded-xl flex items-center justify-center tap-effect ${bg}"><i class="ph ph-${i} text-2xl"></i></button>`;}).join('');showSheet('modal-icon-select','modal-icon-select-content');}
+function closeIconSelect(){hideSheet('modal-icon-select','modal-icon-select-content');}
+function selectIcon(i){if(currentIconTarget==='new'){newCatIcon=i;document.getElementById('btn-new-icon').innerHTML=`<i class="ph ph-${i} text-xl"></i>`;}else{editCatIcon=i;document.getElementById('btn-edit-icon').innerHTML=`<i class="ph ph-${i} text-2xl"></i>`;}closeIconSelect();}
+function updateCategoriesList(){document.getElementById('categories-list').innerHTML=categories.map(c=>`<div class="card-bg p-4 rounded-xl flex items-center justify-between"><div class="flex items-center gap-4 min-w-0"><div class="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0" style="background:${c.color}"><i class="ph ph-${c.icon} text-xl"></i></div><span class="font-medium text-gray-100 truncate">${esc(c.name)}</span></div><div class="flex gap-2 shrink-0"><button onclick="openEditCategory(${c.id})" class="p-2 text-gray-500 tap-effect"><i class="ph ph-pencil-simple text-xl"></i></button><button onclick="deleteCategory(${c.id})" class="p-2 text-gray-500 tap-effect"><i class="ph ph-trash text-xl"></i></button></div></div>`).join('');}
+function addCategory(e){e.preventDefault();const name=document.getElementById('cat-name').value.trim(),color=document.getElementById('cat-color').value;if(!name)return;categories.push({id:Date.now(),name,color,icon:newCatIcon});document.getElementById('cat-name').value='';newCatIcon='tag';document.getElementById('btn-new-icon').innerHTML=`<i class="ph ph-tag text-xl"></i>`;updateUI();}
+function openEditCategory(id){const c=categories.find(x=>x.id===id);if(!c)return;editingCatId=id;editCatIcon=c.icon||'tag';document.getElementById('edit-cat-name').value=c.name;document.getElementById('edit-cat-color').value=c.color;document.getElementById('btn-edit-icon').innerHTML=`<i class="ph ph-${editCatIcon} text-2xl"></i>`;showSheet('modal-category','modal-category-content');}
 function closeCategoryModal(){hideSheet('modal-category','modal-category-content');}
-function saveCategoryEdit(e){
-  e.preventDefault();
-  const name=document.getElementById('edit-cat-name').value.trim(),color=document.getElementById('edit-cat-color').value;
-  const c=categories.find(x=>x.id===editingCatId);
-  if(c){const old=c.name;c.name=name;c.color=color;c.icon=editCatIcon;transactions.forEach(t=>{if(t.category===old)t.category=name;});if(catFilter===old)catFilter=name;}
-  closeCategoryModal();updateUI();
-}
-function clearData(){pendingAction='clear_all';openSimpleConfirm('Limpar dados','Todas as transações serão apagadas (as categorias são mantidas). Faça um backup antes se precisar. Continuar?');}
-function deleteCategory(id){pendingAction='delete_category';pendingData={catId:id};openSimpleConfirm('Excluir Categoria','Transações atreladas a esta categoria ficarão sem marcação. Continuar?');}
-
-function openCategorySelectModal(){
-  document.getElementById('category-select-list').innerHTML=categories.map(c=>`
-    <div class="flex items-center gap-4 p-4 border-b border-gray-800 cursor-pointer tap-effect" onclick="selectCategory(${c.id})">
-      <div class="w-9 h-9 rounded-full flex items-center justify-center text-white" style="background:${c.color}"><i class="ph ph-${c.icon} text-lg"></i></div>
-      <span class="text-white text-[17px] font-medium">${esc(c.name)}</span></div>`).join('');
-  showSheet('modal-category-select','modal-category-select-content');
-}
+function saveCategoryEdit(e){e.preventDefault();const name=document.getElementById('edit-cat-name').value.trim(),color=document.getElementById('edit-cat-color').value,c=categories.find(x=>x.id===editingCatId);if(c){const old=c.name;c.name=name;c.color=color;c.icon=editCatIcon;transactions.forEach(t=>{if(t.category===old)t.category=name;});if(catFilter===old)catFilter=name;}closeCategoryModal();updateUI();}
+function deleteCategory(id){pendingAction='delete_category';pendingData={catId:id};openSimpleConfirm('Excluir Categoria','Transações atreladas ficarão sem marcação. Continuar?');}
+function openCategorySelectModal(){document.getElementById('category-select-list').innerHTML=categories.map(c=>`<div class="flex items-center gap-4 p-4 border-b border-gray-800 cursor-pointer tap-effect" onclick="selectCategory(${c.id})"><div class="w-9 h-9 rounded-full flex items-center justify-center text-white" style="background:${c.color}"><i class="ph ph-${c.icon} text-lg"></i></div><span class="text-white text-[17px] font-medium">${esc(c.name)}</span></div>`).join('');showSheet('modal-category-select','modal-category-select-content');}
 function closeCategorySelectModal(){hideSheet('modal-category-select','modal-category-select-content');}
-function selectCategory(id){
-  const c=categories.find(x=>x.id===id);if(!c)return;
-  document.getElementById('category').value=c.name;
-  const d=document.getElementById('selected-category-display');d.innerText=c.name;d.classList.replace('text-gray-400','text-white');
-  closeCategorySelectModal();
-}
-
-function switchTab(id){
-  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
-  setTimeout(()=>document.getElementById('tab-'+id).classList.add('active'),10);
-  document.getElementById('scroll').scrollTop=0;
-  document.querySelectorAll('.nav-btn').forEach(btn=>{
-    const icon=btn.querySelector('i');
-    if(btn.dataset.target===id){btn.classList.replace('text-gray-500','text-roxo');icon.classList.replace('ph','ph-fill');}
-    else{btn.classList.replace('text-roxo','text-gray-500');icon.classList.replace('ph-fill','ph');}
-  });
-}
-function resetCatDisplay(name){
-  const d=document.getElementById('selected-category-display');
-  d.innerText=name||'Selecione a Categoria';
-  if(name)d.classList.replace('text-gray-400','text-white');else d.classList.replace('text-white','text-gray-400');
-}
-
-function openModal(){
-  editingTxId=null;
-  document.getElementById('modal-tx-title').innerText='Nova Transação';
-  document.getElementById('btn-delete-tx').classList.add('hidden');
-  document.getElementById('form').reset();
-  
-  // Reseta inputs
-  document.getElementById('date').type = 'date';
-  document.getElementById('date').value=todayStr();
-  document.getElementById('category').value='';
-  resetCatDisplay('');
-  currentRepetition = 'unica';
-  setType('expense');
-  showSheet('modal','modal-content');
-}
-
-function openEditTransaction(id){
-  const t=transactions.find(x=>x.id===id);if(!t)return;editingTxId=id;
-  document.getElementById('modal-tx-title').innerText='Editar Transação';
-  document.getElementById('btn-delete-tx').classList.remove('hidden');
-  document.getElementById('amount').value=t.amount.toFixed(2).replace('.',',').replace(/(\d)(?=(\d{3})+(?!\d))/g,'$1.');
-  document.getElementById('desc').value=t.desc.replace(/ \(\d+\/\d+\)$/,'');
-  
-  // Restaura a data corretamente independente do tipo
-  document.getElementById('date').type = 'date';
-  document.getElementById('date').value = t.date;
-  
-  document.getElementById('category').value=t.category;resetCatDisplay(t.category);
-  
-  setType(t.type); 
-  currentRepetition = t.repetition || 'unica';
-  setRepetition(currentRepetition);
-  
-  showSheet('modal','modal-content');
-}
+function selectCategory(id){const c=categories.find(x=>x.id===id);if(!c)return;document.getElementById('category').value=c.name;const d=document.getElementById('selected-category-display');d.innerText=c.name;d.classList.replace('text-gray-400','text-white');closeCategorySelectModal();}
+function switchTab(id){document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));setTimeout(()=>document.getElementById('tab-'+id).classList.add('active'),10);document.getElementById('scroll').scrollTop=0;document.querySelectorAll('.nav-btn').forEach(btn=>{const icon=btn.querySelector('i');if(btn.dataset.target===id){btn.classList.replace('text-gray-500','text-roxo');icon.classList.replace('ph','ph-fill');}else{btn.classList.replace('text-roxo','text-gray-500');icon.classList.replace('ph-fill','ph');}});}
+function resetCatDisplay(name){const d=document.getElementById('selected-category-display');d.innerText=name||'Selecione a Categoria';if(name)d.classList.replace('text-gray-400','text-white');else d.classList.replace('text-white','text-gray-400');}
+function openModal(){editingTxId=null;document.getElementById('modal-tx-title').innerText='Nova Transação';document.getElementById('btn-delete-tx').classList.add('hidden');document.getElementById('form').reset();document.getElementById('date').type='date';document.getElementById('date').value=todayStr();document.getElementById('category').value='';resetCatDisplay('');currentRepetition='unica';setType('expense');showSheet('modal','modal-content');}
+function openEditTransaction(id){const t=transactions.find(x=>x.id===id);if(!t)return;editingTxId=id;document.getElementById('modal-tx-title').innerText='Editar Transação';document.getElementById('btn-delete-tx').classList.remove('hidden');document.getElementById('amount').value=t.amount.toFixed(2).replace('.',',').replace(/(\d)(?=(\d{3})+(?!\d))/g,'$1.');document.getElementById('desc').value=t.desc.replace(/ \(\d+\/\d+\)$/,'');document.getElementById('date').type='date';document.getElementById('date').value=t.date;document.getElementById('category').value=t.category;resetCatDisplay(t.category);setType(t.type);currentRepetition=t.repetition||'unica';setRepetition(currentRepetition);showSheet('modal','modal-content');}
 function closeModal(){hideSheet('modal','modal-content');}
+function setType(type){currentType=type;const e=document.getElementById('btn-expense'),i=document.getElementById('btn-income'),n=document.getElementById('btn-neutral'),base='flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg transition-all tap-effect ';e.className=base+(type==='expense'?'bg-red-500/20 text-red-500 border border-red-500/50':'text-gray-400 border border-transparent');i.className=base+(type==='income'?'bg-green-500/20 text-green-500 border border-green-500/50':'text-gray-400 border border-transparent');n.className=base+(type==='neutral'?'bg-blue-500/20 text-blue-400 border border-blue-500/50':'text-gray-400 border border-transparent');document.getElementById('rep-section').style.display='block';const dateInput=document.getElementById('date');dateInput.type='date';dateInput.required=true;if(dateInput.value.length===7){dateInput.value=dateInput.value+'-01';}setRepetition(currentRepetition||'unica');}
+function setRepetition(type){currentRepetition=type;const base='flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect ';[['unica','btn-rep-unica'],['fixa','btn-rep-fixa'],['parcelada','btn-rep-parcelada']].forEach(([k,id])=>{document.getElementById(id).className=base+(k===type?'seg-on':'seg-off');});document.getElementById('installments-div').classList.toggle('hidden',type!=='parcelada');const dw=document.getElementById('date-wrapper');if(type==='unica')dw.classList.remove('hidden');else{dw.classList.add('hidden');document.getElementById('date').value=todayStr();}}
 
-function setType(type){
-  currentType = type;
-  const e = document.getElementById('btn-expense');
-  const i = document.getElementById('btn-income');
-  const n = document.getElementById('btn-neutral');
-  const base = 'flex-1 py-3 text-[11px] sm:text-xs font-medium rounded-lg transition-all tap-effect ';
-  
-  e.className = base + (type === 'expense' ? 'bg-red-500/20 text-red-500 border border-red-500/50' : 'text-gray-400 border border-transparent');
-  i.className = base + (type === 'income' ? 'bg-green-500/20 text-green-500 border border-green-500/50' : 'text-gray-400 border border-transparent');
-  n.className = base + (type === 'neutral' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50' : 'text-gray-400 border border-transparent');
-  
-  // Mostrar repeticao e datas igualzinho despesa para todos!
-  document.getElementById('rep-section').style.display = 'block';
-  const dateInput = document.getElementById('date');
-  dateInput.type = 'date';
-  dateInput.required = true;
-  if(dateInput.value.length === 7) { dateInput.value = dateInput.value + '-01'; }
-  
-  setRepetition(currentRepetition || 'unica');
-}
-
-function setRepetition(type){
-  currentRepetition = type;
-  const base = 'flex-1 py-3 text-sm font-medium rounded-lg flex items-center justify-center gap-1.5 tap-effect ';
-  [['unica','btn-rep-unica'],['fixa','btn-rep-fixa'],['parcelada','btn-rep-parcelada']].forEach(([k,id])=>{
-    document.getElementById(id).className = base + (k===type ? 'seg-on' : 'seg-off');
-  });
-  document.getElementById('installments-div').classList.toggle('hidden', type !== 'parcelada');
-  const dw = document.getElementById('date-wrapper');
-  
-  if(type === 'unica') dw.classList.remove('hidden'); 
-  else {
-    dw.classList.add('hidden');
-    document.getElementById('date').value = todayStr();
+// Ações da aba Mais
+function toggleLogin() { if(window.currentUser){ if(window.logoutGoogle) window.logoutGoogle(); } else { if(window.loginComGoogle) window.loginComGoogle(); } }
+function clearLocalData() {
+  if(confirm('Isso apagará o app deste celular e desconectará sua conta. Os dados na nuvem estão seguros. Continuar?')) {
+    localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(CATS_KEY); location.reload();
   }
 }
+function clearAllData() { pendingAction='clear_all'; openSimpleConfirm('Excluir Tudo', 'Todos os seus dados (inclusive na nuvem) serão apagados para sempre. Continuar?'); }
 
-function exportData(){
-  const blob=new Blob([JSON.stringify({transactions,categories})],{type:'application/json'});
-  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='MeuControle_Backup.json';a.click();URL.revokeObjectURL(url);
-}
+function exportData(){const blob=new Blob([JSON.stringify({transactions,categories})],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='MeuControle_Backup.json';a.click();URL.revokeObjectURL(url);}
 function importData(event){
-  const file=event.target.files[0];if(!file)return;
-  const r=new FileReader();
+  const file=event.target.files[0];if(!file)return; const r=new FileReader();
   r.onload=e=>{
     try{
       const d=JSON.parse(e.target.result);
-      if(d.transactions)transactions=d.transactions;
-      if(d.categories)categories=d.categories;
-      updateUI();alert('Dados restaurados!');
+      if(d.transactions) transactions=d.transactions;
+      if(d.categories) categories=d.categories;
+      updateUI(); // O updateUI já cuida de salvar local e mandar pra nuvem
+      alert('Dados restaurados e sincronizados!');
     }catch(err){alert('Erro ao ler o arquivo.');}
   };
   r.readAsText(file);
 }
 
-setType('expense');setRepetition('unica');
-document.getElementById('date').value=todayStr();
-updateUI();
+setType('expense');setRepetition('unica'); document.getElementById('date').value=todayStr(); updateUI();
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
 </script>
 </body>
